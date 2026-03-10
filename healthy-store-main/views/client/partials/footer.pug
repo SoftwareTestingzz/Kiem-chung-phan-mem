@@ -1,0 +1,73 @@
+footer.footer
+    // Decor hai bên
+    img.footer-decor.footer-decor-left(src="/images/footer-shape1.png" alt="Decor left")
+    img.footer-decor.footer-decor-right(src="/images/footer-shape2.png" alt="Decor right")
+
+    .footer-container
+
+        // ======================= CỘT 1 =======================
+        .footer-column.footer-brand
+            .inner-logo
+                a(href="/")
+                    img(src="/images/logo.svg", alt="Logo")
+
+            ul.footer-contact
+                li
+                    i.fa-solid.fa-location-dot
+                    span 70 Tô Ký, Trung Mỹ Tây, TP. HCM
+                li
+                    i.fa-solid.fa-phone
+                    span 0523.321.876 | 0392.792.057
+                li
+                    i.fa-solid.fa-envelope
+                    span vonguyenphongphu@gmail.com
+                li
+                    i.fa-regular.fa-clock
+                    span Giờ hoạt động: 7:00 - 20:00
+
+            .footer-social
+                a(href="#", aria-label="YouTube")
+                    i.fa-brands.fa-youtube
+                a(href="#", aria-label="Facebook")
+                    i.fa-brands.fa-facebook-f
+                a(href="#", aria-label="Instagram")
+                    i.fa-brands.fa-instagram
+                a(href="#", aria-label="TikTok")
+                    i.fa-brands.fa-tiktok
+
+        // ======================= CỘT 2 =======================
+        .footer-column
+            h3.footer-title VỀ CHÚNG TÔI
+            ul.footer-links
+                li: a(href="#") Giới thiệu
+                li: a(href="#") Sản phẩm
+                li: a(href="#") Tin tức
+                li: a(href="#") Dịch vụ
+                li: a(href="#") Liên hệ
+                li: a(href="#") Hỗ trợ
+                li: a(href="#") Chăm sóc khách hàng
+
+        // ======================= CỘT 3 =======================
+        .footer-column
+            h3.footer-title ĐIỀU KHOẢN SỬ DỤNG
+            ul.footer-links.footer-links--policy
+                li: a(href="#") Chính sách bảo mật
+                li: a(href="#") Chính sách vận chuyển
+                li: a(href="#") Chính sách và quy định chung
+                li: a(href="#") Mua hàng và thanh toán
+                li: a(href="#") Thông tin về chủ sở hữu website
+                li: a(href="#") Thông tin về điều kiện giao dịch chung
+                li: a(href="#") Thông tin về vận chuyển và giao nhận
+                li: a(href="#") Thông tin về các phương thức thanh toán
+
+        // ======================= CỘT 4 =======================
+        .footer-column.footer-newsletter
+            h3.footer-title ĐĂNG KÝ NGAY!!!
+            p.footer-desc Nhập email để nhận thông báo mới nhất từ chúng tôi.
+            form.footer-form(action="#" method="post")
+                input.footer-input(type="email" placeholder="Nhập email của bạn")
+                button.footer-btn(type="submit") Đăng ký ngay
+
+    // ======================= FOOTER BOTTOM =======================
+    .footer-bottom
+        p © 2025 thevvq. All rights reserved.

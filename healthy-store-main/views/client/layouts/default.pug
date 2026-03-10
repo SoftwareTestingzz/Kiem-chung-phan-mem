@@ -1,0 +1,83 @@
+doctype html
+html(lang="vi")
+    head
+        meta(charset="UTF-8")
+        meta(name="viewport" content="width=device-width, initial-scale=1.0")
+
+        // SEO CƠ BẢN
+        if pageTitle
+            title #{pageTitle} | Verdish
+        else
+            title Verdish - Thực phẩm healthy
+
+
+        link(rel="icon" href="/images/favicon.png" type="image/png")
+
+        // BOOTSTRAP CSS
+        link(
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+        )
+
+        // FONT AWESOME
+        link(
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+        )
+
+        // CSS chung
+        link(rel="stylesheet" href="/css/style.css")
+        link(rel="stylesheet" href="/css/blog.css")
+        link(rel="stylesheet" href="/css/home.products.css")
+        link(rel="stylesheet" href="/css/category.menu.css")
+        link(rel="stylesheet" href="/css/home.css")
+
+        // CSS riêng từng trang
+        block css
+
+    body
+        // ✅ Biến global cho JS – dùng JSON.stringify để tránh lỗi with-expression
+        script.
+            window.isLoggedIn = #{JSON.stringify(!!user)};
+
+        // HEADER
+        include ../partials/header.pug
+
+        // CATEGORY MENU (popup danh mục trên header)
+        include ../partials/category.menu.pug
+
+        // NỘI DUNG TỪNG TRANG
+        block main
+
+        // FOOTER
+        include ../partials/footer.pug
+
+        // BUTTON CHAT ZALO
+        a.zalo-chat-button(
+            href="https://zalo.me/0523321876"
+            target="_blank"
+            aria-label="Chat Zalo"
+        )
+            .zalo-chat-circle
+                i.fa-solid.fa-comments
+            span.zalo-chat-text Chat Zalo
+
+        // JS BOOTSTRAP & POPPER
+        script(src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js")
+        script(src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.min.js")
+
+        // SweetAlert2
+        script(src="https://cdn.jsdelivr.net/npm/sweetalert2@11")
+
+        // JS CHUNG
+        script(src="/js/slider.js")
+        script(src="/js/cart.js")
+        script(src="/js/header.js")
+        script(src="/js/home.category.menu.js")
+
+        // JS riêng từng trang
+        block scripts
+
+        // Blog JS (nếu nhiều trang dùng)
+        script(src="/js/blog.js")
+

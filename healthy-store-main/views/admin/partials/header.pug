@@ -1,0 +1,30 @@
+header.header
+    .container-fluid
+        .row.align-items-center
+
+            // LEFT (TRỐNG / SAU NÀY CÓ THỂ ĐỂ BREADCRUMB)
+            .col-3
+
+            // RIGHT AREA
+            .col-9.d-flex.justify-content-end.align-items-center.gap-3
+                if user
+                    // USER INFO
+                    .admin-user.d-flex.align-items-center.gap-2
+                        img.admin-avatar(
+                            src= user.avatar ? user.avatar : "/admin/images/default-avatar.png"
+                            alt="avatar"
+                            width="36"
+                            height="36"
+                            style="border-radius:50%;object-fit:cover;"
+                        )
+                        span.text-muted Hi,
+                        strong #{user.fullName}
+
+                    // LOGOUT
+                    form(
+                        action=`${prefixAdmin}/auth/logout`
+                        method="POST"
+                    )
+                        button.btn.btn-sm.btn-outline-danger(type="submit")
+                            i.fa-solid.fa-right-from-bracket.me-1
+                            | Đăng xuất

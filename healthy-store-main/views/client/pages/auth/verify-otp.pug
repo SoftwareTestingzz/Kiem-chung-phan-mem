@@ -1,0 +1,29 @@
+extends ../../layouts/default
+
+block main
+    link(rel="stylesheet", href="/css/verify-otp.css")
+
+    .auth-container
+        .auth-box
+            h2.title Xác thực OTP
+            p.subtitle
+                | Nhập mã 6 chữ số đã được gửi tới email của bạn
+
+            form(method="POST", action="/password/verify-otp" autocomplete="off")
+                .otp-group
+                    input(type="text" name="otp1" maxlength="1" required)
+                    input(type="text" name="otp2" maxlength="1" required)
+                    input(type="text" name="otp3" maxlength="1" required)
+                    input(type="text" name="otp4" maxlength="1" required)
+                    input(type="text" name="otp5" maxlength="1" required)
+                    input(type="text" name="otp6" maxlength="1" required)
+
+                input(type="hidden" name="otp" id="otp-hidden")
+
+                button.btn-submit(type="submit") Xác nhận
+
+            form(method="POST", action="/password/resend-otp" class="resend-form")
+                button(type="submit" class="resend-btn") Gửi lại OTP
+
+block scripts
+    script(src="/js/verify-otp.js")

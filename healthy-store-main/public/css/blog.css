@@ -1,0 +1,200 @@
+/* ===========================
+   BLOG LIST
+=========================== */
+.blog-container {
+    padding: 40px 0;
+    background: #ffffff;
+}
+
+.blog-title {
+    font-size: 32px;
+    font-weight: 800;
+    margin-bottom: 30px;
+    text-align: center;
+    color: #14532d;
+}
+
+/* ===========================
+   BLOG CARD
+=========================== */
+
+.blog-card {
+    display: block;
+    background: #ffffff;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #dff5e3;
+    height: 100%;
+    text-decoration: none;
+    color: #111;
+    transition: all 0.25s ease;
+    position: relative;
+}
+
+.blog-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 12px;
+    background: linear-gradient(135deg,
+            rgba(34, 197, 94, 0.12),
+            rgba(16, 185, 129, 0.12));
+    opacity: 0;
+    transition: 0.25s;
+}
+
+.blog-card:hover::after {
+    opacity: 1;
+}
+
+.blog-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 14px 32px rgba(34, 197, 94, 0.28);
+    border-color: #3cb815;
+}
+
+/* IMAGE */
+.blog-image img {
+    width: 100%;
+    height: 190px;
+    object-fit: cover;
+    transition: transform 0.35s ease;
+}
+
+.blog-card:hover .blog-image img {
+    transform: scale(1.06);
+}
+
+/* BODY */
+.blog-body {
+    padding: 16px;
+    position: relative;
+    z-index: 1;
+}
+
+.blog-name {
+    font-size: 17px;
+    font-weight: 700;
+    line-height: 1.4;
+    height: 48px;
+    overflow: hidden;
+    color: #14532d;
+}
+
+.blog-desc {
+    font-size: 14px;
+    color: #4b5563;
+    height: 40px;
+    overflow: hidden;
+    margin: 10px 0;
+}
+
+.blog-date {
+    font-size: 13px;
+    color: #16a34a;
+    font-weight: 600;
+}
+
+/* ===========================
+   PAGINATION – VERDISH
+=========================== */
+
+.pagination-container {
+    margin-top: 35px;
+    text-align: center;
+}
+
+.pagination-verdish {
+    display: inline-flex;
+    gap: 8px;
+    list-style: none;
+    padding: 0;
+}
+
+.pagination-verdish li a {
+    padding: 7px 14px;
+    border-radius: 6px;
+    border: 1px solid #d1fae5;
+    color: #14532d;
+    text-decoration: none;
+    font-weight: 600;
+    background: #ffffff;
+    transition: 0.2s;
+}
+
+.pagination-verdish li a:hover {
+    background: #ecfdf5;
+    color: #16a34a;
+}
+
+.pagination-verdish li.active a {
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: #ffffff;
+    border-color: #16a34a;
+}
+
+/* ===========================
+   BLOG DETAIL
+=========================== */
+
+.blog-detail {
+    max-width: 900px;
+    margin: 40px auto;
+    background: #ffffff;
+    padding: 30px;
+    border-radius: 14px;
+    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.06);
+}
+
+.blog-detail-title {
+    font-size: 34px;
+    font-weight: 800;
+    color: #534114;
+    margin-bottom: 10px;
+}
+
+.blog-detail-date {
+    color: #fa9614;
+    font-weight: 600;
+    margin: 10px 0 25px;
+}
+
+.blog-detail-thumb {
+    width: 100%;
+    border-radius: 10px;
+    margin-bottom: 25px;
+}
+
+.blog-detail-content {
+    line-height: 1.85;
+    font-size: 16px;
+    color: #1f2937;
+}
+
+/* FIX TRÀN CHỮ */
+.blog-detail-content,
+.blog-detail-content p {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    white-space: normal;
+}
+
+/* ===========================
+   BACK BUTTON
+=========================== */
+
+.back-btn {
+    display: inline-block;
+    margin-top: 30px;
+    padding: 11px 18px;
+    background: linear-gradient(135deg, #fe9d25, #fc7e17);
+    color: #ffffff;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 700;
+    transition: 0.25s;
+}
+
+.back-btn:hover {
+    opacity: 0.9;
+}

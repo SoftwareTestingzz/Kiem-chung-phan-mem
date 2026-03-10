@@ -1,0 +1,124 @@
+extends ../../layouts/default
+
+block main
+    if roleUser && roleUser.permissions && roleUser.permissions.includes('orders_view')
+        .container
+            h1 Quản lý đơn hàng
+
+            // ================= FILTER FORM =================
+            form#filterForm(method="GET", action="/admin/orders", class="row g-3 mb-4")
+                .col-md-3
+                    label.form-label Tìm mã đơn
+                    input.form-control(
+                        type="text",
+                        name="keyword",
+                        placeholder="Nhập mã đơn...",
+                        value=(query && query.keyword) ? query.keyword : "",
+                        oninput="document.getElementById('filterForm').submit()"
+                    )
+
+                .col-md-2
+                    label.form-label Năm
+                    select.form-select(name="year", onchange="document.getElementById('filterForm').submit()")
+                        option(value="") Tất cả
+                        if years && years.length
+                            each y in years
+                                option(value=y selected=(query && query.year == y)) #{y}
+
+                .col-md-2
+                    label.form-label Tháng
+                    select.form-select(name="month", onchange="document.getElementById('filterForm').submit()")
+                        option(value="") Tất cả
+                        each m in [1,2,3,4,5,6,7,8,9,10,11,12]
+                            option(value=m selected=(query && query.month == m)) Tháng #{m}
+
+                .col-md-2
+                    label.form-label Trạng thái
+                    select.form-select(name="status", onchange="document.getElementById('filterForm').submit()")
+                        option(value="") Tất cả
+                        option(value="pending" selected=(query && query.status=='pending')) Đang xử lý
+                        option(value="confirmed" selected=(query && query.status=='confirmed')) Đã duyệt
+                        option(value="shipping" selected=(query && query.status=='shipping')) Đang giao
+                        option(value="completed" selected=(query && query.status=='completed')) Hoàn tất
+                        option(value="cancelled" selected=(query && query.status=='cancelled')) Đã hủy
+
+                .col-md-2
+                    label.form-label Sắp xếp
+                    select.form-select(name="sort", onchange="document.getElementById('filterForm').submit()")
+                        option(value="newest" selected=(query && query.sort=='newest')) Mới nhất
+                        option(value="oldest" selected=(query && query.sort=='oldest')) Cũ nhất
+
+                .col-md-1.d-flex.align-items-end
+                    a.btn.btn-danger.w-100(href="/admin/orders") Xóa lọc
+
+            // ================= ERROR =================
+            if error
+                p.text-danger #{error}
+
+            // ================= TABLE =================
+            if !orders || orders.length === 0
+                p.text-danger.mt-3 Chưa có đơn hàng nào.
+            else
+                table.table.table-bordered.mt-3
+                    thead
+                        tr
+                            th Mã đơn
+                            th Người nhận
+                            th Tổng tiền
+                            th Trạng thái
+                            th Ngày tạo
+                            th Hành động
+                    tbody
+                        each order in orders
+                            tr
+                                td #{order._id}
+
+                                td
+                                    if order.shippingInfo && order.shippingInfo.name
+                                        | #{order.shippingInfo.name}
+                                    else
+                                        | ---
+
+                                td
+                                    if typeof order.total !== 'undefined' && order.total !== null
+                                        - const totalVND = Number(order.total) || 0;
+                                        | #{totalVND.toLocaleString('vi-VN')} VND
+                                    else
+                                        | ---
+
+                                td
+                                    span.badge(
+                                        class= order.status === 'cancelled' ? 'bg-secondary' :
+                                              order.status === 'completed' ? 'bg-success' :
+                                              order.status === 'shipping' ? 'bg-info' :
+                                              order.status === 'confirmed' ? 'bg-primary' :
+                                              'bg-warning text-dark'
+                                    ) #{order.statusText || order.status}
+
+                                td
+                                    | #{order.createdAt.toLocaleDateString('vi-VN')} #{order.createdAt.toLocaleTimeString('vi-VN')}
+
+                                td
+                                    a.btn.btn-primary.btn-sm(href=`/admin/orders/${order._id}`) Xem chi tiết
+
+            // ================= PAGINATION =================
+            if totalPages > 1
+                nav.mt-4
+                    ul.pagination
+                        li.page-item(class=(page <= 1 ? "disabled" : ""))
+                            a.page-link(
+                                href=`?page=${page-1}&keyword=${(query && query.keyword) ? query.keyword : ""}&year=${(query && query.year) ? query.year : ""}&month=${(query && query.month) ? query.month : ""}&sort=${(query && query.sort) ? query.sort : ""}&status=${(query && query.status) ? query.status : ""}`
+                            ) Trước
+
+                        each num in [...Array(totalPages).keys()].map(n => n + 1)
+                            li.page-item(class=(page == num ? "active" : ""))
+                                a.page-link(
+                                    href=`?page=${num}&keyword=${(query && query.keyword) ? query.keyword : ""}&year=${(query && query.year) ? query.year : ""}&month=${(query && query.month) ? query.month : ""}&sort=${(query && query.sort) ? query.sort : ""}&status=${(query && query.status) ? query.status : ""}`
+                                ) #{num}
+
+                        li.page-item(class=(page >= totalPages ? "disabled" : ""))
+                            a.page-link(
+                                href=`?page=${page+1}&keyword=${(query && query.keyword) ? query.keyword : ""}&year=${(query && query.year) ? query.year : ""}&month=${(query && query.month) ? query.month : ""}&sort=${(query && query.sort) ? query.sort : ""}&status=${(query && query.status) ? query.status : ""}`
+                            ) Sau
+    else
+        +alert-no-permission()

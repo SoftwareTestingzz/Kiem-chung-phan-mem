@@ -1,0 +1,226 @@
+/* ===========================
+   LAYOUT CHUNG
+=========================== */
+.profile-container {
+    display: flex;
+    gap: 30px;
+    padding: 40px 0;
+    max-width: 1200px;
+    margin: auto;
+    font-family: "Inter", sans-serif;
+}
+
+
+/* ===========================
+   SIDEBAR
+=========================== */
+.profile-sidebar {
+    width: 260px;
+}
+
+.sidebar-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #f2f2f2;
+}
+
+.avatar-small {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #f1f1f1;
+}
+
+.sidebar-name {
+    font-weight: 600;
+    font-size: 16px;
+}
+
+.sidebar-menu {
+    list-style: none;
+    padding: 0;
+    margin-top: 25px;
+}
+
+/* ===== Nút Sidebar ===== */
+.sidebar-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    font-size: 15px;
+    cursor: pointer;
+    background: #fafafa;
+    border-radius: 8px;
+    border: 1px solid #eee;
+    color: #444;
+    transition: all 0.18s ease;
+}
+
+.sidebar-btn i {
+    font-size: 18px;
+    color: #777;
+}
+
+.sidebar-btn:hover {
+    background: #ffece5;
+    border-color: #ee4d2d;
+    color: #ee4d2d;
+}
+
+.sidebar-btn:hover i {
+    color: #ee4d2d;
+}
+
+/* Active */
+.sidebar-btn.active {
+    background: #fff3ef;
+    color: #ee4d2d;
+    font-weight: 600;
+    border-color: #ee4d2d;
+}
+
+.sidebar-btn.active i {
+    color: #ee4d2d;
+}
+
+
+/* ===========================
+   CONTENT
+=========================== */
+.profile-content {
+    flex: 1;
+    background: #fff;
+    padding: 32px;
+    border-radius: 12px;
+    box-shadow: 0 2px 14px rgba(0,0,0,0.06);
+}
+
+.title {
+    font-size: 22px;
+    margin-bottom: 25px;
+    font-weight: 600;
+    color: #333;
+}
+
+
+/* ===========================
+   FORM INPUT
+=========================== */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-control {
+    padding: 12px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    width: 100%;
+    transition: .15s;
+    font-size: 15px;
+}
+
+.form-control:focus {
+    border-color: #ee4d2d;
+    box-shadow: 0 0 0 2px rgba(238, 77, 45, 0.15);
+    outline: none;
+}
+
+
+/* ===========================
+   GIỚI TÍNH
+=========================== */
+.gender-group {
+    display: flex;
+    gap: 25px;
+    font-size: 15px;
+}
+
+.gender-group label {
+    cursor: pointer;
+}
+
+.gender-group input {
+    margin-right: 5px;
+}
+
+
+/* ===========================
+   AVATAR GIỮA TRANG
+=========================== */
+.avatar-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 30px;
+    gap: 15px;
+}
+
+.avatar-preview {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #eee;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+input[type="file"] {
+    font-size: 14px;
+}
+
+
+/* ===========================
+   BUTTONS
+=========================== */
+.btn-group {
+    margin-top: 30px;
+    display: flex;
+    gap: 12px;
+}
+
+.btn-edit,
+.btn-save,
+.btn-cancel {
+    padding: 11px 26px;
+    border-radius: 6px;
+    cursor: pointer;
+    border: none;
+    font-size: 15px;
+    font-weight: 500;
+    transition: 0.15s;
+}
+
+/* CHỈNH SỬA */
+.btn-edit {
+    background: #ee4d2d;
+    color: white;
+}
+
+.btn-edit:hover {
+    background: #d93e21;
+}
+
+/* LƯU */
+.btn-save {
+    background: #27ae60;
+    color: white;
+}
+
+.btn-save:hover {
+    background: #1c8a4c;
+}
+
+/* HỦY */
+.btn-cancel {
+    background: #b5b5b5;
+    color: white;
+}
+
+.btn-cancel:hover {
+    background: #9c9c9c;
+}

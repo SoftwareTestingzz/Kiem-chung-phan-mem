@@ -1,0 +1,67 @@
+extends ../../layouts/default.pug
+include ../../mixins/alert.pug
+include ../../mixins/category-rows.pug
+include ../../mixins/filter-status.pug
+include ../../mixins/search.pug
+include ../../mixins/form-change-multi.pug
+
+block main
+    +alert-success(3000)
+    +alert-error(5000)
+
+    if roleUser.permissions.includes('categories_view')
+        h1.mb-4 #{pageTitle}
+
+        .card.mb-3
+            .card-header Bộ lọc và Tìm kiếm
+            .card-body
+                .row
+                    .col-md-6.mb-2
+                        +filter-status(filterStatus)
+                    .col-md-6
+                        +search(keyword)
+
+        .card.mb-3
+            .card-header Danh mục sản phẩm
+            .card-body
+                .row.mb-3
+                    .col-8
+                        +form-change-multi(`${prefixAdmin}/categories/change-multi?_method=PATCH`)
+                    .col-4.text-end
+                        if roleUser.permissions.includes('categories_create')
+                            a.btn.btn-outline-success(
+                                href=`${prefixAdmin}/categories/create`
+                            ) + Thêm mới
+
+                table.table.table-hover.table-sm.category-table(checkbox-multi='')
+                    thead
+                        tr  
+                            th 
+                                input(type="checkbox" name="check-all")
+                            th STT
+                            th Hình ảnh
+                            th Tiêu đề
+                            th Vị trí
+                            th Trạng thái
+                            th Hành động
+                    tbody
+                        - const counter = { value: 0 }
+                        +category-rows(tree, '', counter)
+
+        form.d-none(
+            action=""
+            method="POST"
+            id="form-change-status"
+            data-path=`${prefixAdmin}/categories/change-status`
+        ) 
+
+        form.d-none(
+            action=""
+            method="POST"
+            id="form-delete-category"
+            data-path=`${prefixAdmin}/categories/delete-category`
+        ) 
+
+        script(src="/admin/js/category.js") 
+    else
+        +alert-no-permission()

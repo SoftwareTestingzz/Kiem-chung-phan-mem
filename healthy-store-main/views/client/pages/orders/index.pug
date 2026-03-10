@@ -1,0 +1,84 @@
+extends ../../layouts/default
+
+block main
+    .container.my-4
+        h2.mb-4 Đơn hàng của tôi
+
+        if !orders || orders.length === 0
+            .empty-orders.d-flex.justify-content-center
+                .empty-orders-box.text-center(
+                    style="background:#fff;border-radius:12px;padding:40px 30px;max-width:420px;width:100%;box-shadow:0 8px 24px rgba(0,0,0,0.06);"
+                )
+                    h4.mb-2 Bạn chưa có đơn hàng nào
+                    p.text-muted.mb-4
+                        | Khi bạn đặt hàng, thông tin đơn hàng sẽ hiển thị tại đây.
+                    a.btn.btn-success(href="/products") Tiếp tục mua sắm
+
+        if orders && orders.length > 0
+            each order in orders
+                .order-box(
+                    style="border:1px solid #ddd;padding:16px;border-radius:8px;margin-bottom:22px;background:#fff;"
+                )
+
+                    .d-flex.justify-content-between.align-items-center
+                        h3(style="font-size:20px;") Đơn hàng ##{order._id}
+
+                        if order.status === 'pending'
+                            span.badge.bg-warning.text-dark Đang xử lý
+                        else if order.status === 'confirmed'
+                            span.badge.bg-info.text-dark Đã duyệt
+                        else if order.status === 'shipping'
+                            span.badge.bg-primary.text-white Đang giao
+                        else if order.status === 'completed'
+                            span.badge.bg-success.text-white Hoàn tất
+                        else if order.status === 'cancelled'
+                            span.badge.bg-danger.text-white Đã hủy
+
+                    p.text-muted.mt-1
+
+                        | Ngày đặt: #{order.createdAt.toLocaleDateString('vi-VN')} #{order.createdAt.toLocaleTimeString('vi-VN')}
+
+                    hr
+
+                    h4(style="font-size:18px;margin-top:10px;") Thông tin giao hàng
+
+                    if order.shippingInfo
+                        p Tên: #{order.shippingInfo.name}
+                        p SĐT: #{order.shippingInfo.phone}
+                        p Địa chỉ: #{order.shippingInfo.address}
+                    else
+                        p(style="color:#777;") Không có thông tin giao hàng.
+
+                    hr
+
+                    h4(style="font-size:18px;margin-top:10px;") Sản phẩm
+
+                    table.table.table-bordered.align-middle
+                        thead.table-light
+                            tr
+                                th(style="width:80px;") Ảnh
+                                th Tên
+                                th(style="width:60px;") SL
+                                th Giá
+                                th Thành tiền
+
+                        tbody
+                            each item in order.items
+                                tr
+                                    td
+                                        img(
+                                            src=item.thumbnail,
+                                            width="60",
+                                            style="border-radius:6px;"
+                                        )
+                                    td #{item.title}
+                                    td #{item.quantity}
+                                    td #{item.price.toLocaleString("vi-VN")} VND
+                                    td #{(item.quantity * item.price).toLocaleString("vi-VN")} VND
+
+                    h4.mt-3
+                        | Tổng thanh toán:
+                        span.text-danger  #{order.total.toLocaleString("vi-VN")} VND
+
+                    .mt-3
+                        a.btn.btn-primary(href=`/orders/${order._id}`) Xem chi tiết

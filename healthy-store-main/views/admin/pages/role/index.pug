@@ -1,0 +1,51 @@
+extends ../../layouts/default.pug
+include ../../mixins/alert.pug
+
+block main
+    +alert-success(3000)
+    +alert-error(5000)
+
+    if roleUser.permissions.includes('roles_view')
+        .container.mt-5
+            h1 Quản lý Roles
+
+            if roleUser.permissions.includes('roles_create')
+                a.btn.btn-primary.mb-3(href=`${prefixAdmin}/roles/create`) Thêm Role mới
+
+            table.table.table-bordered.table-hover.roles-table
+
+                thead 
+                    tr
+                        th STT
+                        th Nhóm quyền
+                        th Mô tả
+                        th Hành động
+                tbody
+                    if records.length > 0
+                        each item, index in records
+                            tr
+                                td #{index + 1}
+                                td #{item.title}
+                                td #{item.description}
+                                td
+                                    a.btn.btn-sm.btn-secondary.me-1(href=`${prefixAdmin}/roles/detail/${item.id}`) Chi tiết
+
+                                    if roleUser.permissions.includes('roles_edit')
+                                        a.btn.btn-sm.btn-warning.me-1(href=`${prefixAdmin}/roles/edit/${item.id}`) Sửa
+
+                                    if roleUser.permissions.includes('roles_delete')
+                                        button.btn.btn-danger.btn-sm.ms-1(
+                                            data-id=item.id 
+                                            data-btn-delete=''
+                                        ) Xóa
+
+        form.d-none(
+            action=""
+            method="POST"
+            id="form-delete-role"
+            data-path=`${prefixAdmin}/roles/delete-role`
+        )
+
+        script(src='/admin/js/role.js')
+    else
+        +alert-no-permission()

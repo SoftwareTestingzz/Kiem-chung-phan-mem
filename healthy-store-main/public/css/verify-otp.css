@@ -1,0 +1,105 @@
+.auth-container {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #f5f6fa;
+}
+
+.auth-box {
+    width: 100%;
+    max-width: 420px;
+    background: #fff;
+    padding: 32px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    text-align: center;
+}
+
+.title {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.subtitle {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 24px;
+}
+
+/* ===== OTP INPUT ===== */
+.otp-group {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 24px;
+}
+
+.otp-group input {
+    width: 48px;
+    height: 56px;
+    font-size: 22px;
+    text-align: center;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    outline: none;
+    transition: 0.2s;
+}
+
+.otp-group input:focus {
+    border-color: #4CAF50;
+    box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+}
+
+/* ===== SUBMIT BUTTON ===== */
+.btn-submit {
+    width: 100%;
+    height: 48px;
+    background: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.btn-submit:hover {
+    background: #43a047;
+}
+
+/* ===== RESEND OTP ===== */
+.resend {
+    margin-top: 16px;
+    font-size: 14px;
+    color: #555;
+}
+
+.resend-form {
+    display: inline;
+}
+
+.resend-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    margin-top: 10px;
+    margin-left: 4px;
+    font-size: 14px;
+    color: #4CAF50;
+    cursor: pointer;
+    font-weight: 500;
+    transition: color 0.2s ease;
+}
+
+.resend-btn:hover {
+    color: #388E3C;
+    text-decoration: underline;
+}
+
+.resend-btn:disabled {
+    color: #aaa;
+    cursor: not-allowed;
+    text-decoration: none;
+}

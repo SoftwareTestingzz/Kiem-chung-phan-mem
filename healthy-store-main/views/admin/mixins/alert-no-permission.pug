@@ -1,0 +1,11 @@
+mixin alert-no-permission()
+    .container.mt-5
+        .d-flex.justify-content-center
+            .card.shadow-lg(style="max-width: 450px; width: 100%;")
+                .card-body.text-center.py-4
+                    i.fa-solid.fa-shield-cat.text-danger(style="font-size: 3rem;")
+                    h4.mt-3.text-danger Không có quyền truy cập
+                    p.text-muted Bạn không có quyền truy cập vào chức năng này.
+                    a.btn.btn-primary.mt-3(href=`${prefixAdmin}/dashboard`)
+                        i.fa-solid.fa-house.me-2
+                        | Quay về Dashboard

@@ -1,0 +1,66 @@
+//- ================= MIXIN ĐỆ QUY =================
+mixin homeCategoryChildren(categories, parentId, level)
+  - level = level || 1
+  ul(class= level === 1 ? 'home-category-list' : 'home-category-submenu')
+    each item in categories
+      if item.parent_category && String(item.parent_category) == String(parentId)
+        - const hasChildren = categories.some(c => c.parent_category && String(c.parent_category) == String(item._id))
+        li(class= hasChildren ? 'has-children' : '')
+          a(href=`/products?category=${item.slug}`)= item.title
+          if hasChildren
+            +homeCategoryChildren(categories, item._id, level + 1)
+
+
+//- ================= KHỐI DANH MỤC TRÊN HOME =================
+.block-home-top
+  .container
+    .home-top-inner
+
+      // ===== BÊN TRÁI: DANH MỤC + BLOG =====
+      .home-top-left
+
+        // ===== NÚT DANH MỤC =====
+        .home-category
+          .home-category-label
+            i.fa-solid.fa-bars
+            span Danh mục
+
+          .home-category-wrapper
+
+            // ---- CỘT TRÁI: CHA ----
+            ul.home-category-main
+              if categoriesMenu && categoriesMenu.length
+                each cat in categoriesMenu
+                  if !cat.parent_category
+                    li.home-category-main-item(
+                      data-id=cat._id
+                      data-slug=cat.slug
+                    )
+                      span.home-category-main-text= cat.title
+                      i.fa-solid.fa-angle-right
+              else
+                li.home-category-main-empty Không có danh mục
+
+            // ---- CỘT PHẢI: CON ----
+            .home-category-detail
+              if categoriesMenu && categoriesMenu.length
+                each parent in categoriesMenu
+                  if !parent.parent_category
+                    .home-category-panel(data-id=parent._id)
+                      h3.home-category-title= parent.title
+                      +homeCategoryChildren(categoriesMenu, parent._id, 1)
+              else
+                p.home-category-empty Chưa có danh mục
+
+        // ===== NÚT BLOG =====
+        a.home-top-blog(href="/blog")
+          i.fa-regular.fa-newspaper
+          span Tin tức
+
+
+      // ===== BÊN PHẢI: 24/7 SUPPORT =====
+      a.home-top-support
+        i.fa-solid.fa-headset
+        .support-text
+          span.support-title 24/7 Support
+          span.support-phone 0523 321 876

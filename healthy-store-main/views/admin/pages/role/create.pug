@@ -1,0 +1,20 @@
+extends ../../layouts/default.pug
+
+block main
+
+    if roleUser.permissions.includes('roles_create')
+        .container.mt-5
+            h1 Tạo Role mới
+
+            form(method="POST", action=`${prefixAdmin}/roles/create`)
+                .mb-3
+                    label.form-label(for="title") Nhóm quyền
+                    input.form-control(type="text" id="title" name="title" required)
+                
+                .mb-3
+                    label.form-label(for="description") Mô tả
+                    input.form-control(type="text" id="description" name="description")
+
+                button.btn.btn-success(type="submit") Lưu
+    else
+        +alert-no-permission()

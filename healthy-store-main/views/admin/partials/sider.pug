@@ -1,0 +1,77 @@
+.sider#adminSider
+
+    // ===== LOGO SIDER =====
+    .sider-logo
+        a(href=`${prefixAdmin}/dashboard`)
+            <img src="/images/logo.svg" class="logo-white">
+
+    .inner-menu
+        ul
+
+            // ===== TỔNG QUAN =====
+            li.menu-section Tổng quan
+
+            li
+                a(href=`${prefixAdmin}/dashboard`)
+                    i.fa-solid.fa-chart-line.menu-icon
+                    span.menu-text Dashboard
+
+            if roleUser.permissions.includes('categories_view') && roleUser.permissions.includes('products_view') && roleUser.permissions.includes('orders_view')
+                // ===== BÁN HÀNG =====
+                li.menu-section Bán hàng
+
+                if roleUser.permissions.includes('categories_view')
+                    li
+                        a(href=`${prefixAdmin}/categories`)
+                            i.fa-solid.fa-layer-group.menu-icon
+                            span.menu-text Danh mục sản phẩm
+
+                if roleUser.permissions.includes('products_view')
+                    li
+                        a(href=`${prefixAdmin}/products`)
+                            i.fa-solid.fa-box.menu-icon
+                            span.menu-text Danh sách sản phẩm
+
+                if roleUser.permissions.includes('orders_view')
+                    li
+                        a(href="/admin/orders")
+                            i.fa-solid.fa-cart-shopping.menu-icon
+                            span.menu-text Quản lý đơn hàng
+
+            if roleUser.permissions.includes('blogs_view')
+                // ===== NỘI DUNG =====
+                li.menu-section Nội dung
+
+                if roleUser.permissions.includes('blogs_view')
+                    li
+                        a(href="/admin/blog")
+                            i.fa-solid.fa-newspaper.menu-icon
+                            span.menu-text Quản lý Blog
+
+
+            if roleUser.permissions.includes('accounts_view')
+                // ===== QUẢN TRỊ NGƯỜI DÙNG =====
+                li.menu-section Quản trị
+
+                if roleUser.permissions.includes('accounts_view')
+                    li
+                        a(href=`${prefixAdmin}/accounts`)
+                            i.fa-solid.fa-users.menu-icon
+                            span.menu-text Quản lý tài khoản
+
+
+            if roleUser.permissions.includes('roles_view')
+                // ===== PHÂN QUYỀN =====
+                li.menu-section Phân quyền
+
+                if roleUser.permissions.includes('roles_view')
+                    li
+                        a(href=`${prefixAdmin}/roles`)
+                            i.fa-solid.fa-user-shield.menu-icon
+                            span.menu-text Nhóm quyền
+
+                if roleUser.permissions.includes('roles_permissions')
+                    li
+                        a(href=`${prefixAdmin}/roles/permissions`)
+                            i.fa-solid.fa-key.menu-icon
+                            span.menu-text Phân quyền

@@ -1,0 +1,272 @@
+/* =============================
+   KHỐI DANH MỤC TRÊN TRANG HOME
+============================= */
+
+.block-home-top {
+    background-color: #3cb815;
+}
+
+/* Wrapper chứa "Danh mục" + nút Blog */
+.home-top-inner {
+    display: flex;
+    align-items: center;
+    gap: 12px; /* khoảng cách nhẹ giữa Danh mục và Blog */
+}
+
+/* ----- Nút "Danh mục" ----- */
+.home-category {
+    position: relative;
+    display: inline-block;
+    z-index: 20;
+}
+
+.home-category-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border-radius: 999px;
+    background: #3cb815;
+    color: #ffffff;
+    cursor: pointer;
+    font-weight: 600;
+    border: none;
+}
+
+/* ====== NÚT BLOG KẾ BÊN DANH MỤC ====== */
+.home-top-blog {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border-radius: 999px;
+    background: #3cb815;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    color: #ffffff;
+    transition: transform 0.18s ease,
+                box-shadow 0.18s ease,
+                background 0.18s ease,
+                color 0.18s ease;
+}
+
+.home-top-blog i {
+    font-size: 15px;
+}
+
+/* ====== POPUP TỔNG (CHA + CON) ====== */
+.home-category-wrapper {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    padding-top: 6px;          /* cách nhẹ với nút "Danh mục" */
+    display: none;             /* mặc định ẩn */
+}
+
+/* Hover vào "Danh mục" mới hiện popup + flex + gap giữa CHA & CON */
+.home-category:hover .home-category-wrapper {
+    display: flex;
+    gap: 4px;                  
+    align-items: flex-start;
+}
+
+/* ----- CỘT TRÁI: DANH MỤC CHA ----- */
+.home-category-main {
+    width: 220px;
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 18px 40px rgba(0,0,0,0.12);
+    list-style: none;
+    margin: 0;
+    padding: 8px 0;
+}
+
+.home-category-main-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.home-category-main-item:hover,
+.home-category-main-item.active {
+    background: #f3f3f3;
+}
+
+/* ----- CỘT PHẢI: DANH MỤC CON CỦA CHA ĐANG ACTIVE ----- */
+.home-category-detail {
+    min-width: 240px;
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 18px 40px rgba(0,0,0,0.12);
+    padding: 10px 12px;
+    display: none;               /* ẩn mặc định cả cột */
+}
+
+.home-category-detail.has-active {
+    display: block;              /* hiện khi JS thêm class has-active */
+}
+
+.home-category-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+/* ⭐ ẨN TỪNG PANEL CON RIÊNG BIỆT ⭐ */
+.home-category-panel {
+    display: none;
+}
+
+.home-category-panel.active {
+    display: block;
+}
+
+/* LIST CON xếp dọc giống style bên trái */
+.home-category-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;      /* xếp dọc */
+    gap: 4px;
+}
+
+
+.home-category-list li {
+    position: relative;          /* để submenu con-con bám theo */
+}
+
+
+.home-category-list li > a {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 10px;
+    border-radius: 8px;
+    text-decoration: none;
+    color: #333;
+    font-size: 14px;
+}
+
+.home-category-list li > a:hover {
+    background: #f3f3f3;
+    color: #0f9d58;
+}
+
+/* Mũi tên cho item có con nữa (cấp tiếp theo) */
+.home-category-list li.has-children > a::after {
+    content: "›";
+    margin-left: 6px;
+    font-size: 12px;
+    opacity: 0.6;
+}
+
+/* =============================
+   CỘT THỨ 3: CON CỦA CON
+   (dùng class .home-category-submenu trong Pug)
+============================= */
+
+.home-category-submenu {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: calc(100% + 16px);  
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 18px 40px rgba(0,0,0,0.12);
+    padding: 8px 0;
+    list-style: none;
+    min-width: 220px;
+    z-index: 30;
+}
+
+.home-category-submenu::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -16px;
+    width: 16px;
+    height: 100%;
+}
+
+/* Hover vào CON hoặc đang hover trong submenu đều giữ menu mở */
+.home-category-list li:hover > .home-category-submenu,
+.home-category-submenu:hover {
+    display: block;
+}
+
+/* Bên trong box con-của-con cũng xếp dọc giống list con */
+.home-category-submenu li {
+    position: relative;
+}
+
+.home-category-submenu li > a {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    border-radius: 8px;
+    text-decoration: none;
+    color: #333;
+    font-size: 14px;
+}
+
+.home-category-submenu li > a:hover {
+    background: #f3f3f3;
+    color: #0f9d58;
+}
+
+/* =============================
+   CĂN "24/7 SUPPORT" SÁT BÊN PHẢI
+============================= */
+
+/* Thanh top: cho phép tách trái/phải */
+.home-top-inner{
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+/* Cụm bên trái: Danh mục + Blog */
+.home-top-left{
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Nút Support tự đẩy qua phải */
+.home-top-support{
+  margin-left: auto;              /* quan trọng */
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+/* Text support (nếu bạn muốn đẹp hơn) */
+.home-top-support .support-text{
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.home-top-support .support-title{
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.home-top-support .support-phone{
+  font-weight: 700;
+  font-size: 13px;
+}

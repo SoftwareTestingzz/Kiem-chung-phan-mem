@@ -1,0 +1,85 @@
+extends ../../layouts/default
+
+block main
+    .container.my-4
+        h2.mb-4 Thanh toán đơn hàng
+
+        table.table.align-middle
+            thead
+                tr
+                    th Ảnh
+                    th Sản phẩm
+                    th Giá
+                    th SL
+                    th Thành tiền
+            tbody
+                each item in items
+                    tr
+                        td
+                            img(
+                                src=item.thumbnail,
+                                width="60",
+                                style="border-radius:6px;object-fit:cover;"
+                            )
+                        td #{item.title}
+                        td
+                            | #{item.price.toLocaleString("vi-VN")} VND
+                        td #{item.quantity}
+                        td
+                            | #{(item.price * item.quantity).toLocaleString("vi-VN")} VND   
+
+        hr
+
+        h3
+            | Tổng tiền:
+            span.text-danger &nbsp;
+                | #{total.toLocaleString("vi-VN")} VND
+
+        hr
+
+        form#checkoutForm(method="POST")
+            // ⭐ selectedItems là CHUỖI JSON từ controller
+            input#selectedItemsInput(
+                type="hidden"
+                name="selectedItems"
+                value=selectedItems
+            )
+
+            // nếu direct checkout gửi directItems
+            if (typeof directItems !== 'undefined' && directItems)
+                input#directItemsInput(type="hidden", name="directItems", value=directItems)
+
+            h4.mt-4.mb-3 Thông tin giao hàng
+
+            .mb-3
+                label.form-label Tên người nhận:
+                input.form-control(
+                    type="text"
+                    name="name"
+                    required
+                    value=(profile && profile.fullName) ? profile.fullName : ""
+                )
+
+            .mb-3
+                label.form-label Số điện thoại:
+                input.form-control(
+                    type="text"
+                    name="phone"
+                    required
+                    value=(profile && profile.phone) ? profile.phone : ""
+                )
+
+            .mb-3
+                label.form-label Địa chỉ nhận hàng:
+                input.form-control(
+                    type="text"
+                    name="address"
+                    required
+                    value=(profile && profile.address) ? profile.address : ""
+                )
+
+            button#btnPlaceOrder.btn.btn-success.mt-3(type="submit")
+                | Xác nhận đặt hàng
+
+block scripts
+    script(src="/js/checkout.js")

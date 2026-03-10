@@ -1,0 +1,75 @@
+extends ../../layouts/default.pug
+include ../../mixins/alert.pug
+
+block main 
+    +alert-success(3000)
+    +alert-error(5000)
+    
+    if roleUser.permissions.includes('accounts_create')
+        h1.mb-4 #{pageTitle}
+
+        if roles && roles.length
+            form(action=`${prefixAdmin}/accounts/create` method="POST" enctype="multipart/form-data")
+                .form-group.mb-3
+                    label.form-label(for="fullName") Họ tên *
+                    input.form-control(type="text" id="fullName" name="fullName" required)
+
+                .form-group.mb-3
+                    label.form-label(for="email") Email *
+                    input.form-control(type="text" id="email" name="email" required)
+
+                .form-group.mb-3
+                    label.form-label(for="password") Mật khẩu *
+                    input.form-control(type="password" id="password" name="password" required)
+
+                .form-group.mb-3
+                    label.form-label(for="confirmPassword") Xác nhận lại mật khẩu *
+                    input.form-control(type="password" id="confirmPassword" name="confirmPassword" required)
+
+                .form-group.mb-3
+                    label.form-label(for="phone") Số điện thoại
+                    input.form-control(type="tel" id="phone" name="phone" )
+
+                .form-group.mb-3(upload-image='')
+                    label.form-label(for="avatar") Avartar
+                    input.form-control(type="file" id="avatar" name="avatar" accept="image/*" upload-image-input='') 
+                    .image-preview-wrapper
+                        img(src='' upload-image-preview='')
+                        button(
+                            type='button' 
+                            upload-image-remove='' 
+                            aria-label='Close'
+                        ) x
+
+                .form-group.mb-3
+                    label.form-label(for="role_id") Phân quyền
+                    select.form-control(id="role_id" name="role_id")
+                        option(disabled) -- Chọn --
+                        each role in roles
+                            option(value=role.id) #{role.title}
+
+                .form-group.mb-3.form-check.form-check-inline
+                    input.form-check-input(
+                        type="radio"
+                        id="status-active"
+                        name="status"
+                        value="active"
+                        checked
+                    )
+                    label.form-check-label(for="status-active") Hoạt động
+                .form-group.mb-3.form-check.form-check-inline
+                    input.form-check-input( 
+                        type="radio"
+                        id="status-inactive"
+                        name="status"
+                        value="inactive"
+                    )
+                    label.form-check-label(for="status-inactive") Dừng hoạt động
+
+                .form-group
+                    button.btn.btn-primary(type="submit") Lưu tài khoản
+        else 
+            a.btn.btn-primary.mb-3(href=`${prefixAdmin}/roles/create`) Tạo role mới
+
+    else 
+        +alert-no-permission()

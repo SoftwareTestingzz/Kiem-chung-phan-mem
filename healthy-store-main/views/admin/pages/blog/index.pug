@@ -1,0 +1,112 @@
+extends ../../layouts/default.pug
+include ../../mixins/alert.pug
+
+block main
+    +alert-success(3000)
+    +alert-error(5000)
+
+    if roleUser.permissions.includes('blogs_view')
+        .container.mt-4
+            h2 Quản lý Blog
+            if roleUser.permissions.includes('blogs_create')
+                a.btn.btn-primary.mt-2(href="/admin/blog/create") Thêm bài viết
+
+            // ===================== FORM LỌC =====================
+            form.mt-4(method="GET", action="/admin/blog")
+                .row.g-3
+                    .col-md-6
+                        label.form-label Tìm kiếm
+                        input.form-control(
+                            type="text"
+                            name="keyword"
+                            value=keyword
+                            placeholder="Nhập tiêu đề..."
+                            oninput="this.form.submit()"
+                        )
+
+                    .col-md-3
+                        label.form-label Lọc theo năm
+                        select.form-select(name="year", onchange="this.form.submit()")
+                            option(value="") Tất cả năm
+                            each y in (yearOptions || [])
+                                option(
+                                    value=y
+                                    selected=(filterYear && filterYear.toString() === y.toString())
+                                ) #{y}
+
+                    .col-md-3
+                        - const months = [1,2,3,4,5,6,7,8,9,10,11,12];
+                        label.form-label Lọc theo tháng
+                        select.form-select(name="month", onchange="this.form.submit()")
+                            option(value="") Tất cả tháng
+                            each m in months
+                                option(
+                                    value=m
+                                    selected=(filterMonth && filterMonth.toString() === m.toString())
+                                ) Tháng #{m}
+
+                .row.g-3.mt-2
+                    .col-md-4
+                        label.form-label Sắp xếp
+                        select.form-select(name="sort", onchange="this.form.submit()")
+                            option(value="newest" selected=sort==='newest') Ngày đăng mới → cũ
+                            option(value="oldest" selected=sort==='oldest') Ngày đăng cũ → mới
+                            option(value="title_az" selected=sort==='title_az') Tiêu đề A → Z
+                            option(value="title_za" selected=sort==='title_za') Tiêu đề Z → A
+
+                    .col-md-2.d-flex.align-items-end
+                        a.btn.btn-secondary.w-100(href="/admin/blog") Clear
+
+            // ===================== THỐNG KÊ =====================
+            .mt-3.text-muted
+                | Tổng: #{totalBlogs || 0} bài viết
+
+            // ===================== BẢNG DANH SÁCH BLOG =====================
+            table.table.table-bordered.mt-3.blog-table
+
+                thead.table
+                    tr
+                        th(style="width:120px") Ảnh
+                        th Tiêu đề
+                        th Ngày đăng
+                        th(style="width:180px") Hành động
+                tbody
+                    if !blogs || blogs.length === 0
+                        tr
+                            td(colspan="4" class="text-center text-muted py-4")
+                                | Không tìm thấy bài viết nào!
+                    else
+                        each item in blogs
+                            tr
+                                td
+                                    img(
+                                        src=item.thumbnail 
+                                        style="width:100px;height:70px;object-fit:cover;border-radius:6px"
+                                    )
+                                td #{item.title}
+                                td #{item.createdAt.toLocaleDateString('vi-VN')}
+                                td
+                                    if roleUser.permissions.includes('blogs_edit')
+                                        a.btn.btn-warning.btn-sm(href=`/admin/blog/edit/${item._id}`) Sửa
+                                    if roleUser.permissions.includes('blogs_delete')
+                                        a.btn.btn-danger.btn-sm.ms-2(
+                                            href=`/admin/blog/delete/${item._id}`
+                                            onclick="return confirm('Bạn chắc chắn muốn xóa bài viết này?')"
+                                        ) Xóa
+
+            // ===================== PHÂN TRANG =====================
+            if totalPages && totalPages > 1
+                - var qPrefix = (baseQuery && baseQuery.length) ? baseQuery + '&' : '';
+                nav.mt-3
+                    ul.pagination
+                        li.page-item(class=page <= 1 ? 'disabled' : '')
+                            a.page-link(href=`/admin/blog?${qPrefix}page=${page - 1}`) «
+
+                        - for (var i = 1; i <= totalPages; i++)
+                            li.page-item(class=page === i ? 'active' : '')
+                                a.page-link(href=`/admin/blog?${qPrefix}page=${i}`) #{i}
+
+                        li.page-item(class=page >= totalPages ? 'disabled' : '')
+                            a.page-link(href=`/admin/blog?${qPrefix}page=${page + 1}`) »
+    else
+        +alert-no-permission()

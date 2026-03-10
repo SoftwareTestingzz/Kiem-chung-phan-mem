@@ -1,0 +1,23 @@
+extends ../../layouts/default.pug
+include ../../mixins/alert.pug
+
+block main
+    +alert-success(3000)
+    +alert-error(5000)
+
+    if roleUser.permissions.includes('roles_edit')
+        .container.mt-5
+            h1 Chỉnh sửa Role
+
+            form(method="POST" action=`${prefixAdmin}/roles/edit/${role.id}?_method=PATCH`)
+                .mb-3
+                    label.form-label(for="title") Nhóm quyền
+                    input.form-control(type="text" id="title" name="title" required value=role.title)
+                
+                .mb-3
+                    label.form-label(for="description") Mô tả
+                    input.form-control(type="text" id="description" name="description" value=role.description)
+
+                button.btn.btn-success(type="submit") Cập nhật
+    else
+        +alert-no-permission()

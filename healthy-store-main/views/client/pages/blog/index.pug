@@ -1,0 +1,60 @@
+extends ../../layouts/default
+
+block css
+  link(rel="stylesheet", href="/css/blog.css")
+
+block main
+  .container.blog-container
+    h2.blog-title Tin tức & Blog
+
+    if !blogs || blogs.length === 0
+      .empty-state.text-center(style="padding:60px 0;")
+        img(src="/images/none blog.jpg" width="120" alt="no-blogs")
+        h4.mt-3 Chưa có bài viết nào
+        p.text-muted Vui lòng quay lại sau để xem tin tức.
+    else
+      .row.g-4
+        each item in blogs
+          .col-md-4
+            a.blog-card(href=`/blog/${item.slug}`)
+              .blog-image
+                img(src=item.thumbnail || "/images/no-image.png")
+
+              .blog-body
+                h3.blog-name #{item.title}
+
+                p.blog-desc #{item.description || ""}
+
+                .blog-date
+                  i.fa-regular.fa-calendar
+                  span
+                    |  #{item.createdAt.toLocaleDateString("vi-VN")}
+
+    // =======================
+    // PAGINATION
+    // =======================
+    if totalPages > 1
+      .pagination-container
+        ul.pagination-verdish
+
+          // PREV
+          if page > 1
+            li
+              a(href=`?page=${page - 1}`) ‹
+          else
+            li.disabled
+              span ‹
+
+          // PAGE NUMBER
+          each p in [...Array(totalPages).keys()]
+            - const pageNumber = p + 1
+            li(class=pageNumber === page ? "active" : "")
+              a(href=`?page=${pageNumber}`)= pageNumber
+
+          // NEXT
+          if page < totalPages
+            li
+              a(href=`?page=${page + 1}`) ›
+          else
+            li.disabled
+              span ›

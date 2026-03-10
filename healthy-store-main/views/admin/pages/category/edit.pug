@@ -1,0 +1,67 @@
+extends ../../layouts/default.pug
+include ../../mixins/alert.pug
+include ../../mixins/select-tree.pug
+
+block main 
+    +alert-success(3000)
+    +alert-error(5000)
+
+    if roleUser.permissions.includes('categories_edit')
+        h1.mb-4 #{pageTitle}
+
+        form(action=`${prefixAdmin}/categories/edit/${data.id}?_method=PATCH` method="POST" enctype="multipart/form-data")
+            .form-group.mb-3
+                label.form-label(for="title") Tên danh mục
+                input.form-control(type="text" id="title" name="title" required value=data.title)
+
+            .form-group.mb-3
+                label.form-label(for="parent_category") Danh mục cha
+                select.form-control(id="parent_category" name="parent_category")
+                    option(value='') -- Chọn danh mục --
+                    if tree
+                        +select-tree(tree, '', data.parent_category)
+
+            .form-group.mb-3
+                label.form-label(for="desc") Mô tả danh mục
+                textarea.form-control(id="desc" name="description" rows="4") #{data.description}
+
+            .form-group.mb-3(upload-image='')
+                label.form-label(for="thumbnail") Hình ảnh danh mục
+                input.form-control(type="file" id="thumbnail" name="thumbnail" accept="image/*" upload-image-input='')
+                input(type="hidden" name="removeThumbnail" value="0" upload-image-remove-flag='') 
+                .image-preview-wrapper
+                    img(src=data.thumbnail data-old=data.thumbnail upload-image-preview='')
+                    button(
+                        type='button' 
+                        upload-image-remove='' 
+                        aria-label='Close'
+                    ) x
+
+            .form-group.mb-3
+                label.form-label(for="position") Vị trí
+                input.form-control(type="number" id="position" name="position" placeholder="Tự động tăng" min="1" value=data.position)
+
+            .form-group.mb-3.form-check.form-check-inline
+                input.form-check-input(
+                    type="radio"
+                    id="status-active"
+                    name="status"
+                    value="active"
+                    checked=(data.status === 'active' ? true : false)
+                )
+                label.form-check-label(for="status-active") Hoạt động
+
+            .form-group.mb-3.form-check.form-check-inline
+                input.form-check-input(
+                    type="radio"
+                    id="status-inactive"
+                    name="status"
+                    value="inactive"
+                    checked=(data.status === 'inactive' ? true : false)
+                )
+                label.form-check-label(for="status-inactive") Dừng hoạt động
+
+            .form-group
+                button.btn.btn-primary(type="submit") Cập nhật
+    else
+        +alert-no-permission()

@@ -1,0 +1,31 @@
+extends ../../layouts/default
+
+block css
+  link(rel="stylesheet", href="/css/blog.css")
+
+block main
+  .container.blog-detail
+    if blog
+      // TITLE
+      h1.blog-detail-title #{blog.title}
+
+      // DATE
+      if blog.createdAt
+        .blog-detail-date
+          i.fa-regular.fa-calendar
+          span
+            |  #{blog.createdAt.toLocaleDateString("vi-VN")}
+
+      // THUMBNAIL
+      if blog.thumbnail
+        img.blog-detail-thumb(src=blog.thumbnail, alt=blog.title)
+
+      // CONTENT
+      .blog-detail-content !{blog.content}
+
+      // BACK
+      a.back-btn(href="/blog") Quay lại Blog
+    else
+      h3 Bài viết không tồn tại
+      a.back-btn(href="/blog") Quay lại Blog
+

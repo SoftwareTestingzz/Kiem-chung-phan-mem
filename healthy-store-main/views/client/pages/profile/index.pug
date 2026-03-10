@@ -1,0 +1,118 @@
+extends ../../layouts/default
+
+block css
+    link(rel="stylesheet", href="/css/profile.css")
+    link(rel="stylesheet", href="/css/style.css")
+
+block main
+    .profile-container
+
+        .profile-sidebar
+            .sidebar-header
+                img.avatar-small(src=user.avatar || "/images/default-avatar.png")
+                .sidebar-name #{user.fullName}
+
+            ul.sidebar-menu
+                li.sidebar-btn.active(onclick="window.location.href='/profile'")
+                    i.fa-solid.fa-user
+                    span Thông tin tài khoản
+
+                li.sidebar-btn(onclick="window.location.href='/cart'")
+                    i.fa-solid.fa-cart-shopping
+                    span Giỏ hàng
+
+                li.sidebar-btn(onclick="window.location.href='/orders'")
+                    i.fa-solid.fa-box
+                    span Đơn hàng
+
+        .profile-content
+            h2.title Thông tin cá nhân
+
+            form#profileForm(method="POST", enctype="multipart/form-data")
+
+                .avatar-center
+                    img.avatar-preview#avatarPreview(src=user.avatar || "/images/default-avatar.svg")
+                    input#avatarInput(type="file", name="avatar", accept="image/*", disabled)
+
+                .form-group
+                    label Họ và tên
+                    input.profile-input.form-control(
+                        type="text",
+                        name="fullName",
+                        value=user.fullName,
+                        disabled
+                    )
+
+                .form-group
+                    label Email
+                    input.form-control(
+                        type="email",
+                        value=user.email,
+                        disabled
+                    )
+
+                .form-group
+                    label Giới tính
+                    .gender-group
+                        label
+                            input(
+                                type="radio",
+                                name="gender",
+                                value="male",
+                                disabled
+                                checked=(user.gender == "male")
+                            )
+                            | Nam
+                        label
+                            input(
+                                type="radio",
+                                name="gender",
+                                value="female",
+                                disabled
+                                checked=(user.gender == "female")
+                            )
+                            | Nữ
+                        label
+                            input(
+                                type="radio",
+                                name="gender",
+                                value="other",
+                                disabled
+                                checked=(user.gender == "other")
+                            )
+                            | Khác
+
+                .form-group
+                    label Ngày sinh
+                    input.profile-input.form-control(
+                        type="date",
+                        name="birthday",
+                        value=user.birthday,
+                        disabled
+                    )
+
+                .form-group
+                    label Số điện thoại
+                    input.profile-input.form-control(
+                        type="text",
+                        name="phone",
+                        value=user.phone,
+                        disabled
+                    )
+
+                .form-group
+                    label Địa chỉ
+                    input.profile-input.form-control(
+                        type="text",
+                        name="address",
+                        value=user.address,
+                        disabled
+                    )
+
+                .btn-group
+                    button.btn-edit(type="button") Chỉnh sửa
+                    button.btn-save#saveBtn(type="button" style="display:none") Lưu
+                    button.btn-cancel(type="button" style="display:none") Hủy
+
+block scripts
+    script(src="/js/profile.js")

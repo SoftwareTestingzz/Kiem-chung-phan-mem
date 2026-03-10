@@ -1,0 +1,16 @@
+mixin sort()
+    .row.g-3.align-items-end(sort='')
+        .col-md-4
+            label.form-label(for="sort") Chọn tiêu chí
+            select#sort.form-select(name="sort" sort-select='')
+                option(value="position-desc") Vị trí giảm dần
+                option(value="position-asc") Vị trí tăng dần
+                option(value="price-desc") Giá giảm dần
+                option(value="price-asc") Giá tăng dần
+                option(value="title-asc") Tiêu đề A - Z
+                option(value="title-desc") Tiêu đề Z - A
+
+        .col-auto.pt-1
+            button.btn.btn-outline-danger(sort-clear='')
+                i.bi.bi-x-circle.me-1
+                | Clear

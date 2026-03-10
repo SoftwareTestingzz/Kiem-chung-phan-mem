@@ -1,0 +1,77 @@
+extends ../../layouts/default
+
+block main
+    link(rel="stylesheet", href="/css/register.css")
+
+    .auth-container
+        .auth-box
+            h2.title Đăng ký
+
+            form(method="POST", action="/register" id="registerForm")
+                .form-group
+                    label Họ tên
+                    input(
+                        type="text",
+                        name="fullName",
+                        placeholder="Nhập họ tên...",
+                        value=(oldData && oldData.fullName) ? oldData.fullName : ""
+                    )
+
+                .form-group
+                    label Email
+                    input(
+                        type="email",
+                        name="email",
+                        placeholder="Nhập email...",
+                        value=(oldData && oldData.email) ? oldData.email : ""
+                    )
+
+                // ===== PASSWORD =====
+                .form-group.password-group
+                    label Mật khẩu
+                    .password-wrapper
+                        input(
+                            type="password",
+                            name="password",
+                            id="password",
+                            placeholder="Nhập mật khẩu..."
+                        )
+                        span.toggle-password(
+                            onclick="togglePassword('password', this)"
+                        ) 👁
+
+                // ===== CONFIRM PASSWORD =====
+                .form-group.password-group
+                    label Nhập lại mật khẩu
+                    .password-wrapper
+                        input(
+                            type="password",
+                            name="confirmPassword",
+                            id="confirmPassword",
+                            placeholder="Nhập lại mật khẩu..."
+                        )
+                        span.toggle-password(
+                            onclick="togglePassword('confirmPassword', this)"
+                        ) 👁
+
+                button(type="submit") Đăng ký
+
+            p.switch-text
+                | Đã có tài khoản?
+                a(href="/login") Đăng nhập
+
+    // ===== SCRIPT SHOW / HIDE PASSWORD =====
+    script.
+        function togglePassword(id, el) {
+            const input = document.getElementById(id);
+            if (input.type === "password") {
+                input.type = "text";
+                el.textContent = "🙈";
+            } else {
+                input.type = "password";
+                el.textContent = "👁";
+            }
+        }
+
+block scripts
+    script(src="/js/register.js")

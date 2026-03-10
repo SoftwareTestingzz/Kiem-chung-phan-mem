@@ -1,0 +1,87 @@
+extends ../../layouts/default
+
+block main
+    .container.my-4
+        h2.mb-4 Giỏ hàng của bạn
+
+        if !cart || cart.length === 0
+            .empty-state.text-center(style="padding:60px 0;")
+                img(src="/images/none cart.jpg" width="120" alt="empty-cart")
+                h4.mt-3 Giỏ hàng đang trống
+                p.text-muted Bạn chưa thêm sản phẩm nào vào giỏ hàng.
+                a.btn.btn-success.mt-3(href="/products") Tiếp tục mua sắm
+        else
+
+            // Nút xóa toàn bộ giỏ hàng
+            button.btn.btn-danger.mb-3#btnClearAll Xóa tất cả giỏ hàng
+
+            table.table.align-middle
+                thead
+                    tr
+                        th Chọn
+                        th Ảnh
+                        th Tên
+                        th Giá
+                        th Số lượng
+                        th Thành tiền
+                        th Hành động
+                tbody
+                    each item in cart
+                        tr
+                            td
+                                input.select-item(
+                                    type="checkbox"
+                                    checked
+                                    data-id=item.productId.toString()
+                                )
+
+                            td
+                                img(
+                                    src=item.thumbnail,
+                                    width="70",
+                                    height="70",
+                                    style="object-fit:cover;border-radius:6px;"
+                                )
+
+                            td #{item.title}
+
+                            // ===== GIÁ (VND) =====
+                            td.price(data-value=item.price)
+                                | #{item.price.toLocaleString("vi-VN")} VND
+
+                            td
+                                input.qty-box(
+                                    type="number",
+                                    min="1",
+                                    max=item.maxStock,
+                                    value=item.quantity,
+                                    data-id=item.productId.toString(),
+                                    style="width:70px;text-align:center;border-radius:6px;"
+                                )
+
+                            // ===== THÀNH TIỀN (VND) =====
+                            td.subtotal
+                                | #{(item.price * item.quantity).toLocaleString("vi-VN")} VND
+
+                            td
+                                button.btn.btn-danger.btn-delete(
+                                    data-id=item.productId.toString()
+                                ) Xóa
+
+            hr
+
+            h3.mt-3
+                | Tổng tiền: 
+                span#selectedTotal.text-danger 0 VND
+
+            form(action="/checkout" method="POST")
+                input(
+                    type="hidden"
+                    id="selectedItemsInput"
+                    name="selectedItems"
+                )
+                button.btn.btn-success.mt-3(type="submit")
+                    | Tiến hành đặt hàng
+
+block scripts
+    script(src="/js/cart.js")

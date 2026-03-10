@@ -1,0 +1,208 @@
+extends ../../layouts/default.pug
+
+block main
+    // ----- SLIDER -----
+    .slider
+        .slides
+            img(src="/images/slider1.jpg", alt="Slide 1")
+            img(src="/images/slider2.jpg", alt="Slide 2")
+            img(src="/images/slider3.jpg", alt="Slide 3")
+        .dots
+
+    // ----- SẢN PHẨM TẠI Verdish -----
+    section.products-section
+        .container
+            h2.products-title Sản phẩm tại Verdish
+
+            .products-tabs
+                button.products-tab.active(type="button" data-filter="best") Bán chạy nhất
+                button.products-tab(type="button" data-filter="new") Hàng mới về
+                button.products-tab(type="button" data-filter="top") Đánh giá cao
+
+            .products-list
+                if productsHome && productsHome.length
+                    each product, index in productsHome
+                        - const catTab = index % 3 === 0 ? 'best' : (index % 3 === 1 ? 'new' : 'top');
+                        // Toàn bộ card là link sang trang chi tiết
+                        a.product-card(
+                            href=`/detail/${product.slug}`
+                            data-category=catTab
+                        )
+                            .product-card-image
+                                if product.thumbnail
+                                    img(src=product.thumbnail, alt=product.title || product.name || 'Sản phẩm')
+                                else
+                                    img(src="/images/logo.svg", alt=product.title || product.name || 'Sản phẩm')
+
+                            .product-card-body
+                                // ===== TÊN SẢN PHẨM =====
+                                h3.product-card-name= product.title || product.name || 'Chưa có tên'
+
+                                // ===== GIÁ + GIẢM GIÁ =====
+                                if product.newPrice
+                                    // Giá mới (sau giảm)
+                                    p.product-card-price #{Number(product.newPrice).toLocaleString('vi-VN')} VND
+
+                                    // Giá cũ (nếu có)
+                                    if product.price
+                                        p.product-card-price-old #{Number(product.price).toLocaleString('vi-VN')} VND
+
+                                    // Badge giảm giá (nếu có)
+                                    if product.discountPercentage
+                                        span.product-card-discount -#{product.discountPercentage}%
+                                else if product.price
+                                    // Trường hợp chưa có newPrice, show giá gốc
+                                    p.product-card-price #{Number(product.price).toLocaleString('vi-VN')} VND
+                else
+                    p.text-muted.text-center Chưa có sản phẩm nào.
+
+            // PAGINATION / XEM THÊM
+            if totalPages && totalPages > 1
+                .products-more
+                    .pagination-container
+                        ul.pagination-verdish
+                            if page > 1
+                                li
+                                    a(href=`/?page=${page - 1}`) ‹
+                            else
+                                li.disabled
+                                    span ‹
+
+                            each p in [...Array(totalPages).keys()]
+                                - const pageNumber = p + 1
+                                li(class=pageNumber === page ? "active" : "")
+                                    a(href=`/?page=${pageNumber}`)= pageNumber
+
+                            if page < totalPages
+                                li
+                                    a(href=`/?page=${page + 1}`) ›
+                            else
+                                li.disabled
+                                    span ›
+            else
+                .products-more
+                    a.products-more-btn(href="/products") Xem thêm sản phẩm →
+
+    // ----- BLOG & FANPAGE -----
+    section.home-blog-fanpage
+        .container
+            .home-bf-wrapper
+                // ----- CARD BLOG -----
+                .bf-card.bf-card-blog
+                    h2.bf-title Info
+
+                    .bf-blog-list
+                        // Item 1
+                        .bf-blog-item
+                            .bf-blog-thumb
+                                span.bf-blog-thumb-text MUA HÀNG VÀ THANH TOÁN
+                            .bf-blog-info
+                                p.bf-blog-desc Tìm hiểu về quy trình mua hàng và thanh toán tại Verdish
+
+                        // Item 2
+                        .bf-blog-item
+                            .bf-blog-thumb
+                                span.bf-blog-thumb-text THÔNG TIN VẬN CHUYỂN VÀ GIAO NHẬN
+                            .bf-blog-info
+                                p.bf-blog-desc Tìm hiểu về thông tin vận chuyển và giao nhận của Verdish
+
+                        // Item 3
+                        .bf-blog-item
+                            .bf-blog-thumb
+                                span.bf-blog-thumb-text CHÍNH SÁCH VÀ QUY ĐỊNH CHUNG
+                            .bf-blog-info
+                                p.bf-blog-desc Biết thêm về các chính sách và quy định chung của Verdish
+
+                    a.bf-btn(href="/blog")
+                        span Xem thêm
+                        span.bf-btn-arrow →
+
+                // ----- CARD FANPAGE -----
+                .bf-card.bf-card-fanpage
+                    h2.bf-title Fanpage
+
+                    .bf-fan-cover
+                        img(src="/images/slider1.jpg", alt="Fanpage Verdish")
+
+                    .bf-fan-content
+                        h3.bf-fan-name Verdish
+                        p.bf-fan-desc Cập nhật ưu đãi & bí quyết sống lành mạnh mỗi ngày.
+
+                        a.bf-btn(href="https://facebook.com" target="_blank")
+                            span Ghé thăm
+                            span.bf-btn-arrow →
+
+    // ----- TẠI SAO NÊN LÀ VERDISH -----
+    section.why-section
+        .container
+            h2.why-title TẠI SAO NÊN LÀ VERDISH
+
+            .why-cards
+                .why-card
+                    .why-icon
+                        i.fa-solid.fa-id-card
+                    p.why-text
+                        | HOÀN TIỀN TRONG 7 NGÀY KỂ TỪ KHI NHẬN HÀNG.
+                        br
+                        | HOÀN TRẢ 100% NẾU SẢN PHẨM KHÔNG NHƯ MÔ TẢ.
+
+                .why-card
+                    .why-icon
+                        i.fa-solid.fa-truck-fast
+                    p.why-text
+                        | GIAO HÀNG TOÀN QUỐC.
+                        br
+                        | FREE SHIP TOÀN QUỐC KHI ĐƠN HÀNG TỪ 199K TRỞ LÊN
+                        br
+                        | HOẶC TỪ 3 SẢN PHẨM TRỞ LÊN
+
+                .why-card
+                    .why-icon
+                        i.fa-solid.fa-award
+                    p.why-text
+                        | SẢN PHẨM ĐƯỢC ĐẢM BẢO CHẤT LƯỢNG VÀ NGUỒN GỐC.
+                        br
+                        | CAM KẾT CHÍNH HÃNG 100%.
+
+    // ----- CÁC ĐỊA CHỈ MUA HÀNG -----
+    section.shop-address-section
+        .container
+            h2.shop-address-title Các kênh mua hàng
+
+            .shop-address-wrapper
+                // Card TikTok
+                .shop-card.shop-tiktok
+                    .shop-badge
+                        span.shop-badge-text TikTok
+                    .shop-cover
+                        img(src="/images/slider1.jpg", alt="TikTok store")
+                    h3.shop-name Tiktok
+                    a.shop-btn(href="#" target="_blank")
+                        span Xem chi tiết
+                        span.shop-btn-arrow →
+
+                // Card Instagram
+                .shop-card.shop-instagram
+                    .shop-badge
+                        span.shop-badge-text Instagram
+                    .shop-cover
+                        img(src="/images/slider2.jpg", alt="Instagram store")
+                    h3.shop-name Instagram
+                    a.shop-btn(href="#" target="_blank")
+                        span Xem chi tiết
+                        span.shop-btn-arrow →
+
+                // Card Facebook
+                .shop-card.shop-facebook
+                    .shop-badge
+                        span.shop-badge-text Facebook
+                    .shop-cover
+                        img(src="/images/slider3.jpg", alt="Facebook store")
+                    h3.shop-name Facebook
+                    a.shop-btn(href="#" target="_blank")
+                        span Xem chi tiết
+                        span.shop-btn-arrow →
+
+block scripts
+    script(src="/js/home.products.js")
+    script(src="/js/slider.js")

@@ -1,0 +1,53 @@
+extends ../../layouts/default.pug
+include ../../mixins/alert.pug
+
+block main
+    +alert-success(3000)
+    +alert-error(5000)
+
+    if roleUser.permissions.includes('accounts_view')
+        h1.mb-4 #{pageTitle}
+
+        .card
+            .card-header Thông tin tài khoản
+            .card-body
+                .row
+                    .col-md-4.text-center
+                        if account.avatar
+                            img(
+                                src=account.avatar
+                                style="max-width:180px;border-radius:10px;"
+                            )
+                        else
+                            span.text-muted Không có avatar
+
+                    .col-md-8
+                        p
+                            strong Họ tên:
+                            |  #{account.fullName}
+
+                        p
+                            strong Email:
+                            |  #{account.email}
+
+                        p
+                            strong Phân quyền:
+                            if account.role
+                                span.badge.bg-info.ms-2 #{account.role.title}
+                            else
+                                span.text-muted Chưa phân quyền
+
+                        p
+                            strong Trạng thái:
+                            if account.status == 'active'
+                                span.badge.bg-success.ms-2 Hoạt động
+                            else
+                                span.badge.bg-danger.ms-2 Dừng hoạt động
+
+                        p
+                            strong Ngày tạo:
+                            |  #{account.createdAt.toLocaleString('vi-VN')}
+
+              
+    else
+        +alert-no-permission()

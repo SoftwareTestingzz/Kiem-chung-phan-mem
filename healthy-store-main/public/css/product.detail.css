@@ -1,0 +1,599 @@
+/* ===== TRANG CHI TIẾT SẢN PHẨM ===== */
+
+.product-detail {
+    font-size: 14px;
+}
+
+/* --- Gallery bên trái --- */
+.product-detail-gallery {
+    background: #fff;
+    border-radius: 12px;
+    border: 1px solid #eee;
+    padding: 20px;
+
+    transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+    will-change: transform;
+}
+
+.product-detail-gallery:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.10);
+    border-color: rgba(0, 0, 0, 0.10);
+}
+
+.product-detail-main {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.product-detail-main img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+
+    transition: transform 0.22s ease;
+    will-change: transform;
+}
+
+.product-detail-gallery:hover .product-detail-main img {
+    transform: scale(1.02);
+}
+
+/* --- Thông tin bên phải --- */
+.product-detail-title {
+    font-size: 28px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    line-height: 1.2;
+}
+
+.product-detail-price {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px 12px;
+    margin-bottom: 8px;
+}
+
+.price-new {
+    font-size: 24px;
+    font-weight: 700;
+    color: green;
+    /* đồng bộ với list sản phẩm */
+}
+
+.price-old {
+    font-size: 16px;
+    text-decoration: line-through;
+    color: #999;
+}
+
+.price-discount {
+    font-size: 13px;
+    font-weight: 600;
+    color: #e53935;
+    background: rgba(229, 57, 53, 0.10);
+    padding: 4px 10px;
+    border-radius: 999px;
+}
+
+.product-detail-stock {
+    margin-bottom: 16px;
+    color: #6b7280;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.product-detail-stock::before {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: #22c55e;
+    display: inline-block;
+}
+
+.product-detail-desc {
+    margin: 16px 0 24px;
+    line-height: 1.6;
+    color: #4b5563;
+}
+
+/* --- Nút + số lượng --- */
+.product-detail-actions {
+    display: flex;
+    flex-direction: column;
+    /* xếp dọc: qty + thêm giỏ + mua ngay */
+    gap: 12px;
+    align-items: flex-start;
+}
+
+.product-detail-qty {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid #ddd;
+    border-radius: 999px;
+    overflow: hidden;
+    background: #fff;
+
+    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+    will-change: transform;
+}
+
+.product-detail-qty:focus-within {
+    border-color: rgba(0, 0, 0, 0.25);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.10);
+}
+
+.product-detail-row {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.qty-btn {
+    border: none;
+    background: #f5f5f5;
+    width: 36px;
+    height: 36px;
+    cursor: pointer;
+
+    transition: transform 0.12s ease, background 0.12s ease;
+    will-change: transform;
+}
+
+.qty-btn:hover {
+    background: #ededed;
+    transform: translateY(-1px);
+}
+
+.qty-input {
+    width: 52px;
+    height: 36px;
+    border: none;
+    text-align: center;
+    outline: none;
+}
+
+/* --- Nút hành động --- */
+.btn-add-cart {
+    padding: 9px 22px;
+    border-radius: 999px;
+    border: none;
+    background: #000;
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+
+    transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
+    will-change: transform;
+}
+
+.btn-add-cart:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+    box-shadow: 0 12px 26px rgba(0, 0, 0, 0.18);
+}
+
+.btn-buy-now {
+    display: block;
+    /* cho phép width 100% */
+    width: 100%;
+    /* dài full dòng */
+    text-align: center;
+    padding: 12px 32px;
+    border-radius: 999px;
+    background: #28a745;
+    /* xanh lá */
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+    border: none;
+
+    transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
+    will-change: transform;
+}
+
+.btn-buy-now:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+    box-shadow: 0 14px 30px rgba(40, 167, 69, 0.30);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .product-detail-actions {
+        align-items: stretch;
+    }
+}
+
+/* ===== PHẦN ĐÁNH GIÁ SẢN PHẨM ===== */
+.product-review {
+    margin-top: 40px;
+    padding: 24px 28px;
+    border-radius: 16px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+
+    transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+    will-change: transform;
+}
+
+.product-review:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 36px rgba(15, 23, 42, 0.10);
+    border-color: rgba(17, 24, 39, 0.10);
+}
+
+/* Header */
+.product-review .review-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.product-review .review-header h2 {
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.product-review .review-header h2::before {
+    content: "";
+    width: 4px;
+    height: 20px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+}
+
+.review-summary {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    font-size: 14px;
+    color: #6b7280;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: #f9fafb;
+    border: 1px solid #eef2f7;
+}
+
+.review-score {
+    font-size: 18px;
+    font-weight: 700;
+    color: #111827;
+}
+
+.review-count {
+    font-size: 13px;
+    color: #9ca3af;
+}
+
+/* Form */
+.review-form {
+    padding: 16px 18px;
+    border-radius: 12px;
+    background: #f9fafb;
+    border: 1px dashed #e5e7eb;
+    margin-bottom: 16px;
+
+    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+    will-change: transform;
+}
+
+.review-form:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 28px rgba(15, 23, 42, 0.08);
+    border-color: rgba(34, 197, 94, 0.25);
+}
+
+.review-form .form-group {
+    margin-bottom: 12px;
+}
+
+.review-form label {
+    font-size: 13px;
+    font-weight: 500;
+    color: #374151;
+    display: block;
+    margin-bottom: 6px;
+}
+
+
+/* Sao đánh giá */
+.rating-stars .stars {
+    display: inline-flex;
+    gap: 4px;
+}
+
+.rating-stars .star {
+    position: relative;
+}
+
+.rating-stars .star input {
+    display: none;
+}
+
+.rating-stars .star span {
+    font-size: 26px;
+    cursor: pointer;
+    transition: transform 0.15s ease, filter 0.15s ease, color 0.15s ease;
+    color: #e5e7eb;
+    /* xám khi chưa chọn */
+}
+
+/* Sao đang active (được chọn) */
+.rating-stars .star.active span {
+    color: #fbbf24;
+    /* vàng */
+    filter: none;
+}
+
+/* Hover cho đẹp hơn */
+.rating-stars .star span:hover {
+    transform: translateY(-1px) scale(1.05);
+}
+
+/* Textarea */
+.review-form textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid #e5e7eb;
+    font-size: 14px;
+    resize: vertical;
+    min-height: 90px;
+    outline: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.review-form textarea:focus {
+    border-color: #22c55e;
+    box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.15);
+}
+
+/* Button gửi */
+.review-form .btn.btn-primary,
+.review-form button.btn-primary {
+    padding: 8px 18px;
+    border-radius: 999px;
+    border: none;
+    font-size: 14px;
+    font-weight: 500;
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: #fff;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 8px 18px rgba(16, 185, 129, 0.35);
+    transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;
+    will-change: transform;
+}
+
+.review-form .btn.btn-primary:hover,
+.review-form button.btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 24px rgba(16, 185, 129, 0.45);
+    filter: brightness(1.03);
+}
+
+/* Info không được review */
+.product-review .text-muted {
+    font-size: 13px;
+    color: #9ca3af !important;
+    margin-bottom: 16px;
+}
+
+/* Danh sách comment */
+.comment-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.comment-item {
+    padding: 14px 0;
+    border-top: 1px solid #e5e7eb;
+
+    transition: transform 0.18s ease, background 0.18s ease;
+    will-change: transform;
+}
+
+.comment-item:hover {
+    transform: translateY(-2px);
+    background: rgba(249, 250, 251, 0.7);
+}
+
+.comment-item:first-child {
+    border-top: none;
+    padding-top: 0;
+}
+
+.comment-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 12px;
+    margin-bottom: 4px;
+}
+
+.comment-user {
+    font-weight: 600;
+    font-size: 14px;
+    color: #111827;
+}
+
+/* Sao trong list comment */
+.comment-rating .star {
+    font-size: 14px;
+}
+
+.comment-rating .star.filled {
+    color: #fbbf24;
+}
+
+.comment-rating .star.empty {
+    color: #e5e7eb;
+}
+
+.comment-date {
+    font-size: 12px;
+    color: #9ca3af;
+}
+
+.comment-content {
+    margin: 2px 0 0;
+    font-size: 14px;
+    color: #4b5563;
+    line-height: 1.5;
+}
+
+.no-comment {
+    font-size: 13px;
+    color: #9ca3af;
+    font-style: italic;
+    margin: 6px 0 0;
+}
+
+.rating-stars .stars {
+    display: inline-flex;
+    gap: 4px;
+}
+
+.rating-stars .star input {
+    display: none;
+}
+
+.rating-stars .star span {
+    font-size: 26px;
+    cursor: pointer;
+    transition: transform 0.15s ease, filter 0.15s ease, color 0.15s ease;
+    color: #e5e7eb;
+    /* xám khi chưa chọn */
+}
+
+/* Sao đang active (được chọn) */
+.rating-stars .star.active span {
+    color: #fbbf24;
+    /* vàng */
+    filter: none;
+}
+
+/* Hover cho đẹp hơn */
+.rating-stars .star span:hover {
+    transform: translateY(-1px) scale(1.05);
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+    .product-review {
+        padding: 18px 16px;
+        border-radius: 12px;
+    }
+
+    .product-review .review-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .product-detail-gallery:hover,
+    .product-review:hover,
+    .review-form:hover,
+    .comment-item:hover,
+    .btn-add-cart:hover,
+    .btn-buy-now:hover,
+    .qty-btn:hover,
+    .product-detail-gallery:hover .product-detail-main img {
+        transform: none;
+        box-shadow: none;
+    }
+}
+
+/* ==============================
+   FIX TRÀN CHỮ (title/desc dài)
+============================== */
+
+/* Bootstrap col là flex-item -> cho phép co lại để wrap đúng */
+.product-detail .row > [class^="col-"],
+.product-detail .row > [class*=" col-"]{
+  min-width: 0;
+}
+
+/* Title xuống dòng dù không có khoảng trắng */
+.product-detail-title{
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* Mô tả (TinyMCE) bẻ chữ + không làm tràn layout */
+.product-detail-desc,
+.product-detail-desc *{
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* Nếu mô tả có ảnh/table từ TinyMCE thì ép responsive */
+.product-detail-desc img,
+.product-detail-desc table{
+  max-width: 100%;
+}
+
+.product-detail-desc table{
+  display: block;        /* tránh table làm tràn ngang */
+  overflow-x: auto;      /* nếu bảng rộng thì scroll trong bảng */
+}
+
+/* Nếu mô tả có thẻ pre/code dài */
+.product-detail-desc pre{
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.buy-note{
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: #6b7280;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.buy-note i{
+  color: #22c55e;
+}
+
+.buy-note-list{
+  list-style: none;
+  padding: 0;
+  margin: 10px 0 0;
+  display: grid;
+  gap: 8px;
+}
+
+.buy-note-item{
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13px;
+  color: #6b7280;
+  line-height: 1.4;
+}
+
+.buy-note-item i{
+  margin-top: 2px;
+  color: #22c55e;
+  font-size: 14px;
+}

@@ -1,0 +1,151 @@
+extends ../../layouts/default.pug
+
+block css
+    link(rel="stylesheet", href="/css/product.detail.css")
+
+block main 
+    if product
+        // ========== PHẦN THÔNG TIN SẢN PHẨM ==========
+        .container.product-detail.my-4
+            .row
+                // -------- CỘT TRÁI: ẢNH SẢN PHẨM --------
+                .col-md-6.mb-3
+                    .product-detail-gallery
+                        .product-detail-main
+                            img(src=product.thumbnail, alt=product.title)
+
+                // -------- CỘT PHẢI: THÔNG TIN --------
+                .col-md-6.mb-3
+                    h1.product-detail-title #{product.title}
+
+                    .product-detail-price
+                        if product.newPrice
+                            span.price-new #{Number(product.newPriceNumber).toLocaleString('vi-VN')} VND
+                        if product.price
+                            span.price-old #{Number(product.oldPriceNumber).toLocaleString('vi-VN')} VND
+                        if product.discountPercentage
+                            span.price-discount -#{product.discountPercentage}%
+
+                    if product.stock != null
+                        p.product-detail-stock Còn lại: #{product.stock}
+
+                    if product.description
+                        .product-detail-desc !{product.description}
+                    else
+                        .product-detail-desc Mô tả đang được cập nhật.
+
+                    // ------ ACTIONS ------
+                    .product-detail-actions
+                        // Hàng trên: số lượng + thêm giỏ hàng
+                        .product-detail-row
+                            .product-detail-qty
+                                input.qty-input(type="number", value="1", min="1")
+
+                            button.btn-add-cart(
+                                data-id=product._id
+                                data-title=product.title
+                                data-price=product.newPriceNumber
+                                data-image=product.thumbnail
+                                data-stock=product.stock
+                            ) Thêm vào giỏ hàng
+
+                        // Hàng dưới: nút mua ngay
+                        button.btn-buy-now(type="button", data-id=product._id, data-stock=product.stock, data-logged=(user ? '1' : '0')) Mua ngay
+
+                        // Ghi chú dưới nút mua ngay (đã tách câu + icon mới)
+                        ul.buy-note-list
+                            li.buy-note-item
+                                i.fa-solid.fa-paper-plane
+                                span Giao hàng toàn quốc.
+                            li.buy-note-item
+                                i.fa-solid.fa-tags
+                                span Freeship khi mua từ 3 sản phẩm trở lên hoặc từ 199k.
+
+                            li.buy-note-item
+                                i.fa-solid.fa-circle-check
+                                span Hoàn tiền trong 7 ngày nếu sản phẩm lỗi.
+
+                            li.buy-note-item
+                                i.fa-solid.fa-shield-heart
+                                span Sản phẩm đảm bảo chất lượng & nguồn gốc.
+                            li.buy-note-item
+                                i.fa-solid.fa-certificate
+                                span Cam kết chính hãng 100%.
+
+        // ========== PHẦN ĐÁNH GIÁ & BÌNH LUẬN ==========
+        .container.my-4
+            .product-review
+                .review-header
+                    h2 Đánh giá & bình luận
+
+                    if avgRating && avgRating > 0
+                        .review-summary
+                            span.review-score #{avgRating.toFixed(1)} / 5
+                            span.review-count (#{comments.length} đánh giá)
+
+                // ----- FORM ĐÁNH GIÁ -----
+                if canReview
+                    form.review-form(method="POST", action='/detail/' + product.slug + '/comment')
+                        .form-group
+                            label Chấm sao:
+                            .rating-stars
+                                .stars
+                                    label.star(data-value="1")
+                                        input(type="radio", name="rating", value="1", required)
+                                        span ★
+                                    label.star(data-value="2")
+                                        input(type="radio", name="rating", value="2")
+                                        span ★
+                                    label.star(data-value="3")
+                                        input(type="radio", name="rating", value="3")
+                                        span ★
+                                    label.star(data-value="4")
+                                        input(type="radio", name="rating", value="4")
+                                        span ★
+                                    label.star(data-value="5")
+                                        input(type="radio", name="rating", value="5")
+                                        span ★
+
+                        .form-group
+                            label(for="content") Nội dung bình luận
+                            textarea#content(
+                                name="content" 
+                                rows="4" 
+                                placeholder="Chia sẻ cảm nhận của bạn..."
+                                required
+                            )
+
+                        button.btn.btn-primary(type="submit") Gửi đánh giá
+                else if hasReviewed
+                    p.text-muted Bạn đã đánh giá sản phẩm này rồi.
+                else
+                    p.text-muted Bạn cần mua sản phẩm này trước khi có thể đánh giá & bình luận.
+
+                hr
+
+                // ----- DANH SÁCH BÌNH LUẬN -----
+                if comments && comments.length
+                    ul.comment-list
+                        each c in comments
+                            li.comment-item
+                                .comment-header
+                                    strong.comment-user= c.userName || 'Người dùng'
+                                    span.comment-rating
+                                        - for (var i = 1; i <= 5; i++)
+                                            if i <= (c.rating || 0)
+                                                span.star.filled ★
+                                            else
+                                                span.star.empty ☆
+                                    if c.createdAt
+                                        span.comment-date= new Date(c.createdAt).toLocaleString('vi-VN')
+                                if c.content
+                                    p.comment-content= c.content
+                else
+                    p.no-comment Chưa có bình luận nào. Hãy là người đầu tiên!
+    else
+        .container.my-4
+            h1.mb-4 Sản phẩm không tồn tại
+
+block scripts
+    script(src="/js/product.buy.js")
+    script(src="/js/product.review.js")

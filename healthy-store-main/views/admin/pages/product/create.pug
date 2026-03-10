@@ -1,0 +1,139 @@
+extends ../../layouts/default.pug
+include ../../mixins/alert.pug
+include ../../mixins/select-tree.pug
+
+block main 
+    +alert-success(3000)
+    +alert-error(5000)
+
+    if roleUser.permissions.includes('products_create')
+        h1.mb-4 #{pageTitle}
+
+        form(
+            action=`${prefixAdmin}/products/create`
+            method="POST"
+            id="form-create-product"
+            enctype="multipart/form-data"
+        )
+            // ===== TIÊU ĐỀ =====
+            .form-group.mb-3
+                label.form-label(for="title") Tiêu đề sản phẩm
+                input.form-control(
+                    type="text"
+                    id="title"
+                    name="title"
+                    required
+                )
+
+            // ===== DANH MỤC =====
+            .form-group.mb-3
+                label.form-label(for="product_category") Danh mục
+                select.form-control(
+                    id="product_category"
+                    name="product_category"
+                )
+                    option(value='') -- Chọn danh mục --
+                    if categories
+                        +select-tree(categories)
+
+            // ===== MÔ TẢ =====
+            .form-group.mb-3
+                label.form-label(for="desc") Mô tả sản phẩm
+                textarea.form-control(
+                    id="desc"
+                    name="description"
+                    rows="5"
+                    required
+                )
+
+            // ===== GIÁ (VND) =====
+            .form-group.mb-3
+                label.form-label(for="price") Giá sản phẩm (VND)
+                input.form-control(
+                    type="number"
+                    id="price"
+                    name="price"
+                    value="0"
+                    min="0"
+                )
+                small.text-muted Nhập giá theo đơn vị Việt Nam Đồng (VND)
+
+            // ===== GIẢM GIÁ =====
+            .form-group.mb-3
+                label.form-label(for="discount") % Giảm giá
+                input.form-control(
+                    type="number"
+                    id="discount"
+                    name="discountPercentage"
+                    value="0"
+                    min="0"
+                )
+
+            // ===== SỐ LƯỢNG =====
+            .form-group.mb-3
+                label.form-label(for="stock") Số lượng sản phẩm
+                input.form-control(
+                    type="number"
+                    id="stock"
+                    name="stock"
+                    value="0"
+                    min="0"
+                )
+
+            // ===== HÌNH ẢNH =====
+            .form-group.mb-3(upload-image='')
+                label.form-label(for="thumbnail") Hình ảnh sản phẩm
+                input.form-control(
+                    type="file"
+                    id="thumbnail"
+                    name="thumbnail"
+                    accept="image/*"
+                    upload-image-input=''
+                ) 
+                .image-preview-wrapper
+                    img(
+                        src=''
+                        upload-image-preview=''
+                    )
+                    button(
+                        type='button' 
+                        upload-image-remove='' 
+                        aria-label='Close'
+                    ) x
+
+            // ===== VỊ TRÍ =====
+            .form-group.mb-3
+                label.form-label(for="position") Vị trí
+                input.form-control(
+                    type="number"
+                    id="position"
+                    name="position"
+                    placeholder="Tự động tăng"
+                    min="1"
+                )
+
+            // ===== TRẠNG THÁI =====
+            .form-group.mb-3.form-check.form-check-inline
+                input.form-check-input(
+                    type="radio"
+                    id="status-active"
+                    name="status"
+                    value="active"
+                    checked
+                )
+                label.form-check-label(for="status-active") Hoạt động
+
+            .form-group.mb-3.form-check.form-check-inline
+                input.form-check-input( 
+                    type="radio"
+                    id="status-inactive"
+                    name="status"
+                    value="inactive"
+                )
+                label.form-check-label(for="status-inactive") Dừng hoạt động
+
+            // ===== SUBMIT =====
+            .form-group
+                button.btn.btn-primary(type="submit") Lưu sản phẩm
+    else
+        +alert-no-permission()

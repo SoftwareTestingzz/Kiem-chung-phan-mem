@@ -1,0 +1,98 @@
+extends ../../layouts/default.pug
+include ../../mixins/alert.pug
+
+block main
+    +alert-success(3000)
+    +alert-error(5000)
+    
+    if roleUser.permissions.includes('accounts_view')
+        h1.mb-4 #{pageTitle}
+
+        .card.mb-3
+            .card-header Danh sách tài khoản
+            .card-body
+                .row.mb-3
+                    .col-8
+                    .col-4.text-end
+                        if roleUser.permissions.includes('accounts_create')
+                            a.btn.btn-outline-success(
+                                href=`${prefixAdmin}/accounts/create`
+                            ) + Thêm mới
+
+                table.table.table-hover.table-sm.accounts-table
+
+                    thead
+                        tr  
+                            th STT
+                            th Avatar
+                            th Họ tên
+                            th Phân quyền
+                            th Email
+                            th Trạng thái
+                            th Hành động
+                    tbody
+                        if records && records.length 
+                            each item, index in records
+                                tr
+                                    td #{index + 1}
+                                    td
+                                        img.img-fluid(
+                                            src=item.avatar
+                                            alt=item.title
+                                            style="max-width: 100px;"
+                                        )
+                                    td #{item.fullName}
+                                    td #{item.role.title}
+                                    td #{item.email}
+                                    td
+                                        if roleUser.permissions.includes('accounts_edit')
+                                            if item.status == 'active'
+                                                a.badge.bg-success(
+                                                    href="#"
+                                                    data-id=item.id
+                                                    data-status=item.status
+                                                    data-btn-change-status=''
+                                                    style="min-width: 120px; text-decoration: none;"
+                                                ) Hoạt động
+                                            else
+                                                a.badge.bg-danger(
+                                                    href="#"
+                                                    data-id=item.id
+                                                    data-status=item.status
+                                                    data-btn-change-status=''
+                                                    style="min-width: 120px; text-decoration: none;"
+                                                ) Dừng hoạt động
+                                        else
+                                            if item.status == 'active'
+                                                span.badge.bg-success(style="min-width: 120px;") Hoạt động
+                                            else
+                                                span.badge.bg-danger(style="min-width: 120px;") Dừng hoạt động
+
+                                    td
+                                        a(href=`${prefixAdmin}/accounts/detail/${item.id}`).btn.btn-secondary.btn-sm.me-1 Chi tiết
+                                        if roleUser.permissions.includes('accounts_edit')
+                                            a(href=`${prefixAdmin}/accounts/edit/${item.id}`).btn.btn-warning.btn-sm Sửa
+                                        if roleUser.permissions.includes('accounts_delete')
+                                            button.btn.btn-danger.btn-sm.ms-1(
+                                                data-id=item.id 
+                                                data-btn-delete=''
+                                            ) Xóa
+
+
+        form.d-none(
+            action=""
+            method="POST"
+            id="form-delete-account"
+            data-path=`${prefixAdmin}/accounts/delete-account`
+        )
+
+        form.d-none(
+            action=""
+            method="POST"
+            id="form-change-status"
+            data-path=`${prefixAdmin}/accounts/change-status`
+        )
+
+        script(src='/admin/js/account.js')
+    else 
+        +alert-no-permission()

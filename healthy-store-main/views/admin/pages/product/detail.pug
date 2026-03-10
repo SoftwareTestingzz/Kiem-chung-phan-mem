@@ -1,0 +1,83 @@
+extends ../../layouts/default.pug
+
+block main
+    if roleUser.permissions.includes('products_view')
+        if product
+            h1.mb-4 #{product.title}
+
+            // ===== THÔNG TIN SẢN PHẨM =====
+            .card.mb-4
+                .card-header Thông tin sản phẩm
+                .card-body
+                    .row
+                        .col-md-4
+                            img.img-fluid(
+                                src=product.thumbnail
+                                alt=product.title
+                            )
+
+                        .col-md-8
+                            h3 #{product.price.toLocaleString('vi-VN')} VND
+
+                            p Giảm giá: #{product.discountPercentage}%
+                            p Còn lại: #{product.stock}
+
+                            p Trạng thái:
+                                if product.status === 'active'
+                                    span.badge.bg-success.ms-2 Hoạt động
+                                else if product.status === 'inactive'
+                                    span.badge.bg-danger.ms-2 Dừng hoạt động
+
+                            p Danh mục: #{product.nameCategory}
+                            p Vị trí: #{product.position}
+
+                            p !{product.description}
+
+                            a.btn.btn-warning(
+                                href=`${prefixAdmin}/products/edit/${product._id}`
+                            )
+                                i.bi.bi-pencil-square.me-1
+                                | Chỉnh sửa sản phẩm
+
+            // ===== THÔNG TIN HỆ THỐNG =====
+            .card
+                .card-header Thông tin hệ thống
+                .card-body
+                    .row
+                        .col-md-6
+                            p
+                                strong Ngày tạo:
+                                if product.createdAt
+                                    |  #{product.createdAt.toLocaleString('vi-VN')}
+                                else
+                                    |  —
+
+                            p
+                                strong Người tạo:
+                                if product.createdBy && product.createdBy.fullName
+                                    |  #{product.createdBy.fullName}
+                                else
+                                    |  Không xác định
+
+                        .col-md-6
+                            p
+                                strong Ngày cập nhật:
+                                if product.updatedAt
+                                    |  #{product.updatedAt.toLocaleString('vi-VN')}
+                                else
+                                    |  —
+
+                            p
+                                strong Người cập nhật:
+                                if product.updatedBy && product.updatedBy.fullName
+                                    |  #{product.updatedBy.fullName}
+                                else
+                                    |  Chưa cập nhật
+
+
+        else
+            h2.text-danger Sản phẩm không tồn tại
+
+        script(src="/admin/js/product.js")
+    else
+        +alert-no-permission()

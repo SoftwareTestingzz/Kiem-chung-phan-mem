@@ -1,0 +1,35 @@
+extends ../../layouts/default.pug
+
+block main
+
+    if roleUser.permissions.includes('roles_view')
+        .container.mt-5
+            h2 Chi tiết nhóm quyền
+
+            .card.mt-3
+                .card-body
+                    h4 #{role.title}
+                    p.text-muted.mt-2 #{role.description}
+
+                    hr
+
+                    h5 Quyền hạn
+                    if permissionsDisplay.length
+                        ul
+                            each per in permissionsDisplay
+                                li= per
+                    else
+                        p.text-muted Không có quyền nào
+
+                    hr
+
+                    p
+                        strong Tạo lúc:
+                        |  #{role.createdAt.toLocaleString()}
+
+                    p
+                        strong Cập nhật lúc:
+                        |  #{role.updatedAt.toLocaleString()}
+
+    else
+        +alert-no-permission()

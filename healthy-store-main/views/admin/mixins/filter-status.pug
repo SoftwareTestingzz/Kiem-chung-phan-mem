@@ -1,0 +1,4 @@
+mixin filter-status(filterStatus)
+    for item in filterStatus
+        button.btn.btn-sm.btn-outline-success.ms-1(class=item.class btn-status=item.status)= item.name
+        

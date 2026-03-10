@@ -1,0 +1,44 @@
+extends ../../layouts/default.pug
+include ../../mixins/alert.pug
+
+block main
+    +alert-success(3000)
+    +alert-error(5000)
+
+    if roleUser.permissions.includes('blogs_create')
+        .container.mt-4
+            h2 Thêm bài viết
+
+            form(method="POST", action="/admin/blog/create", enctype="multipart/form-data")
+                .mb-3
+                    label.form-label(for="title") Tiêu đề
+                    input.form-control(type="text", name="title", required)
+
+                .mb-3
+                    label.form-label(for="thumbnail") Hình ảnh
+                    input.form-control(type="file", name="thumbnail", accept="image/*", onchange="previewImg(event)")
+                    img#preview(style="max-width:200px;margin-top:10px;border-radius:8px;display:none")
+
+                .mb-3
+                    label.form-label(for="content") Nội dung
+                    textarea.form-control#editor(name="content", rows="10", required)
+
+                button.btn.btn-success.mt-3(type="submit") Lưu bài viết
+    else
+        +alert-no-permission()
+
+
+    script.
+        tinymce.init({
+            selector: '#editor',
+            plugins: 'image link media table lists code preview',
+            menubar: false,
+            toolbar: 'undo redo | bold italic underline | bullist numlist | link image media | preview code',
+            height: 350
+        });
+
+        function previewImg(e) {
+            const img = document.getElementById("preview");
+            img.src = URL.createObjectURL(e.target.files[0]);
+            img.style.display = "block";
+        }
