@@ -1,467 +1,324 @@
-# 📋 Kế hoạch Test Case 6 Tuần - Verdish E-Commerce Platform
+# 📋 Kế hoạch Test Case 6 Tuần - Verdish E-Commerce Platform (SIMPLIFIED)
 
 ## 📊 Tổng quan
 
-**Mục tiêu**: Xây dựng test suite đầy đủ cho toàn bộ project trong 6 tuần với 6 bản release version.
+**Mục tiêu**: Xây dựng test suite CHỈ CHO CORE FEATURES trong 6 tuần - dễ làm, đủ dùng.
 
-**Phương pháp**: Ưu tiên các tính năng quan trọng trước, sau đó mở rộng coverage dần.
+**Phương pháp**: Chỉ test HAPPY PATH + 1-2 ERROR CASES quan trọng. Bỏ qua edge cases phức tạp.
 
 **Framework đề xuất**: 
 - **Jest** - Unit & Integration testing
 - **Supertest** - API testing
-- **Puppeteer/Playwright** - E2E testing (tuần 5-6)
+- **Puppeteer** - E2E testing (chỉ 2-3 flows chính)
+
+**Giảm từ 180-200 test cases → 80-100 test cases**
 
 ---
 
-## 🎯 Phân bổ công việc theo tuần
+## 🎯 Phân bổ công việc theo tuần (RÚT GỌN)
 
-### **Tuần 1: Setup & Authentication Testing** 
-**Release Version: v1.0.0-test**
+### **Tuần 1 (Sprint 1): Setup & Authentication** 
+**Release Version: v1.0.0-auth**
 
 #### Mục tiêu
-- Setup môi trường testing
-- Test các tính năng authentication cơ bản
+- Setup môi trường testing cơ bản
+- Test CORE authentication flows (login, register)
 
 #### Công việc chi tiết
 
-**1. Setup Testing Environment (2 ngày)**
+**1. Setup Testing Environment (1 ngày)**
 - [ ] Cài đặt Jest, Supertest
-- [ ] Tạo file `jest.config.js`
-- [ ] Setup test database (MongoDB Memory Server)
-- [ ] Tạo folder structure: `tests/unit/`, `tests/integration/`, `tests/e2e/`
-- [ ] Viết helper functions: `setupTestDB()`, `clearTestDB()`, `createTestUser()`
+- [ ] Tạo file `jest.config.js` đơn giản
+- [ ] Setup test database (dùng MongoDB thật, không dùng Memory Server)
+- [ ] Tạo folder: `tests/auth/`, `tests/helpers/`
+- [ ] Viết 2 helper functions: `createTestUser()`, `loginTestUser()`
 
-**2. Unit Tests - Helper Functions (1 ngày)**
-- [ ] `helper/generateOtp.js` - Test OTP generation (6 digits)
-- [ ] `helper/pagination.js` - Test pagination logic
-- [ ] `helper/search.js` - Test search functionality
-- [ ] `helper/filterStatus.js` - Test status filtering
-- [ ] `helper/createTree.js` - Test nested category tree
+**2. Unit Tests - Helper Functions (0.5 ngày) - CHỈ TEST QUAN TRỌNG**
+- [ ] `helper/generateOtp.js` - Test OTP có 6 digits
+- [ ] `helper/pagination.js` - Test 1 case cơ bản
 
-**3. Unit Tests - Authentication Services (2 ngày)**
-- [ ] `services/client/register.service.js`
-  - Test tạo pending registration
-  - Test OTP generation & hashing
-  - Test email validation
-  - Test duplicate email check
-- [ ] `services/client/login.service.js`
-  - Test login với email/password đúng
-  - Test login với credentials sai
-  - Test account bị khóa
-- [ ] `services/client/password.service.js`
-  - Test forgot password flow
-  - Test OTP verification
-  - Test password reset
-
-**4. Integration Tests - Auth API (2 ngày)**
-- [ ] POST `/register` - Đăng ký bước 1 (gửi OTP)
-- [ ] POST `/register/verify-otp` - Xác thực OTP
-- [ ] POST `/register/create-account` - Tạo tài khoản
-- [ ] POST `/login` - Đăng nhập
-- [ ] POST `/password/forgot` - Quên mật khẩu
-- [ ] POST `/password/verify-otp` - Xác thực OTP reset
-- [ ] POST `/password/reset-password` - Đặt lại mật khẩu
+**3. Integration Tests - Auth API (1.5 ngày) - CHỈ HAPPY PATH**
+- [ ] POST `/register` + `/register/verify-otp` + `/register/create-account`
+  - Test full flow: Gửi OTP → Verify → Tạo account (1 test dài)
+- [ ] POST `/login` 
+  - Test login thành công
+  - Test login sai password (1 error case)
+- [ ] POST `/password/forgot` + `/password/reset-password`
+  - Test full flow reset password (1 test dài)
 
 #### Deliverables
-- ✅ 25-30 test cases
-- ✅ Test coverage: Helper functions (100%), Auth services (80%+)
-- ✅ CI/CD pipeline setup (GitHub Actions)
+- ✅ 8-10 test cases (thay vì 25-30)
+- ✅ Test coverage: Auth core flows (60%+)
+- ✅ KHÔNG CẦN CI/CD (làm sau nếu có thời gian)
 
 ---
 
-### **Tuần 2: Product & Category Testing**
-**Release Version: v1.1.0-test**
+### **Tuần 2 (Sprint 2): Product Management**
+**Release Version: v1.1.0-product**
 
 #### Mục tiêu
-- Test CRUD operations cho Products & Categories
-- Test business logic quan trọng
+- Test CRUD cơ bản cho Products
+- BỎ QUA Category testing (không quan trọng lắm)
 
 #### Công việc chi tiết
 
-**1. Unit Tests - Product Services (2 ngày)**
-- [ ] `services/admin/product.service.js`
-  - Test create product với đầy đủ fields
-  - Test update product
-  - Test delete product (soft delete)
-  - Test change status
-  - Test change position
-  - Test stock validation
-  - Test price calculation với discount
-- [ ] `services/client/product.service.js`
-  - Test get products với pagination
-  - Test filter by category
-  - Test search products
-  - Test get product detail by slug
+**1. Integration Tests - Product API (2 ngày) - CHỈ ADMIN**
+- [ ] POST `/admin/products/create` 
+  - Test tạo product thành công với đầy đủ fields
+  - Mock Cloudinary upload (return fake URL)
+- [ ] PATCH `/admin/products/edit/:id`
+  - Test update product thành công
+- [ ] DELETE `/admin/products/delete-product/:id`
+  - Test soft delete thành công
 
-**2. Unit Tests - Category Services (1 ngày)**
-- [ ] `services/admin/category.service.js`
-  - Test create category
-  - Test create nested category (parent_id)
-  - Test update category
-  - Test delete category (check products)
-  - Test build category tree
-
-**3. Integration Tests - Product API (2 ngày)**
-- [ ] Admin Product Routes:
-  - GET `/admin/products` - List với pagination
-  - POST `/admin/products/create` - Tạo sản phẩm
-  - PATCH `/admin/products/edit/:id` - Cập nhật
-  - PATCH `/admin/products/change-status/:status/:id` - Đổi status
-  - DELETE `/admin/products/delete-product/:id` - Xóa
-  - GET `/admin/products/history/:id` - Lịch sử thay đổi
-- [ ] Client Product Routes:
-  - GET `/products` - Danh sách sản phẩm
-  - GET `/product/:slug` - Chi tiết sản phẩm
-
-**4. Integration Tests - Category API (1 ngày)**
-- [ ] POST `/admin/categories/create`
-- [ ] PATCH `/admin/categories/edit/:id`
-- [ ] DELETE `/admin/categories/delete-category/:id`
-- [ ] GET `/categories` - Client view
+**2. Integration Tests - Client Product View (1 ngày)**
+- [ ] GET `/products`
+  - Test lấy danh sách products
+  - Test pagination (page 1, page 2)
+- [ ] GET `/product/:slug`
+  - Test xem chi tiết 1 product
 
 #### Deliverables
-- ✅ 35-40 test cases
-- ✅ Test coverage: Product services (85%+), Category services (80%+)
-- ✅ Mock Cloudinary upload trong tests
+- ✅ 10-12 test cases (thay vì 35-40)
+- ✅ Test coverage: Product CRUD (60%+)
+- ✅ BỎ QUA: Category, Product history, change status, search
 
 ---
 
-### **Tuần 3: Cart & Checkout Testing**
-**Release Version: v1.2.0-test**
+### **Tuần 3 (Sprint 3): Cart Management**
+**Release Version: v1.2.0-cart**
 
 #### Mục tiêu
-- Test shopping cart functionality
-- Test checkout process & order creation
-- Test inventory management
+- Test shopping cart cơ bản
+- BỎ QUA checkout (để tuần 4)
 
 #### Công việc chi tiết
 
-**1. Unit Tests - Cart Services (2 ngày)**
-- [ ] `services/client/cart.service.js`
-  - Test add product to cart
-  - Test update quantity (increase/decrease)
-  - Test remove product from cart
-  - Test calculate cart total
-  - Test merge cart khi login
-  - Test validate stock availability
-  - Test cart với product đã xóa
-  - Test cart với product hết hàng
-
-**2. Unit Tests - Checkout Services (2 ngày)**
-- [ ] `services/client/checkout.service.js`
-  - Test validate shipping info
-  - Test create order từ cart
-  - Test calculate order total
-  - Test reduce stock sau order
-  - Test clear cart sau order
-  - Test order với product không đủ stock
-  - Test order với cart rỗng
-
-**3. Integration Tests - Cart API (1 ngày)**
-- [ ] POST `/cart/add` - Thêm vào giỏ
-- [ ] POST `/cart/update` - Cập nhật số lượng
-- [ ] POST `/cart/delete` - Xóa khỏi giỏ
-- [ ] GET `/cart` - Xem giỏ hàng
-
-**4. Integration Tests - Checkout API (2 ngày)**
-- [ ] POST `/checkout` - Tạo đơn hàng
-- [ ] Test full checkout flow:
-  - User login → Add to cart → Update quantity → Checkout → Verify order created
-  - Verify stock reduced
-  - Verify cart cleared
+**1. Integration Tests - Cart API (2 ngày) - CHỈ HAPPY PATH**
+- [ ] POST `/cart/add`
+  - Test thêm product vào cart thành công
+  - Test thêm product đã có (tăng quantity)
+- [ ] POST `/cart/update`
+  - Test tăng quantity
+  - Test giảm quantity
+- [ ] POST `/cart/delete`
+  - Test xóa product khỏi cart
+- [ ] GET `/cart`
+  - Test xem cart với items
+  - Test xem cart rỗng
 
 #### Deliverables
-- ✅ 30-35 test cases
-- ✅ Test coverage: Cart services (85%+), Checkout services (90%+)
-- ✅ Test concurrent checkout scenarios
+- ✅ 8-10 test cases (thay vì 30-35)
+- ✅ Test coverage: Cart CRUD (60%+)
+- ✅ BỎ QUA: Stock validation, merge cart, edge cases
 
 ---
 
-### **Tuần 4: Order Management & Admin Features**
-**Release Version: v1.3.0-test**
+### **Tuần 4 (Sprint 4): Checkout & Orders**
+**Release Version: v1.3.0-checkout**
 
 #### Mục tiêu
-- Test order management
-- Test admin dashboard
-- Test role & permissions
+- Test checkout flow
+- Test xem orders
+- BỎ QUA dashboard, roles, permissions
 
 #### Công việc chi tiết
 
-**1. Unit Tests - Order Services (2 ngày)**
-- [ ] `services/client/orders.service.js`
-  - Test get user orders
-  - Test get order detail
-  - Test filter orders by status
-- [ ] `services/admin/orders.service.js`
-  - Test get all orders
-  - Test update order status (pending → confirmed → shipping → completed)
-  - Test cancel order
-  - Test restore stock khi cancel
-  - Test order statistics
+**1. Integration Tests - Checkout API (1.5 ngày)**
+- [ ] POST `/checkout`
+  - Test tạo order từ cart thành công
+  - Test với shipping info đầy đủ
+  - Verify order được tạo
+  - Verify cart được clear
 
-**2. Unit Tests - Dashboard Services (1 ngày)**
-- [ ] `services/admin/dashboard.service.js`
-  - Test calculate revenue by day
-  - Test calculate revenue by month
-  - Test calculate revenue by quarter
-  - Test calculate revenue by year
-  - Test export to Excel
-  - Test export to Word
-
-**3. Unit Tests - Role & Permission (1 ngày)**
-- [ ] `services/admin/role.service.js`
-  - Test create role
-  - Test assign permissions
-  - Test check user permission
-  - Test permission middleware
-
-**4. Integration Tests - Order API (2 ngày)**
-- [ ] Client:
-  - GET `/orders` - Danh sách đơn hàng
-  - GET `/orders/:id` - Chi tiết đơn hàng
-- [ ] Admin:
-  - GET `/admin/orders` - Tất cả đơn hàng
-  - POST `/admin/orders/:id/status` - Cập nhật trạng thái
-  - Test permission-based access
+**2. Integration Tests - Orders API (1.5 ngày)**
+- [ ] GET `/orders` (Client)
+  - Test user xem danh sách orders của mình
+- [ ] GET `/orders/:id` (Client)
+  - Test user xem chi tiết 1 order
+- [ ] GET `/admin/orders` (Admin)
+  - Test admin xem tất cả orders
+- [ ] POST `/admin/orders/:id/status` (Admin)
+  - Test admin update order status
 
 #### Deliverables
-- ✅ 30-35 test cases
-- ✅ Test coverage: Order services (85%+), Dashboard (75%+)
-- ✅ Test role-based access control
+- ✅ 8-10 test cases (thay vì 30-35)
+- ✅ Test coverage: Checkout + Orders view (60%+)
+- ✅ BỎ QUA: Dashboard, statistics, export, roles, permissions
 
 ---
 
-### **Tuần 5: Blog, Profile & Advanced Features**
-**Release Version: v1.4.0-test**
+### **Tuần 5 (Sprint 5): Orders Management & E2E Setup**
+**Release Version: v1.4.0-orders**
 
 #### Mục tiêu
-- Test blog functionality
-- Test user profile management
-- Test audit logging
-- Bắt đầu E2E testing
+- Test order status update
+- Setup E2E framework
+- BỎ QUA blog, profile, account management
 
 #### Công việc chi tiết
 
-**1. Unit Tests - Blog Services (1 ngày)**
-- [ ] `services/admin/blog.service.js`
-  - Test create blog post
-  - Test update blog post
-  - Test delete blog post
-  - Test publish/unpublish
-- [ ] `services/client/blog.service.js`
-  - Test get published blogs
-  - Test get blog by slug
-  - Test search blogs
+**1. Integration Tests - Order Status Flow (1 ngày)**
+- [ ] Test update order status flow:
+  - pending → confirmed → shipping → completed
+  - Test mỗi transition 1 lần
 
-**2. Unit Tests - Profile Services (1 ngày)**
-- [ ] `services/client/profile.service.js`
-  - Test update profile info
-  - Test change password
-  - Test upload avatar
-  - Test validate phone number
+**2. Setup E2E Framework (1 ngày)**
+- [ ] Cài đặt Puppeteer (đơn giản hơn Playwright)
+- [ ] Tạo helper: `loginE2E()`, `waitForElement()`
+- [ ] Test chạy browser thành công
 
-**3. Unit Tests - Account Management (1 ngày)**
-- [ ] `services/admin/account.service.js`
-  - Test create admin account
-  - Test update account
-  - Test lock/unlock account
-  - Test delete account
-  - Test assign role
+**3. E2E Test - Registration Flow (1 ngày)**
+- [ ] Test full registration flow trên UI:
+  - Fill form → Submit → Verify OTP (mock) → Success
 
-**4. E2E Tests - Critical User Flows (2 ngày)**
-- [ ] Setup Puppeteer/Playwright
-- [ ] Test complete registration flow (UI)
-- [ ] Test complete login flow (UI)
+#### Deliverables
+- ✅ 6-8 test cases (thay vì 25-30)
+- ✅ E2E framework ready
+- ✅ BỎ QUA: Blog, Profile, Account management (không quan trọng)
+
+---
+
+### **Tuần 6 (Sprint 6): E2E Critical Flows**
+**Release Version: v1.5.0-e2e (Production Ready)**
+
+#### Mục tiêu
+- Test 2-3 E2E flows quan trọng nhất
+- Viết documentation
+- BỎ QUA performance, security testing
+
+#### Công việc chi tiết
+
+**1. E2E Tests - Shopping Flow (2 ngày)**
 - [ ] Test complete shopping flow:
-  - Browse products → Add to cart → Checkout → View order
+  - Login → Browse products → Add to cart → Checkout → View order
+  - Đây là flow QUAN TRỌNG NHẤT
+
+**2. E2E Tests - Admin Product Management (1 ngày)**
+- [ ] Test admin flow:
+  - Login admin → Create product → View product list
+
+**3. Documentation (1 ngày)**
+- [ ] Viết README đơn giản:
+  - How to run tests
+  - Test structure
+  - Test data setup
+- [ ] Tạo test report đơn giản (Excel/Word)
 
 #### Deliverables
-- ✅ 25-30 test cases
-- ✅ Test coverage: Blog (80%+), Profile (85%+)
-- ✅ 3-4 E2E test scenarios
+- ✅ 3-4 E2E test cases (thay vì 20-25)
+- ✅ Overall test coverage: 60%+ (thay vì 85%+)
+- ✅ Simple documentation
+- ✅ BỎ QUA: Performance, Security, Regression testing
 
 ---
 
-### **Tuần 6: E2E Testing & Final Integration**
-**Release Version: v1.5.0-test (Production Ready)**
-
-#### Mục tiêu
-- Hoàn thiện E2E testing
-- Test performance & security
-- Final integration testing
-- Documentation
-
-#### Công việc chi tiết
-
-**1. E2E Tests - Admin Panel (2 ngày)**
-- [ ] Admin login flow
-- [ ] Product management flow:
-  - Create product → Upload image → Publish → Edit → Delete
-- [ ] Order management flow:
-  - View orders → Update status → Export report
-- [ ] Category management flow
-- [ ] User management flow
-
-**2. E2E Tests - Client Flows (1 ngày)**
-- [ ] Password reset flow (full)
-- [ ] Profile update flow
-- [ ] Blog reading flow
-- [ ] Multiple products checkout
-
-**3. Performance & Security Tests (1 ngày)**
-- [ ] Load testing với Artillery/k6:
-  - Test 100 concurrent users
-  - Test API response time < 500ms
-- [ ] Security tests:
-  - Test SQL injection prevention
-  - Test XSS prevention
-  - Test CSRF protection
-  - Test rate limiting
-  - Test authentication bypass attempts
-
-**4. Integration & Regression Testing (1 ngày)**
-- [ ] Run toàn bộ test suite
-- [ ] Fix failing tests
-- [ ] Improve test coverage lên 85%+
-- [ ] Test trên staging environment
-
-**5. Documentation (1 ngày)**
-- [ ] Viết README cho test suite
-- [ ] Document test data setup
-- [ ] Document CI/CD pipeline
-- [ ] Tạo test report template
-
-#### Deliverables
-- ✅ 20-25 E2E test cases
-- ✅ Performance test report
-- ✅ Security test report
-- ✅ Overall test coverage: 85%+
-- ✅ Complete test documentation
-
----
-
-## 📈 Tổng kết Test Coverage
+## 📈 Tổng kết Test Coverage (SIMPLIFIED)
 
 | Module | Target Coverage | Test Types |
 |--------|----------------|------------|
-| Authentication | 90%+ | Unit, Integration, E2E |
-| Products | 85%+ | Unit, Integration, E2E |
-| Categories | 80%+ | Unit, Integration |
-| Cart | 85%+ | Unit, Integration, E2E |
-| Checkout | 90%+ | Unit, Integration, E2E |
-| Orders | 85%+ | Unit, Integration, E2E |
-| Blog | 80%+ | Unit, Integration |
-| Profile | 85%+ | Unit, Integration |
-| Admin Dashboard | 75%+ | Unit, Integration |
-| Roles & Permissions | 80%+ | Unit, Integration |
+| Authentication | 60%+ | Integration, E2E |
+| Products | 60%+ | Integration |
+| Cart | 60%+ | Integration, E2E |
+| Checkout | 60%+ | Integration, E2E |
+| Orders | 60%+ | Integration |
+| ~~Categories~~ | ❌ Bỏ qua | - |
+| ~~Blog~~ | ❌ Bỏ qua | - |
+| ~~Profile~~ | ❌ Bỏ qua | - |
+| ~~Dashboard~~ | ❌ Bỏ qua | - |
+| ~~Roles~~ | ❌ Bỏ qua | - |
 
-**Tổng số test cases dự kiến**: 180-200 test cases
+**Tổng số test cases dự kiến**: 80-100 test cases (giảm 50%)
 
 ---
 
-## 🛠️ Setup Testing Environment
+## 🛠️ Setup Testing Environment (SIMPLIFIED)
 
-### Cài đặt dependencies
+### Cài đặt dependencies (CHỈ CẦN THIẾT)
 
 ```bash
-npm install --save-dev jest supertest mongodb-memory-server
-npm install --save-dev @types/jest @types/supertest
-npm install --save-dev puppeteer # Cho E2E testing
+npm install --save-dev jest supertest
+npm install --save-dev puppeteer # Cho E2E (tuần 5-6)
 ```
 
-### File `jest.config.js`
+**KHÔNG CẦN**: mongodb-memory-server (phức tạp) → Dùng MongoDB thật
+
+### File `jest.config.js` (ĐƠN GIẢN)
 
 ```javascript
 module.exports = {
   testEnvironment: 'node',
-  coverageDirectory: 'coverage',
-  collectCoverageFrom: [
-    'services/**/*.js',
-    'controllers/**/*.js',
-    'helper/**/*.js',
-    '!**/node_modules/**'
-  ],
-  testMatch: [
-    '**/tests/**/*.test.js'
-  ],
-  setupFilesAfterEnv: ['<rootDir>/tests/setup.js'],
-  testTimeout: 10000
+  testTimeout: 10000,
+  testMatch: ['**/tests/**/*.test.js']
 };
 ```
 
-### File `tests/setup.js`
+### File `tests/setup.js` (ĐƠN GIẢN)
 
 ```javascript
-const { MongoMemoryServer } = require('mongodb-memory-server');
 const mongoose = require('mongoose');
 
-let mongoServer;
-
 beforeAll(async () => {
-  mongoServer = await MongoMemoryServer.create();
-  const mongoUri = mongoServer.getUri();
-  await mongoose.connect(mongoUri);
+  // Kết nối MongoDB thật (test database)
+  await mongoose.connect(process.env.MONGO_URL_TEST);
 });
 
 afterAll(async () => {
   await mongoose.disconnect();
-  await mongoServer.stop();
 });
 
-afterEach(async () => {
-  const collections = mongoose.connection.collections;
-  for (const key in collections) {
-    await collections[key].deleteMany();
-  }
-});
+// Helper: Tạo user test
+global.createTestUser = async () => {
+  const User = require('../models/user-client');
+  return await User.create({
+    fullName: 'Test User',
+    email: `test${Date.now()}@example.com`,
+    password: 'hashedpassword123',
+    token: 'test-token-' + Date.now()
+  });
+};
 ```
 
 ---
 
-## 📊 Metrics & KPIs
+## 📊 Metrics & KPIs (REALISTIC)
 
 ### Mỗi tuần cần đạt:
-- ✅ Hoàn thành 100% test cases theo kế hoạch
-- ✅ Test coverage tăng ít nhất 15% mỗi tuần
-- ✅ Không có critical bugs trong test suite
-- ✅ CI/CD pipeline chạy thành công
+- ✅ Hoàn thành 80% test cases theo kế hoạch (không cần 100%)
+- ✅ Test coverage tăng ~10% mỗi tuần
+- ✅ Tests chạy được và pass
 
 ### Cuối 6 tuần:
-- ✅ 180-200 test cases
-- ✅ 85%+ overall test coverage
-- ✅ Tất cả critical paths được test
-- ✅ E2E tests cho main user flows
-- ✅ Performance benchmarks established
-- ✅ Security tests passed
+- ✅ 80-100 test cases (đủ dùng)
+- ✅ 60%+ overall test coverage (chấp nhận được)
+- ✅ Core flows được test (Auth, Product, Cart, Checkout, Orders)
+- ✅ 2-3 E2E tests cho main flows
+- ✅ KHÔNG CẦN: Performance, Security testing (làm sau nếu cần)
 
 ---
 
-## 🚀 CI/CD Integration
+## 🚀 CI/CD Integration (OPTIONAL - Làm sau nếu có thời gian)
 
-### GitHub Actions Workflow
+**Hiện tại**: Chạy tests manual bằng `npm test`
+
+**Sau này** (nếu muốn): Setup GitHub Actions
 
 ```yaml
+# .github/workflows/test.yml (TẠO SAU)
 name: Test Suite
 
-on: [push, pull_request]
+on: [push]
 
 jobs:
   test:
     runs-on: ubuntu-latest
-    
     steps:
     - uses: actions/checkout@v2
-    - uses: actions/setup-node@v2
-      with:
-        node-version: '16'
-    
     - run: npm install
     - run: npm test
-    - run: npm run test:coverage
-    
-    - name: Upload coverage
-      uses: codecov/codecov-action@v2
 ```
+
+**Ưu tiên**: Viết tests trước, CI/CD sau!
 
 ---
 
@@ -493,25 +350,30 @@ jobs:
 
 ---
 
-## 🎯 Success Criteria
+## 🎯 Success Criteria (REALISTIC)
 
 Sau 6 tuần, project sẽ có:
 
-✅ Test suite đầy đủ với 180-200 test cases  
-✅ 85%+ code coverage  
-✅ CI/CD pipeline tự động  
-✅ E2E tests cho critical flows  
-✅ Performance benchmarks  
-✅ Security tests passed  
-✅ Documentation đầy đủ  
-✅ Team có kinh nghiệm viết tests  
+✅ Test suite với 80-100 test cases (đủ dùng)  
+✅ 60%+ code coverage (chấp nhận được)  
+✅ E2E tests cho 2-3 critical flows  
+✅ Documentation cơ bản  
+✅ Team biết cách viết tests  
+
+❌ KHÔNG CẦN:
+- CI/CD pipeline (làm sau)
+- Performance testing (làm sau)
+- Security testing (làm sau)
+- High coverage (60% là đủ)
 
 ---
 
-**Lưu ý**: Kế hoạch này có thể điều chỉnh dựa trên:
-- Độ phức tạp thực tế của code
-- Bugs phát hiện trong quá trình test
-- Thay đổi requirements
-- Team capacity
+**Lưu ý quan trọng**: 
 
-**Nguyên tắc**: Ưu tiên quality over quantity. Tốt hơn có 150 test cases chất lượng cao hơn là 200 test cases kém.
+⚠️ **Kế hoạch này ĐÃ RÚT GỌN 50%** so với bản đầy đủ:
+- Chỉ test CORE features (Auth, Product, Cart, Checkout, Orders)
+- Chỉ test HAPPY PATH + 1-2 error cases
+- Bỏ qua: Blog, Profile, Category, Dashboard, Roles, Permissions
+- Bỏ qua: Performance, Security, Advanced scenarios
+
+**Nguyên tắc**: DONE IS BETTER THAN PERFECT. Làm được 80-100 test cases chạy được là thành công rồi!
