@@ -109,3 +109,32 @@ module.exports.editCategory = async (req, res) => {
         });
     }
 }
+
+// [GET] /admin/categories/create
+module.exports.create = async (req, res) => {
+    try {
+        const tree = await categoryService.create(req)
+        res.render('admin/pages/category/create', {
+            pageTitle: 'Thêm danh mục',
+            tree
+        })
+    } catch (err) {
+        req.flash('error', 'Có lỗi xảy ra, vui lòng thử lại!')
+        res.redirect(`${sysConfig.prefixAdmin}/categories`)
+    }
+}
+
+// [GET] /admin/categories/edit/:id
+module.exports.edit = async (req, res) => {
+    try {
+        const { data, tree } = await categoryService.edit(req.params.id)
+        res.render('admin/pages/category/edit', {
+            pageTitle: 'Chỉnh sửa danh mục',
+            record: data,
+            tree
+        })
+    } catch (err) {
+        req.flash('error', 'Có lỗi xảy ra, vui lòng thử lại!')
+        res.redirect(`${sysConfig.prefixAdmin}/categories`)
+    }
+}
