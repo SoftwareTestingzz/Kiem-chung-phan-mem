@@ -12,7 +12,55 @@
         "type": "text/javascript",
         "exec": [
           "// Tự động set timestamp cho mỗi request",
-          "pm.environment.set('timestamp', Date.now());"
+          "pm.environment.set('timestamp', Date.now());",
+          "",
+          "// Tự động thêm Accept: application/json để server trả JSON thay vì HTML",
+          "pm.request.headers.upsert({ key: 'Accept', value: 'application/json' });",
+          "",
+          "// Reset bug list cho request này",
+          "pm.variables.set('_bugs', '[]');"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// ============================================================",
+          "// AUTO LOG BUG TO JIRA — Sprint 2",
+          "// ============================================================",
+          "",
+          "const _jiraUrl    = pm.environment.get('jira_url') || 'https://pson4282.atlassian.net';",
+          "const _jiraEmail  = pm.environment.get('jira_email') || 'pson4282@gmail.com';",
+          "const _jiraToken  = pm.environment.get('jira_api_token');",
+          "const _projectKey = 'KIEM';",
+          "const _sprintId   = 2;",
+          "",
+          "// Đọc danh sách test fail được push từ request-level test scripts",
+          "const _bugs = JSON.parse(pm.variables.get('_bugs') || '[]');",
+          "pm.variables.set('_bugs', '[]');",
+          "",
+          "if (_bugs.length > 0 && _jiraToken && _jiraToken !== '{{jira_api_token}}') {",
+          "  const summary = `[BUG] ${pm.info.requestName} — ${_bugs.length} test(s) failed`;",
+          "  const detail  = `Request: ${pm.info.requestName}\\nURL: ${pm.request.url}\\nMethod: ${pm.request.method}\\nStatus: ${pm.response.code}\\n\\nFailed tests:\\n${_bugs.map(b => '- ' + b).join('\\n')}`;",
+          "  pm.sendRequest({",
+          "    url: `${_jiraUrl}/rest/api/3/issue`,",
+          "    method: 'POST',",
+          "    header: { 'Content-Type': 'application/json', 'Authorization': 'Basic ' + btoa(`${_jiraEmail}:${_jiraToken}`) },",
+          "    body: { mode: 'raw', raw: JSON.stringify({ fields: {",
+          "      project: { key: _projectKey },",
+          "      summary: summary,",
+          "      description: { version: 1, type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: detail }] }] },",
+          "      issuetype: { name: 'Bug' },",
+          "      customfield_10020: _sprintId",
+          "    }}) }",
+          "  }, (err, res) => {",
+          "    if (err) console.error('[Jira] Error:', err);",
+          "    else if (res.code >= 400) console.error('[Jira] Failed:', res.code, res.text());",
+          "    else console.log('[Jira] Created:', res.json().key, '—', summary);",
+          "  });",
+          "}"
         ]
       }
     }
@@ -53,8 +101,9 @@
                       "pm.test('TC01 - Status 200 OK', () => {",
                       "  pm.response.to.have.status(200);",
                       "});",
-                      "pm.test('TC01 - Response có nội dung trang (không redirect)', () => {",
-                      "  pm.expect(pm.response.text()).to.include('html');",
+                      "pm.test('TC01 - Response JSON thành công', () => {",
+                      "  const json = pm.response.json();",
+                      "  pm.expect(json).to.have.property('success', true);",
                       "});",
                       "pm.test('TC01 - Cookie session được set', () => {",
                       "  const cookie = pm.cookies.get('connect.sid');",
@@ -103,17 +152,17 @@
                   "script": {
                     "type": "text/javascript",
                     "exec": [
-                      "pm.test('TC02 - Response trả lỗi (200 với flash message hoặc redirect 302)', () => {",
-                      "  pm.expect([200, 302]).to.include(pm.response.code);",
+                      "pm.test('TC02 - Status 400', () => {",
+                      "  pm.response.to.have.status(400);",
+                      "});",
+                      "pm.test('TC02 - Response có success: false và message lỗi', () => {",
+                      "  const json = pm.response.json();",
+                      "  pm.expect(json.success).to.be.false;",
+                      "  pm.expect(json.message).to.be.a('string').and.not.empty;",
                       "});",
                       "pm.test('TC02 - Không set cookie session mới', () => {",
-                      "  if (pm.response.code === 200) {",
-                      "    const body = pm.response.text();",
-                      "    pm.expect(body).to.satisfy(",
-                      "      (t) => t.includes('sai') || t.includes('incorrect') || t.includes('error') || t.includes('không đúng'),",
-                      "      'Body phải chứa thông báo lỗi'",
-                      "    );",
-                      "  }",
+                      "  const json = pm.response.json();",
+                      "  pm.expect(json.success).to.be.false;",
                       "});"
                     ]
                   }
@@ -157,15 +206,13 @@
                   "script": {
                     "type": "text/javascript",
                     "exec": [
-                      "pm.test('TC03 - Server xử lý email không tồn tại', () => {",
-                      "  pm.expect([200, 302, 400]).to.include(pm.response.code);",
+                      "pm.test('TC03 - Status 400', () => {",
+                      "  pm.response.to.have.status(400);",
                       "});",
-                      "pm.test('TC03 - Không được redirect vào dashboard', () => {",
-                      "  if (pm.response.code === 302) {",
-                      "    const location = pm.response.headers.get('Location');",
-                      "    pm.expect(location).to.not.include('dashboard');",
-                      "    pm.expect(location).to.not.equal('/');",
-                      "  }",
+                      "pm.test('TC03 - Response có success: false và message lỗi', () => {",
+                      "  const json = pm.response.json();",
+                      "  pm.expect(json.success).to.be.false;",
+                      "  pm.expect(json.message).to.include('tồn tại');",
                       "});"
                     ]
                   }
@@ -205,14 +252,13 @@
                   "script": {
                     "type": "text/javascript",
                     "exec": [
-                      "pm.test('TC04 - Validation lỗi khi thiếu email/password', () => {",
-                      "  pm.expect([200, 302, 400, 422]).to.include(pm.response.code);",
+                      "pm.test('TC04 - Status 400', () => {",
+                      "  pm.response.to.have.status(400);",
                       "});",
-                      "pm.test('TC04 - Không được login thành công', () => {",
-                      "  if (pm.response.code === 302) {",
-                      "    const loc = pm.response.headers.get('Location') || '';",
-                      "    pm.expect(loc).to.not.equal('/');",
-                      "  }",
+                      "pm.test('TC04 - Response có errors array từ validation', () => {",
+                      "  const json = pm.response.json();",
+                      "  pm.expect(json.success).to.be.false;",
+                      "  pm.expect(json.errors).to.be.an('array').and.not.empty;",
                       "});"
                     ]
                   }
@@ -248,8 +294,13 @@
                   "script": {
                     "type": "text/javascript",
                     "exec": [
-                      "pm.test('TC05 - Thiếu password bị từ chối', () => {",
-                      "  pm.expect([200, 302, 400]).to.include(pm.response.code);",
+                      "pm.test('TC05 - Status 400', () => {",
+                      "  pm.response.to.have.status(400);",
+                      "});",
+                      "pm.test('TC05 - Response có errors array từ validation', () => {",
+                      "  const json = pm.response.json();",
+                      "  pm.expect(json.success).to.be.false;",
+                      "  pm.expect(json.errors).to.be.an('array').and.not.empty;",
                       "});"
                     ]
                   }
@@ -289,8 +340,13 @@
                   "script": {
                     "type": "text/javascript",
                     "exec": [
-                      "pm.test('TC06 - Email không đúng format bị reject', () => {",
-                      "  pm.expect([200, 302, 400, 422]).to.include(pm.response.code);",
+                      "pm.test('TC06 - Status 400', () => {",
+                      "  pm.response.to.have.status(400);",
+                      "});",
+                      "pm.test('TC06 - Response có errors array từ validation', () => {",
+                      "  const json = pm.response.json();",
+                      "  pm.expect(json.success).to.be.false;",
+                      "  pm.expect(json.errors).to.be.an('array').and.not.empty;",
                       "});"
                     ]
                   }
@@ -327,13 +383,13 @@
                   "script": {
                     "type": "text/javascript",
                     "exec": [
-                      "pm.test('TC07 - Tài khoản bị khóa không login được', () => {",
-                      "  pm.expect([200, 302, 403]).to.include(pm.response.code);",
-                      "  if (pm.response.code === 200) {",
-                      "    pm.expect(pm.response.text()).to.satisfy(",
-                      "      (t) => t.includes('khóa') || t.includes('locked') || t.includes('inactive') || t.includes('block')",
-                      "    );",
-                      "  }",
+                      "pm.test('TC07 - Status 400', () => {",
+                      "  pm.response.to.have.status(400);",
+                      "});",
+                      "pm.test('TC07 - Response có success: false và message tài khoản bị khóa', () => {",
+                      "  const json = pm.response.json();",
+                      "  pm.expect(json.success).to.be.false;",
+                      "  pm.expect(json.message).to.include('khóa');",
                       "});"
                     ]
                   }
@@ -466,13 +522,11 @@
                   "script": {
                     "type": "text/javascript",
                     "exec": [
-                      "pm.test('TC-R02 - Email đã tồn tại bị từ chối', () => {",
-                      "  pm.expect([200, 302, 400]).to.include(pm.response.code);",
-                      "  if (pm.response.code === 200) {",
-                      "    pm.expect(pm.response.text()).to.satisfy(",
-                      "      (t) => t.includes('đã tồn tại') || t.includes('exists') || t.includes('already')",
-                      "    );",
-                      "  }",
+                      "pm.test('TC-R02 - Status 200 với success: false khi email đã tồn tại', () => {",
+                      "  pm.response.to.have.status(200);",
+                      "  const json = pm.response.json();",
+                      "  pm.expect(json.success).to.be.false;",
+                      "  pm.expect(json.message).to.include('tồn tại');",
                       "});"
                     ]
                   }
@@ -513,8 +567,8 @@
                   "script": {
                     "type": "text/javascript",
                     "exec": [
-                      "pm.test('TC-R03 - Email không hợp lệ bị reject', () => {",
-                      "  pm.expect([200, 302, 400, 422]).to.include(pm.response.code);",
+                      "pm.test('TC-R03 - Validation fail trả 200 (render HTML)', () => {",
+                      "  pm.response.to.have.status(200);",
                       "});"
                     ]
                   }
@@ -551,8 +605,8 @@
                   "script": {
                     "type": "text/javascript",
                     "exec": [
-                      "pm.test('TC-R04 - Thiếu fullName bị từ chối', () => {",
-                      "  pm.expect([200, 302, 400, 422]).to.include(pm.response.code);",
+                      "pm.test('TC-R04 - Validation fail trả 200 (render HTML)', () => {",
+                      "  pm.response.to.have.status(200);",
                       "});"
                     ]
                   }
@@ -593,8 +647,8 @@
                   "script": {
                     "type": "text/javascript",
                     "exec": [
-                      "pm.test('TC-R05 - Password ngắn bị reject', () => {",
-                      "  pm.expect([200, 302, 400, 422]).to.include(pm.response.code);",
+                      "pm.test('TC-R05 - Validation fail trả 200 (render HTML)', () => {",
+                      "  pm.response.to.have.status(200);",
                       "});"
                     ]
                   }
@@ -672,13 +726,11 @@
                   "script": {
                     "type": "text/javascript",
                     "exec": [
-                      "pm.test('TC-R07 - OTP sai bị từ chối', () => {",
-                      "  pm.expect([200, 302, 400]).to.include(pm.response.code);",
-                      "  if (pm.response.code === 200) {",
-                      "    pm.expect(pm.response.text()).to.satisfy(",
-                      "      (t) => t.includes('OTP') || t.includes('không đúng') || t.includes('invalid')",
-                      "    );",
-                      "  }",
+                      "pm.test('TC-R07 - Status 200 với success: false khi OTP sai', () => {",
+                      "  pm.response.to.have.status(200);",
+                      "  const json = pm.response.json();",
+                      "  pm.expect(json.success).to.be.false;",
+                      "  pm.expect(json.message).to.be.a('string').and.not.empty;",
                       "});"
                     ]
                   }
@@ -714,13 +766,11 @@
                   "script": {
                     "type": "text/javascript",
                     "exec": [
-                      "pm.test('TC-R08 - OTP hết hạn bị từ chối', () => {",
-                      "  pm.expect([200, 302, 400]).to.include(pm.response.code);",
-                      "  if (pm.response.code === 200) {",
-                      "    pm.expect(pm.response.text()).to.satisfy(",
-                      "      (t) => t.includes('hết hạn') || t.includes('expired') || t.includes('timeout')",
-                      "    );",
-                      "  }",
+                      "pm.test('TC-R08 - Status 200 với success: false khi OTP hết hạn', () => {",
+                      "  pm.response.to.have.status(200);",
+                      "  const json = pm.response.json();",
+                      "  pm.expect(json.success).to.be.false;",
+                      "  pm.expect(json.message).to.be.a('string').and.not.empty;",
                       "});"
                     ]
                   }
@@ -877,8 +927,11 @@
                   "script": {
                     "type": "text/javascript",
                     "exec": [
-                      "pm.test('TC-FP02 - Email không tồn tại bị thông báo lỗi', () => {",
-                      "  pm.expect([200, 302, 400]).to.include(pm.response.code);",
+                      "pm.test('TC-FP02 - Status 200 với success: false khi email không tồn tại', () => {",
+                      "  pm.response.to.have.status(200);",
+                      "  const json = pm.response.json();",
+                      "  pm.expect(json.success).to.be.false;",
+                      "  pm.expect(json.message).to.be.a('string').and.not.empty;",
                       "});"
                     ]
                   }
@@ -917,8 +970,11 @@
                   "script": {
                     "type": "text/javascript",
                     "exec": [
-                      "pm.test('TC-FP03 - Email sai format bị reject', () => {",
-                      "  pm.expect([200, 302, 400, 422]).to.include(pm.response.code);",
+                      "pm.test('TC-FP03 - Status 200 với success: false khi email sai format', () => {",
+                      "  pm.response.to.have.status(200);",
+                      "  const json = pm.response.json();",
+                      "  pm.expect(json.success).to.be.false;",
+                      "  pm.expect(json.message).to.be.a('string').and.not.empty;",
                       "});"
                     ]
                   }
@@ -1025,8 +1081,11 @@
                   "script": {
                     "type": "text/javascript",
                     "exec": [
-                      "pm.test('TC-FP06 - OTP sai bị từ chối', () => {",
-                      "  pm.expect([200, 302, 400]).to.include(pm.response.code);",
+                      "pm.test('TC-FP06 - Status 200 với success: false khi OTP sai', () => {",
+                      "  pm.response.to.have.status(200);",
+                      "  const json = pm.response.json();",
+                      "  pm.expect(json.success).to.be.false;",
+                      "  pm.expect(json.message).to.be.a('string').and.not.empty;",
                       "});"
                     ]
                   }
@@ -1111,8 +1170,11 @@
                   "script": {
                     "type": "text/javascript",
                     "exec": [
-                      "pm.test('TC-FP08 - Password không khớp bị từ chối', () => {",
-                      "  pm.expect([200, 302, 400, 422]).to.include(pm.response.code);",
+                      "pm.test('TC-FP08 - Status 200 với success: false khi password không khớp', () => {",
+                      "  pm.response.to.have.status(200);",
+                      "  const json = pm.response.json();",
+                      "  pm.expect(json.success).to.be.false;",
+                      "  pm.expect(json.message).to.be.a('string').and.not.empty;",
                       "});"
                     ]
                   }
@@ -1156,8 +1218,11 @@
                   "script": {
                     "type": "text/javascript",
                     "exec": [
-                      "pm.test('TC-FP09 - Password quá ngắn bị reject', () => {",
-                      "  pm.expect([200, 302, 400, 422]).to.include(pm.response.code);",
+                      "pm.test('TC-FP09 - Status 200 với success: false khi password quá ngắn', () => {",
+                      "  pm.response.to.have.status(200);",
+                      "  const json = pm.response.json();",
+                      "  pm.expect(json.success).to.be.false;",
+                      "  pm.expect(json.message).to.be.a('string').and.not.empty;",
                       "});"
                     ]
                   }
@@ -1204,8 +1269,8 @@
                   "pm.test('TC-BC01 - Danh sách blog trả 200', () => {",
                   "  pm.response.to.have.status(200);",
                   "});",
-                  "pm.test('TC-BC01 - HTML hợp lệ', () => {",
-                  "  pm.expect(pm.response.text()).to.include('html');",
+                  "pm.test('TC-BC01 - Blog trả 200 OK', () => {",
+                  "  pm.response.to.have.status(200);",
                   "});"
                 ]
               }
@@ -1383,11 +1448,11 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('TC-AA02 - Sai password bị từ chối', () => {",
-                  "  pm.expect([200, 302, 400, 401]).to.include(pm.response.code);",
-                  "  if (pm.response.code === 302) {",
-                  "    pm.expect(pm.response.headers.get('Location')).to.not.include('dashboard');",
-                  "  }",
+                  "pm.test('TC-AA02 - Status 400 với success: false khi sai password', () => {",
+                  "  pm.response.to.have.status(400);",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.success).to.be.false;",
+                  "  pm.expect(json.message).to.be.a('string').and.not.empty;",
                   "});"
                 ]
               }
@@ -1423,8 +1488,11 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('TC-AA03 - Email không tồn tại bị từ chối', () => {",
-                  "  pm.expect([200, 302, 400, 401]).to.include(pm.response.code);",
+                  "pm.test('TC-AA03 - Status 400 với success: false khi email không tồn tại', () => {",
+                  "  pm.response.to.have.status(400);",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.success).to.be.false;",
+                  "  pm.expect(json.message).to.be.a('string').and.not.empty;",
                   "});"
                 ]
               }
