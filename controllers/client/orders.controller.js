@@ -1,32 +1,33 @@
 const ordersService = require("../../services/client/orders.service");
+const respond = require("../../helper/respond");
 
 module.exports = {
 
 
     orderList: async (req, res) => {
         try {
-            // Chưa đăng nhập → không cho xem đơn hàng
             if (!req.session.user) {
-                return res.redirect("/login");
+                return respond(req, res, {
+                    status: 401,
+                    json: { success: false, message: 'Vui lòng đăng nhập!' },
+                    redirect: '/login'
+                });
             }
 
-            const userId = req.session.user._id;
+            const orders = await ordersService.getOrderList(req.session.user._id);
 
-            // Lấy danh sách đơn hàng từ service
-            const orders = await ordersService.getOrderList(userId);
-
-            return res.render("client/pages/orders/index", {
-                pageTitle: "Đơn hàng của tôi",
-                orders
+            return respond(req, res, {
+                status: 200,
+                json: { success: true, orders },
+                render: { view: 'client/pages/orders/index', data: { pageTitle: 'Đơn hàng của tôi', orders } }
             });
 
         } catch (err) {
             console.error("Order List Error:", err.message);
-
-            return res.render("client/pages/orders/index", {
-                pageTitle: "Đơn hàng của tôi",
-                orders: [],
-                error: "Không thể tải danh sách đơn hàng!"
+            return respond(req, res, {
+                status: 500,
+                json: { success: false, message: 'Không thể tải danh sách đơn hàng!' },
+                render: { view: 'client/pages/orders/index', data: { pageTitle: 'Đơn hàng của tôi', orders: [] } }
             });
         }
     },
@@ -36,23 +37,28 @@ module.exports = {
     orderDetail: async (req, res) => {
         try {
             if (!req.session.user) {
-                return res.redirect("/login");
+                return respond(req, res, {
+                    status: 401,
+                    json: { success: false, message: 'Vui lòng đăng nhập!' },
+                    redirect: '/login'
+                });
             }
 
-            const userId = req.session.user._id;
-            const orderId = req.params.id;
+            const order = await ordersService.getOrderDetail(req.session.user._id, req.params.id);
 
-            const order = await ordersService.getOrderDetail(userId, orderId);
-
-            return res.render("client/pages/orders/detail", {
-                pageTitle: "Chi tiết đơn hàng",
-                order
+            return respond(req, res, {
+                status: 200,
+                json: { success: true, order },
+                render: { view: 'client/pages/orders/detail', data: { pageTitle: 'Chi tiết đơn hàng', order } }
             });
 
         } catch (err) {
             console.error("Order Detail Error:", err.message);
-            req.flash("error", "Không thể xem chi tiết đơn hàng!");
-            return res.redirect("/orders");
+            return respond(req, res, {
+                status: 500,
+                json: { success: false, message: 'Không thể xem chi tiết đơn hàng!' },
+                redirect: '/orders'
+            });
         }
     },
 
@@ -61,22 +67,28 @@ module.exports = {
     cancelOrder: async (req, res) => {
         try {
             if (!req.session.user) {
-                return res.redirect("/login");
+                return respond(req, res, {
+                    status: 401,
+                    json: { success: false, message: 'Vui lòng đăng nhập!' },
+                    redirect: '/login'
+                });
             }
 
-            const userId = req.session.user._id;
-            const orderId = req.params.id;
+            await ordersService.cancelOrder(req.session.user._id, req.params.id);
 
-            await ordersService.cancelOrder(userId, orderId);
-
-            req.flash("success", "Đã hủy đơn hàng thành công!");
-            return res.redirect("/orders");
+            return respond(req, res, {
+                status: 200,
+                json: { success: true, message: 'Đã hủy đơn hàng thành công!' },
+                redirect: '/orders'
+            });
 
         } catch (err) {
             console.error("Cancel Order Error:", err.message);
-
-            req.flash("error", err.message || "Không thể hủy đơn hàng!");
-            return res.redirect("/orders/" + req.params.id);
+            return respond(req, res, {
+                status: 400,
+                json: { success: false, message: err.message || 'Không thể hủy đơn hàng!' },
+                redirect: '/orders/' + req.params.id
+            });
         }
     }
 

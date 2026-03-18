@@ -1,5 +1,6 @@
-const productService = require('../../services/admin/product.service')
-const sysConfig = require('../../config/system')
+const productService = require('../../services/admin/product.service');
+const sysConfig = require('../../config/system');
+const respond = require('../../helper/respond');
 
 // [GET] /admin/products
 module.exports.index = async (req, res) => {
@@ -19,44 +20,57 @@ module.exports.index = async (req, res) => {
 // [PATCH] /admin/products/change-status/:status/:id
 module.exports.changeStatus = async (req, res) => {
     try {
-        const { id, status } = req.params
-        await productService.changeStatus(id, status)
-
-        req.flash('success', 'Cập nhật trạng thái thành công!')
+        const { id, status } = req.params;
+        await productService.changeStatus(id, status);
+        return respond(req, res, {
+            status: 200,
+            json: { success: true, message: 'Cập nhật trạng thái thành công!' },
+            redirect: req.get('Referer') || `${sysConfig.prefixAdmin}/products`
+        });
     } catch (err) {
-        req.flash('error', 'Có lỗi xảy ra, vui lòng thử lại!')
+        return respond(req, res, {
+            status: 500,
+            json: { success: false, message: 'Có lỗi xảy ra, vui lòng thử lại!' },
+            redirect: req.get('Referer') || `${sysConfig.prefixAdmin}/products`
+        });
     }
-
-    res.redirect(req.get('Referer') || `${sysConfig.prefixAdmin}/products`)
 }
 
 // [PATCH] /admin/products/change-multi
 module.exports.changeMulti = async (req, res) => {
     try {
-        const { type, ids } = req.body
-
-        const result = await productService.changeMulti(type, ids.split(','))
-
-        req.flash(result.status, result.message)
+        const { type, ids } = req.body;
+        const result = await productService.changeMulti(type, ids.split(','));
+        return respond(req, res, {
+            status: 200,
+            json: { success: true, message: result.message },
+            redirect: req.get('Referer') || `${sysConfig.prefixAdmin}/products`
+        });
     } catch (err) {
-        console.log(err)
-        req.flash('error', 'Có lỗi xảy ra, vui lòng thử lại!')
+        return respond(req, res, {
+            status: 500,
+            json: { success: false, message: 'Có lỗi xảy ra, vui lòng thử lại!' },
+            redirect: req.get('Referer') || `${sysConfig.prefixAdmin}/products`
+        });
     }
-
-    res.redirect(req.get('Referer') || `${sysConfig.prefixAdmin}/products`)
 }
 
 // [DELETE] /admin/products/delete-product/:id
 module.exports.deleteProduct = async (req, res) => {
     try {
-        await productService.deleteProduct(req.params.id)
-
-        req.flash('success', 'Xóa sản phẩm thành công!')
+        await productService.deleteProduct(req.params.id);
+        return respond(req, res, {
+            status: 200,
+            json: { success: true, message: 'Xóa sản phẩm thành công!' },
+            redirect: req.get('Referer') || `${sysConfig.prefixAdmin}/products`
+        });
     } catch (err) {
-        req.flash('error', 'Có lỗi xảy ra, vui lòng thử lại!')
+        return respond(req, res, {
+            status: 500,
+            json: { success: false, message: 'Có lỗi xảy ra, vui lòng thử lại!' },
+            redirect: req.get('Referer') || `${sysConfig.prefixAdmin}/products`
+        });
     }
-
-    res.redirect(req.get('Referer') || `${sysConfig.prefixAdmin}/products`)
 }
 
 // [GET] /admin/products/create
@@ -77,14 +91,18 @@ module.exports.create = async (req, res) => {
 // [POST] /admin/products/create
 module.exports.createProduct = async (req, res) => {
     try {
-        await productService.createProduct(req, res)
-
-        req.flash('success', 'Thêm sản phẩm thành công!')
-        res.redirect(`${sysConfig.prefixAdmin}/products`)
+        await productService.createProduct(req, res);
+        return respond(req, res, {
+            status: 200,
+            json: { success: true, message: 'Thêm sản phẩm thành công!' },
+            redirect: `${sysConfig.prefixAdmin}/products`
+        });
     } catch (err) {
-        console.log(err)
-        req.flash('error', 'Có lỗi xảy ra, vui lòng thử lại!')
-        res.redirect(`${sysConfig.prefixAdmin}/products`)
+        return respond(req, res, {
+            status: 500,
+            json: { success: false, message: 'Có lỗi xảy ra, vui lòng thử lại!' },
+            redirect: `${sysConfig.prefixAdmin}/products`
+        });
     }
 }
 
@@ -106,18 +124,25 @@ module.exports.edit = async (req, res) => {
 // [PATCH] /admin/products/edit/:id
 module.exports.editProduct = async (req, res) => {
     try {
-        const updated = await productService.editProduct(req, req.params.id, res)
-
+        const updated = await productService.editProduct(req, req.params.id, res);
         if (!updated) {
-            req.flash('error', 'Sản phẩm không tồn tại!')
-            return res.redirect(`${sysConfig.prefixAdmin}/products`)
+            return respond(req, res, {
+                status: 404,
+                json: { success: false, message: 'Sản phẩm không tồn tại!' },
+                redirect: `${sysConfig.prefixAdmin}/products`
+            });
         }
-
-        req.flash('success', 'Cập nhật sản phẩm thành công!')
-        res.redirect(req.get('Referer') || `${sysConfig.prefixAdmin}/products/edit/${req.params.id}`)
+        return respond(req, res, {
+            status: 200,
+            json: { success: true, message: 'Cập nhật sản phẩm thành công!' },
+            redirect: req.get('Referer') || `${sysConfig.prefixAdmin}/products/edit/${req.params.id}`
+        });
     } catch (err) {
-        req.flash('error', 'Có lỗi xảy ra, vui lòng thử lại!')
-        res.redirect(`${sysConfig.prefixAdmin}/products`)
+        return respond(req, res, {
+            status: 500,
+            json: { success: false, message: 'Có lỗi xảy ra, vui lòng thử lại!' },
+            redirect: `${sysConfig.prefixAdmin}/products`
+        });
     }
 }
 

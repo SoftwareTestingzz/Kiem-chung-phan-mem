@@ -1,4 +1,5 @@
 const orderService = require("../../services/admin/orders.service");
+const respond = require("../../helper/respond");
 
 module.exports = {
 
@@ -60,18 +61,25 @@ module.exports = {
         try {
             const orderId = req.params.id;
             const { status } = req.body;
-
             const result = await orderService.updateStatus(orderId, status);
-
             if (result.error) {
-                return res.send(result.error);
+                return respond(req, res, {
+                    status: 400,
+                    json: { success: false, message: result.error },
+                    redirect: `/admin/orders/${orderId}`
+                });
             }
-
-            res.redirect(`/admin/orders/${orderId}`);
-
+            return respond(req, res, {
+                status: 200,
+                json: { success: true, message: 'Cập nhật trạng thái thành công!' },
+                redirect: `/admin/orders/${orderId}`
+            });
         } catch (err) {
-            console.error("Update Status Error:", err);
-            res.send("Lỗi cập nhật trạng thái đơn hàng!");
+            return respond(req, res, {
+                status: 500,
+                json: { success: false, message: 'Lỗi cập nhật trạng thái đơn hàng!' },
+                redirect: `/admin/orders`
+            });
         }
     }
 };
