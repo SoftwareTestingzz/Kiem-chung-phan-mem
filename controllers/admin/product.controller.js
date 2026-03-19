@@ -7,13 +7,18 @@ module.exports.index = async (req, res) => {
     try {
         const data = await productService.getList(req.query)
 
-        res.render('admin/pages/product/index', {
-            pageTitle: 'Sản phẩm',
-            ...data
-        })
+        return respond(req, res, {
+            status: 200,
+            json: { success: true, message: 'Lấy dữ liệu thành công', data },
+            render: { view: 'admin/pages/product/index', data: { pageTitle: 'Sản phẩm', ...data } }
+        });
     } catch (err) {
         req.flash('error', 'Có lỗi xảy ra, vui lòng thử lại!')
-        res.redirect(`${sysConfig.prefixAdmin}/dashboard`)
+        return respond(req, res, {
+            status: 500,
+            json: { success: false, message: 'Có lỗi xảy ra, vui lòng thử lại!' },
+            redirect: `${sysConfig.prefixAdmin}/dashboard`
+        });
     }
 }
 
@@ -78,13 +83,18 @@ module.exports.create = async (req, res) => {
     try{
         const categories = await productService.create()
 
-        res.render('admin/pages/product/create', {
-            pageTitle: 'Thêm sản phẩm mới',
-            categories
-        })
+        return respond(req, res, {
+            status: 200,
+            json: { success: true, message: 'Lấy dữ liệu thành công', data: { categories } },
+            render: { view: 'admin/pages/product/create', data: { pageTitle: 'Thêm sản phẩm mới', categories } }
+        });
     }catch (err) {
         req.flash('error', 'Có lỗi xảy ra, vui lòng thử lại!')
-        res.redirect(`${sysConfig.prefixAdmin}/products`)
+        return respond(req, res, {
+            status: 500,
+            json: { success: false, message: 'Có lỗi xảy ra, vui lòng thử lại!' },
+            redirect: `${sysConfig.prefixAdmin}/products`
+        });
     }
 }
 
@@ -111,13 +121,18 @@ module.exports.edit = async (req, res) => {
     try {
         const records = await productService.edit(req.params.id)
 
-        res.render('admin/pages/product/edit', {
-            pageTitle: 'Chỉnh sửa sản phẩm',
-            ...records
-        })
+        return respond(req, res, {
+            status: 200,
+            json: { success: true, message: 'Lấy dữ liệu thành công', data: records },
+            render: { view: 'admin/pages/product/edit', data: { pageTitle: 'Chỉnh sửa sản phẩm', ...records } }
+        });
     } catch (err) {
         req.flash('error', 'Có lỗi xảy ra, vui lòng thử lại!')
-        res.redirect(`${sysConfig.prefixAdmin}/products`)
+        return respond(req, res, {
+            status: 500,
+            json: { success: false, message: 'Có lỗi xảy ra, vui lòng thử lại!' },
+            redirect: `${sysConfig.prefixAdmin}/products`
+        });
     }
 }
 
@@ -153,16 +168,25 @@ module.exports.detail = async (req, res) => {
 
         if (!product) {
             req.flash('error', 'Sản phẩm không tồn tại!')
-            return res.redirect(`${sysConfig.prefixAdmin}/products`)
+            return respond(req, res, {
+                status: 404,
+                json: { success: false, message: 'Sản phẩm không tồn tại!' },
+                redirect: `${sysConfig.prefixAdmin}/products`
+            });
         }
 
-        res.render('admin/pages/product/detail', {
-            pageTitle: product.title,
-            product
-        })
+        return respond(req, res, {
+            status: 200,
+            json: { success: true, message: 'Lấy dữ liệu thành công', data: { product } },
+            render: { view: 'admin/pages/product/detail', data: { pageTitle: product.title, product } }
+        });
     } catch (err) {
         console.log(err)
         req.flash('error', 'Có lỗi xảy ra, vui lòng thử lại!')
-        res.redirect(`${sysConfig.prefixAdmin}/products`)
+        return respond(req, res, {
+            status: 500,
+            json: { success: false, message: 'Có lỗi xảy ra, vui lòng thử lại!' },
+            redirect: `${sysConfig.prefixAdmin}/products`
+        });
     }
 }

@@ -7,14 +7,18 @@ module.exports.index = async (req, res) => {
     try {
         const records = await categoryService.getList(req.query)
 
-        res.render('admin/pages/category/index', {
-            pageTitle: 'Danh mục sản phẩm',
-            ...records
-        })
-
+        return respond(req, res, {
+            status: 200,
+            json: { success: true, message: 'Lấy dữ liệu thành công', data: records },
+            render: { view: 'admin/pages/category/index', data: { pageTitle: 'Danh mục sản phẩm', ...records } }
+        });
     } catch (err) {
         req.flash('error', 'Có lỗi xảy ra, vui lòng thử lại!')
-        res.redirect(`${sysConfig.prefixAdmin}/dashboard`)
+        return respond(req, res, {
+            status: 500,
+            json: { success: false, message: 'Có lỗi xảy ra, vui lòng thử lại!' },
+            redirect: `${sysConfig.prefixAdmin}/dashboard`
+        });
     }
 }
 
@@ -114,13 +118,18 @@ module.exports.editCategory = async (req, res) => {
 module.exports.create = async (req, res) => {
     try {
         const tree = await categoryService.create(req)
-        res.render('admin/pages/category/create', {
-            pageTitle: 'Thêm danh mục',
-            tree
-        })
+        return respond(req, res, {
+            status: 200,
+            json: { success: true, message: 'Lấy dữ liệu thành công', data: { tree } },
+            render: { view: 'admin/pages/category/create', data: { pageTitle: 'Thêm danh mục', tree } }
+        });
     } catch (err) {
         req.flash('error', 'Có lỗi xảy ra, vui lòng thử lại!')
-        res.redirect(`${sysConfig.prefixAdmin}/categories`)
+        return respond(req, res, {
+            status: 500,
+            json: { success: false, message: 'Có lỗi xảy ra, vui lòng thử lại!' },
+            redirect: `${sysConfig.prefixAdmin}/categories`
+        });
     }
 }
 
@@ -128,13 +137,17 @@ module.exports.create = async (req, res) => {
 module.exports.edit = async (req, res) => {
     try {
         const { data, tree } = await categoryService.edit(req.params.id)
-        res.render('admin/pages/category/edit', {
-            pageTitle: 'Chỉnh sửa danh mục',
-            record: data,
-            tree
-        })
+        return respond(req, res, {
+            status: 200,
+            json: { success: true, message: 'Lấy dữ liệu thành công', data: { record: data, tree } },
+            render: { view: 'admin/pages/category/edit', data: { pageTitle: 'Chỉnh sửa danh mục', data, tree } }
+        });
     } catch (err) {
         req.flash('error', 'Có lỗi xảy ra, vui lòng thử lại!')
-        res.redirect(`${sysConfig.prefixAdmin}/categories`)
+        return respond(req, res, {
+            status: 500,
+            json: { success: false, message: 'Có lỗi xảy ra, vui lòng thử lại!' },
+            redirect: `${sysConfig.prefixAdmin}/categories`
+        });
     }
 }
