@@ -144,7 +144,11 @@ module.exports.edit = async (id) => {
 module.exports.editCategory = async (req) => {
     const id = req.params.id
 
-    req.body.position = parseInt(req.body.position)
+    if (req.body.position) {
+        req.body.position = parseInt(req.body.position)
+    } else {
+        delete req.body.position
+    }
 
     if (req.body.removeThumbnail === "1") {
         req.body.thumbnail = ""
