@@ -1,0 +1,204 @@
+{
+  "id": "verdish-shared-env-001",
+  "name": "Verdish — Local (Shared)",
+  "values": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000",
+      "type": "default",
+      "enabled": true,
+      "description": "Base URL của server local"
+    },
+
+    {
+      "key": "client_email",
+      "value": "nguyenvanan@gmail.com",
+      "type": "default",
+      "enabled": true,
+      "description": "[Sơn/Đạt] Client account chính từ seed"
+    },
+    {
+      "key": "client_password",
+      "value": "123456",
+      "type": "default",
+      "enabled": true,
+      "description": "[Sơn/Đạt] Password client từ seed"
+    },
+    {
+      "key": "client_email_2",
+      "value": "tranthiB@gmail.com",
+      "type": "default",
+      "enabled": true,
+      "description": "[Đạt] Client account thứ 2 từ seed (dùng cho multi-product test)"
+    },
+    {
+      "key": "client_password_2",
+      "value": "123456",
+      "type": "default",
+      "enabled": true,
+      "description": "[Đạt] Password client 2 từ seed"
+    },
+
+    {
+      "key": "admin_email",
+      "value": "verdish@gmail.com",
+      "type": "default",
+      "enabled": true,
+      "description": "[Sơn/Lợi] Admin account từ seed"
+    },
+    {
+      "key": "admin_password",
+      "value": "verdishAdmin",
+      "type": "secret",
+      "enabled": true,
+      "description": "[Sơn/Lợi] Admin password từ seed"
+    },
+
+    {
+      "key": "test_product_id",
+      "value": "",
+      "type": "default",
+      "enabled": true,
+      "description": "[Quyến/Đạt] ID sản phẩm dùng để test — lấy từ DB sau khi seed"
+    },
+    {
+      "key": "test_product_slug",
+      "value": "",
+      "type": "default",
+      "enabled": true,
+      "description": "[Quyến/Đạt] Slug sản phẩm — lấy từ DB sau khi seed"
+    },
+    {
+      "key": "test_category_id",
+      "value": "",
+      "type": "default",
+      "enabled": true,
+      "description": "[Quyến] ID danh mục — lấy từ DB sau khi seed"
+    },
+    {
+      "key": "test_category_parent_id",
+      "value": "",
+      "type": "default",
+      "enabled": true,
+      "description": "[Quyến] ID danh mục cha — dùng cho test nested categories"
+    },
+    {
+      "key": "test_order_id",
+      "value": "",
+      "type": "default",
+      "enabled": true,
+      "description": "[Đạt/Lợi] ID đơn hàng — tự động set sau khi test checkout thành công"
+    },
+    {
+      "key": "test_account_id",
+      "value": "",
+      "type": "default",
+      "enabled": true,
+      "description": "[Lợi] ID tài khoản admin — lấy từ DB hoặc set sau khi tạo account"
+    },
+    {
+      "key": "test_blog_id",
+      "value": "",
+      "type": "default",
+      "enabled": true,
+      "description": "[Lợi] ID bài viết admin — set sau khi tạo blog qua admin"
+    },
+    {
+      "key": "test_blog_slug",
+      "value": "",
+      "type": "default",
+      "enabled": true,
+      "description": "[Sơn] Slug bài viết — lấy từ DB sau khi seed blog"
+    },
+    {
+      "key": "test_role_id",
+      "value": "",
+      "type": "default",
+      "enabled": true,
+      "description": "[Lợi] ID nhóm quyền — lấy từ DB sau khi seed role"
+    },
+
+    {
+      "key": "otp_code",
+      "value": "",
+      "type": "default",
+      "enabled": true,
+      "description": "[Sơn] OTP code — điền tay sau khi nhận được từ email/DB"
+    },
+    {
+      "key": "reset_token",
+      "value": "",
+      "type": "default",
+      "enabled": true,
+      "description": "[Sơn] Token reset password nếu dùng link thay vì OTP"
+    },
+    {
+      "key": "timestamp",
+      "value": "",
+      "type": "default",
+      "enabled": true,
+      "description": "Auto-set bởi Collection pre-request script"
+    },
+
+    {
+      "key": "reg_email",
+      "value": "",
+      "type": "default",
+      "enabled": true,
+      "description": "[Sơn] Auto-set sau khi gửi OTP đăng ký"
+    },
+    {
+      "key": "e2e_email",
+      "value": "",
+      "type": "default",
+      "enabled": true,
+      "description": "[Sơn] Auto-set trong E2E-01 pre-request"
+    },
+    {
+      "key": "e2e_new_password",
+      "value": "",
+      "type": "default",
+      "enabled": true,
+      "description": "[Sơn] Auto-set trong E2E-02 Step3"
+    },
+    {
+      "key": "client_session_set",
+      "value": "",
+      "type": "default",
+      "enabled": true,
+      "description": "Auto-set sau khi client login thành công"
+    },
+    {
+      "key": "admin_session_set",
+      "value": "",
+      "type": "default",
+      "enabled": true,
+      "description": "Auto-set sau khi admin login thành công"
+    },
+
+    {
+      "key": "jira_url",
+      "value": "https://pson4282.atlassian.net",
+      "type": "default",
+      "enabled": true,
+      "description": "Jira base URL"
+    },
+    {
+      "key": "jira_email",
+      "value": "pson4282@gmail.com",
+      "type": "default",
+      "enabled": true,
+      "description": "Email tài khoản Jira (dùng để Basic Auth)"
+    },
+    {
+      "key": "jira_api_token",
+      "value": "{{jira_api_token}}",
+      "type": "secret",
+      "enabled": true,
+      "description": "Jira API Token — tạo tại https://id.atlassian.com/manage-profile/security/api-tokens"
+    }
+  ],
+  "_postman_variable_scope": "environment",
+  "_postman_exported_at": "2026-03-16T00:00:00.000Z",
+  "_postman_exported_using": "Postman/manual"
+}
