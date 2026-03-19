@@ -5,6 +5,7 @@
   "scripts": {
     "start": "nodemon --inspect index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
+    "test:with-jira": "node jira-integration/newman-jira-runner.js --collection docs/son-collection.json --environment docs/shared-environment.json",
     "seed": "node seeds/index.seed.js",
     "seed:admin": "node seeds/admin.seed.js"
   },
@@ -36,6 +37,7 @@
   "devDependencies": {
     "jest": "^30.3.0",
     "mongodb-memory-server": "^11.0.1",
+    "newman": "^6.2.2",
     "nodemon": "^3.1.10",
     "supertest": "^7.2.2"
   }

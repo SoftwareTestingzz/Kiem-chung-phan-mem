@@ -3,6 +3,7 @@
 
 # environment files
 .env
+.jirarc
 
 # debug files
 npm-debug.log*
