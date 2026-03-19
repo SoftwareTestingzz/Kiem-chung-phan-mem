@@ -79,7 +79,24 @@ module.exports.create = async (req, res) => {
 // [POST] /admin/categories/create
 module.exports.createCategory = async (req, res) => {
     try {
+<<<<<<< Updated upstream
         await categoryService.createCategory(req)
+=======
+        const record = await categoryService.createCategory(req);
+        return respond(req, res, {
+            status: 200,
+            json: { success: true, message: 'Thêm danh mục thành công!', data: { _id: record._id } },
+            redirect: `${sysConfig.prefixAdmin}/categories`
+        });
+    } catch (err) {
+        return respond(req, res, {
+            status: 500,
+            json: { success: false, message: 'Có lỗi xảy ra, vui lòng thử lại!' },
+            redirect: `${sysConfig.prefixAdmin}/categories`
+        });
+    }
+}
+>>>>>>> Stashed changes
 
         req.flash('success', 'Thêm doanh mục thành công!')
         res.redirect(`${sysConfig.prefixAdmin}/categories`)

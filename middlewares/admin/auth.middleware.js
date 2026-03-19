@@ -5,7 +5,12 @@ const sysConfig = require('../../config/system')
 module.exports.requireAuth = async (req, res, next) => {
     const token = req.cookies.token;
 
+    const wantsJson = req.headers['accept']?.includes('application/json')
+        || req.headers['content-type']?.includes('application/json')
+        || req.query._format === 'json';
+
     if (!token) {
+        if (wantsJson) return res.status(401).json({ error: 'Unauthorized' });
         req.flash("error", "Bạn cần đăng nhập!");
         return res.redirect(`${sysConfig.prefixAdmin}/auth/login`);
     }
@@ -13,11 +18,13 @@ module.exports.requireAuth = async (req, res, next) => {
     const user = await Account.findOne({ token, deleted: false }).select('-password');
 
     if (!user) {
+        if (wantsJson) return res.status(401).json({ error: 'Unauthorized' });
         req.flash("error", "Phiên đăng nhập không hợp lệ!");
         return res.redirect(`${sysConfig.prefixAdmin}/auth/login`);
     }
 
     if (user.status === "inactive") {
+        if (wantsJson) return res.status(403).json({ error: 'Account is inactive' });
         req.flash("error", "Tài khoản bị khóa!");
         return res.redirect(`${sysConfig.prefixAdmin}/auth/login`);
     }

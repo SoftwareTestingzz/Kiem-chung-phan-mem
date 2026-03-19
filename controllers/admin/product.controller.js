@@ -77,10 +77,19 @@ module.exports.create = async (req, res) => {
 // [POST] /admin/products/create
 module.exports.createProduct = async (req, res) => {
     try {
+<<<<<<< Updated upstream
         await productService.createProduct(req, res)
 
         req.flash('success', 'Thêm sản phẩm thành công!')
         res.redirect(`${sysConfig.prefixAdmin}/products`)
+=======
+        const record = await productService.createProduct(req, res);
+        return respond(req, res, {
+            status: 200,
+            json: { success: true, message: 'Thêm sản phẩm thành công!', data: { _id: record._id } },
+            redirect: `${sysConfig.prefixAdmin}/products`
+        });
+>>>>>>> Stashed changes
     } catch (err) {
         console.log(err)
         req.flash('error', 'Có lỗi xảy ra, vui lòng thử lại!')
