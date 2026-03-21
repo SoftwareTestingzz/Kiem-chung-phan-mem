@@ -80,7 +80,7 @@ module.exports.deleteProduct = async (req, res) => {
 
 // [GET] /admin/products/create
 module.exports.create = async (req, res) => {
-    try{
+    try {
         const categories = await productService.create()
 
         return respond(req, res, {
@@ -88,7 +88,7 @@ module.exports.create = async (req, res) => {
             json: { success: true, message: 'Lấy dữ liệu thành công', data: { categories } },
             render: { view: 'admin/pages/product/create', data: { pageTitle: 'Thêm sản phẩm mới', categories } }
         });
-    }catch (err) {
+    } catch (err) {
         req.flash('error', 'Có lỗi xảy ra, vui lòng thử lại!')
         return respond(req, res, {
             status: 500,
@@ -101,10 +101,10 @@ module.exports.create = async (req, res) => {
 // [POST] /admin/products/create
 module.exports.createProduct = async (req, res) => {
     try {
-        await productService.createProduct(req, res);
+        const product = await productService.createProduct(req, res);
         return respond(req, res, {
             status: 200,
-            json: { success: true, message: 'Thêm sản phẩm thành công!' },
+            json: { success: true, message: 'Thêm sản phẩm thành công!', data: product },
             redirect: `${sysConfig.prefixAdmin}/products`
         });
     } catch (err) {

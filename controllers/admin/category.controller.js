@@ -81,10 +81,10 @@ module.exports.deleteCategory = async (req, res) => {
 // [POST] /admin/categories/create
 module.exports.createCategory = async (req, res) => {
     try {
-        await categoryService.createCategory(req);
+        const category = await categoryService.createCategory(req);
         return respond(req, res, {
             status: 200,
-            json: { success: true, message: 'Thêm danh mục thành công!' },
+            json: { success: true, message: 'Thêm danh mục thành công!', data: category },
             redirect: `${sysConfig.prefixAdmin}/categories`
         });
     } catch (err) {

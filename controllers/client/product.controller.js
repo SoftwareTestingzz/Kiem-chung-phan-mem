@@ -210,7 +210,7 @@ module.exports.comment = async (req, res) => {
         });
 
         if (existingComment) {
-            
+
             return sendError(400, 'Bạn chỉ có thể đánh giá sản phẩm này một lần.');
         }
 
