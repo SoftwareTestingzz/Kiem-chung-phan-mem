@@ -51,6 +51,16 @@ const usersData = [
         birthday: "2000-01-14",
         address: "654 Cách Mạng Tháng 8, Quận Tân Bình, TP.HCM",
         status: "active"
+    },
+    {
+        fullName: "Tài Khoản Bị Khóa",
+        email: "locked_user@verdish.com",
+        password: "Test@123",
+        phone: "0999999999",
+        gender: "male",
+        birthday: "1995-01-01",
+        address: "Test Address",
+        status: "inactive"
     }
 ];
 

@@ -36,21 +36,19 @@ const auth = Buffer.from(`${JIRA_EMAIL}:${JIRA_TOKEN}`).toString('base64');
 
 async function issueExists(summary) {
     try {
-        // Tìm issue có summary giống hệt trong project, chưa bị xóa
-        const jql = `project = "${PROJECT_KEY}" AND summary ~ "${summary.replace(/"/g, '\\"')}" AND issuetype = Bug ORDER BY created DESC`;
+        const jql = `project = "${PROJECT_KEY}" AND summary ~ "${summary.replace(/"/g, '\\"').replace(/\[/g, '\\\\[').replace(/\]/g, '\\\\]')}" AND issuetype = Bug`;
         const res = await axios.get(
             `${JIRA_URL}/rest/api/3/search`,
             {
                 params: { jql, maxResults: 1, fields: 'summary' },
-                headers: { 'Authorization': `Basic ${auth}` }
+                headers: { 'Authorization': `Basic ${auth}`, 'Accept': 'application/json' }
             }
         );
         const issues = res.data.issues || [];
-        // So sánh exact summary để tránh false positive
         return issues.some(i => i.fields.summary === summary);
     } catch (err) {
         console.warn(`⚠️  Không thể check duplicate: ${err.response?.status}`);
-        return false; // Nếu check lỗi thì vẫn tạo mới
+        return false;
     }
 }
 

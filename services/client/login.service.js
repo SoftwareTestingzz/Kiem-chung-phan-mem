@@ -13,6 +13,10 @@ module.exports.login = async (req, res) => {
         throw new Error("EMAIL_NOT_FOUND");
     }
 
+    if (user.status === 'inactive') {
+        throw new Error("ACCOUNT_BLOCK");
+    }
+
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
         throw new Error("PASSWORD_ERROR");
