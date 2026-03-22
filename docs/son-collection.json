@@ -152,8 +152,8 @@
                   "script": {
                     "type": "text/javascript",
                     "exec": [
-                      "pm.test('TC02 - Status 400', () => {",
-                      "  pm.response.to.have.status(400);",
+                      "pm.test('TC02 - Status 401', () => {",
+                      "  pm.response.to.have.status(401);",
                       "});",
                       "pm.test('TC02 - Response có success: false và message lỗi', () => {",
                       "  const json = pm.response.json();",
@@ -206,8 +206,8 @@
                   "script": {
                     "type": "text/javascript",
                     "exec": [
-                      "pm.test('TC03 - Status 400', () => {",
-                      "  pm.response.to.have.status(400);",
+                      "pm.test('TC03 - Status 401', () => {",
+                      "  pm.response.to.have.status(401);",
                       "});",
                       "pm.test('TC03 - Response có success: false và message lỗi', () => {",
                       "  const json = pm.response.json();",
@@ -383,8 +383,8 @@
                   "script": {
                     "type": "text/javascript",
                     "exec": [
-                      "pm.test('TC07 - Status 400', () => {",
-                      "  pm.response.to.have.status(400);",
+                      "pm.test('TC07 - Status 403', () => {",
+                      "  pm.response.to.have.status(403);",
                       "});",
                       "pm.test('TC07 - Response có success: false và message tài khoản bị khóa', () => {",
                       "  const json = pm.response.json();",
@@ -1448,8 +1448,8 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('TC-AA02 - Status 400 với success: false khi sai password', () => {",
-                  "  pm.response.to.have.status(400);",
+                  "pm.test('TC-AA02 - Status 401 với success: false khi sai password', () => {",
+                  "  pm.response.to.have.status(401);",
                   "  const json = pm.response.json();",
                   "  pm.expect(json.success).to.be.false;",
                   "  pm.expect(json.message).to.be.a('string').and.not.empty;",
@@ -1488,8 +1488,8 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('TC-AA03 - Status 400 với success: false khi email không tồn tại', () => {",
-                  "  pm.response.to.have.status(400);",
+                  "pm.test('TC-AA03 - Status 401 với success: false khi email không tồn tại', () => {",
+                  "  pm.response.to.have.status(401);",
                   "  const json = pm.response.json();",
                   "  pm.expect(json.success).to.be.false;",
                   "  pm.expect(json.message).to.be.a('string').and.not.empty;",
