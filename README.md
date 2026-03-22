@@ -885,3 +885,4 @@ Dự án này được sử dụng cho mục đích giáo dục.
 ---
 
 **Cảm ơn vì sử dụng Verdish! 🎉**
+node scripts/newman-jira-reporter.js
