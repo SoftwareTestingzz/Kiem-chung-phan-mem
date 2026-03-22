@@ -31,15 +31,21 @@ module.exports = {
             });
 
         } catch (err) {
+            const statusMap = {
+                EMAIL_NOT_FOUND: 401,
+                PASSWORD_ERROR:  401,
+                ACCOUNT_BLOCK:   403
+            };
             const errorMap = {
                 EMAIL_NOT_FOUND: "Email không tồn tại!",
-                PASSWORD_ERROR: "Mật khẩu không đúng!",
-                ACCOUNT_BLOCK: "Tài khoản đã bị khóa!"
+                PASSWORD_ERROR:  "Mật khẩu không đúng!",
+                ACCOUNT_BLOCK:   "Tài khoản đã bị khóa!"
             };
-            const errorMsg = errorMap[err.message] || "Có lỗi xảy ra, vui lòng thử lại!";
+            const status   = statusMap[err.message] || 500;
+            const errorMsg = errorMap[err.message]  || "Có lỗi xảy ra, vui lòng thử lại!";
 
             return respond(req, res, {
-                status: 400,
+                status,
                 json: { success: false, message: errorMsg },
                 render: { view: "client/pages/auth/login", data: { pageTitle: "Đăng nhập", error: errorMsg, errors: [], oldData: req.body } }
             });
