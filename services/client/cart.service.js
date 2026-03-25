@@ -116,15 +116,14 @@ module.exports.updateQuantity = async (req, productId, qty) => {
     if (!item) throw new Error("Không tìm thấy sản phẩm");
 
     if (quantity <= 0) {
-        cart.items = cart.items.filter(
-            i => i.productId.toString() !== productId
-        );
-    } else {
-        if (quantity > item.maxStock)
-            throw new Error("Vượt quá tồn kho");
-
-        item.quantity = quantity;
+        throw new Error("Số lượng không hợp lệ");
     }
+
+    if (quantity > item.maxStock) {
+        throw new Error("Vượt quá tồn kho");
+    }
+
+    item.quantity = quantity;
 
     await cart.save();
     return true;
