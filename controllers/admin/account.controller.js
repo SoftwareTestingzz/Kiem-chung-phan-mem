@@ -1,5 +1,6 @@
 const accountService = require('../../services/admin/account.service');
 const sysConfig = require('../../config/system');
+const respond = require('../../helper/respond');
 
 // =======================
 // [GET] /admin/accounts
@@ -45,18 +46,20 @@ module.exports.create = async (req, res) => {
 module.exports.createAccount = async (req, res) => {
     try {
         await accountService.createAccount(req);
-
-        req.flash('success', 'Tạo tài khoản thành công!');
-        return res.redirect(`${sysConfig.prefixAdmin}/accounts`);
-
+        return respond(req, res, {
+            status: 200,
+            json: { success: true, message: 'Tạo tài khoản thành công!' },
+            redirect: `${sysConfig.prefixAdmin}/accounts`
+        });
     } catch (err) {
-        if (err.message === "EMAIL_EXISTS") {
-            req.flash('error', 'Email đã tồn tại, vui lòng chọn email khác!');
-        } else {
-            req.flash('error', 'Có lỗi xảy ra, vui lòng thử lại!');
-        }
-
-        return res.redirect('back');
+        const msg = err.message === "EMAIL_EXISTS"
+            ? 'Email đã tồn tại, vui lòng chọn email khác!'
+            : 'Có lỗi xảy ra, vui lòng thử lại!';
+        return respond(req, res, {
+            status: 400,
+            json: { success: false, message: msg },
+            redirect: 'back'
+        });
     }
 };
 
@@ -68,29 +71,35 @@ module.exports.changeStatus = async (req, res) => {
     try {
         const { id, status } = req.params;
         await accountService.changeStatus(id, status);
-
-        req.flash('success', 'Cập nhật trạng thái thành công!');
+        return respond(req, res, {
+            status: 200,
+            json: { success: true, message: 'Cập nhật trạng thái thành công!' },
+            redirect: req.get('Referer') || `${sysConfig.prefixAdmin}/accounts`
+        });
     } catch (err) {
-        req.flash('error', 'Có lỗi xảy ra, vui lòng thử lại!');
+        return respond(req, res, {
+            status: 500,
+            json: { success: false, message: 'Có lỗi xảy ra, vui lòng thử lại!' },
+            redirect: req.get('Referer') || `${sysConfig.prefixAdmin}/accounts`
+        });
     }
-
-    res.redirect(req.get('Referer') || `${sysConfig.prefixAdmin}/accounts`);
 };
 
-
-// =======================
-// [DELETE] /admin/accounts/delete-account/:id
-// =======================
 module.exports.deleteAccount = async (req, res) => {
     try {
         await accountService.deleteAccount(req.params.id);
-
-        req.flash('success', 'Xóa tài khoản thành công!');
+        return respond(req, res, {
+            status: 200,
+            json: { success: true, message: 'Xóa tài khoản thành công!' },
+            redirect: req.get('Referer') || `${sysConfig.prefixAdmin}/accounts`
+        });
     } catch (err) {
-        req.flash('error', 'Có lỗi xảy ra, vui lòng thử lại!');
+        return respond(req, res, {
+            status: 500,
+            json: { success: false, message: 'Có lỗi xảy ra, vui lòng thử lại!' },
+            redirect: req.get('Referer') || `${sysConfig.prefixAdmin}/accounts`
+        });
     }
-
-    res.redirect(req.get('Referer') || `${sysConfig.prefixAdmin}/accounts`);
 };
 
 
@@ -119,12 +128,8 @@ module.exports.edit = async (req, res) => {
 // =======================
 module.exports.editAccount = async (req, res) => {
     try {
-        // ⚠️ service PHẢI return account sau update
         const updatedAccount = await accountService.editAccount(req);
 
-        // ===============================
-        // 🔥 CẬP NHẬT SESSION USER
-        // ===============================
         if (
             req.session.user &&
             req.session.user._id &&
@@ -136,19 +141,21 @@ module.exports.editAccount = async (req, res) => {
             req.session.user.address = updatedAccount.address;
         }
 
-        req.flash('success', 'Cập nhật tài khoản thành công!');
-
+        return respond(req, res, {
+            status: 200,
+            json: { success: true, message: 'Cập nhật tài khoản thành công!' },
+            redirect: `${sysConfig.prefixAdmin}/accounts/edit/${req.params.id}`
+        });
     } catch (err) {
-        console.log(err);
-
-        if (err.message === "EMAIL_EXISTS") {
-            req.flash('error', 'Email đã tồn tại, vui lòng chọn email khác!');
-        } else {
-            req.flash('error', 'Có lỗi xảy ra, vui lòng thử lại!');
-        }
+        const msg = err.message === "EMAIL_EXISTS"
+            ? 'Email đã tồn tại, vui lòng chọn email khác!'
+            : 'Có lỗi xảy ra, vui lòng thử lại!';
+        return respond(req, res, {
+            status: 400,
+            json: { success: false, message: msg },
+            redirect: `${sysConfig.prefixAdmin}/accounts/edit/${req.params.id}`
+        });
     }
-
-    res.redirect(`${sysConfig.prefixAdmin}/accounts/edit/${req.params.id}`);
 };
 
 

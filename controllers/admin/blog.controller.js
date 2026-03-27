@@ -1,5 +1,6 @@
 const blogService = require("../../services/admin/blog.service");
 const sysConfig = require("../../config/system");
+const respond = require("../../helper/respond");
 
 module.exports = {
 
@@ -53,12 +54,19 @@ module.exports = {
     store: async (req, res) => {
         try {
             await blogService.createBlog(req);
-            req.flash("success", "Thêm bài viết thành công!");
+            return respond(req, res, {
+                status: 201,
+                json: { success: true, message: 'Thêm bài viết thành công!' },
+                redirect: '/admin/blog'
+            });
         } catch (err) {
             console.error("BLOG CREATE ERROR:", err);
-            req.flash("error", "Có lỗi xảy ra khi tạo bài viết!");
+            return respond(req, res, {
+                status: 500,
+                json: { success: false, message: 'Có lỗi xảy ra khi tạo bài viết!' },
+                redirect: '/admin/blog/create'
+            });
         }
-        res.redirect("/admin/blog");
     },
 
 
@@ -90,12 +98,19 @@ module.exports = {
     update: async (req, res) => {
         try {
             await blogService.updateBlog(req, req.params.id);
-            req.flash("success", "Cập nhật bài viết thành công!");
+            return respond(req, res, {
+                status: 200,
+                json: { success: true, message: 'Cập nhật bài viết thành công!' },
+                redirect: '/admin/blog'
+            });
         } catch (err) {
             console.error("BLOG UPDATE ERROR:", err);
-            req.flash("error", "Lỗi cập nhật!");
+            return respond(req, res, {
+                status: 500,
+                json: { success: false, message: 'Lỗi cập nhật!' },
+                redirect: `/admin/blog/edit/${req.params.id}`
+            });
         }
-        res.redirect("/admin/blog");
     },
 
     // [GET] /admin/blog/delete/:id
@@ -103,11 +118,18 @@ module.exports = {
     delete: async (req, res) => {
         try {
             await blogService.deleteBlog(req.params.id);
-            req.flash("success", "Xóa bài viết thành công!");
+            return respond(req, res, {
+                status: 200,
+                json: { success: true, message: 'Xóa bài viết thành công!' },
+                redirect: '/admin/blog'
+            });
         } catch (err) {
             console.error("BLOG DELETE ERROR:", err);
-            req.flash("error", "Không thể xóa bài viết!");
+            return respond(req, res, {
+                status: 500,
+                json: { success: false, message: 'Không thể xóa bài viết!' },
+                redirect: '/admin/blog'
+            });
         }
-        res.redirect("/admin/blog");
     }
 };

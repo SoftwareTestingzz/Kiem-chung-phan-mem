@@ -1,5 +1,6 @@
 const loginService = require("../../services/client/login.service");
 const { validationResult } = require("express-validator");
+const respond = require("../../helper/respond");
 
 module.exports = {
     renderLogin: (req, res) => {
@@ -12,48 +13,45 @@ module.exports = {
     },
 
     handleLogin: async (req, res) => {
-        // Kiểm tra xem Yêu cầu có đến từ Postman / API không
-        const isApi = req.headers.accept && req.headers.accept.includes('application/json');
-
-        // 👉 BẮT LỖI VALIDATE
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            if (isApi) return res.json({ success: false, message: errors.array()[0].msg });
-            return res.render("client/pages/auth/login", {
-                pageTitle: "Đăng nhập",
-                error: null,
-                errors: errors.array(),
-                oldData: req.body
+            return respond(req, res, {
+                status: 400,
+                json: { success: false, errors: errors.array() },
+                render: { view: "client/pages/auth/login", data: { pageTitle: "Đăng nhập", error: null, errors: errors.array(), oldData: req.body } }
             });
         }
 
         try {
             await loginService.login(req, res);
-            if (isApi) return res.json({ success: true, message: "Đăng nhập thành công" });
-            return res.redirect("/");
+            return respond(req, res, {
+                status: 200,
+                json: { success: true, message: "Đăng nhập thành công!" },
+                redirect: "/"
+            });
 
         } catch (err) {
-            let errorMsg = "Có lỗi xảy ra, vui lòng thử lại!";
+            const errorMap = {
+                EMAIL_NOT_FOUND: "Email không tồn tại!",
+                PASSWORD_ERROR: "Mật khẩu không đúng!",
+                ACCOUNT_BLOCK: "Tài khoản đã bị khóa!"
+            };
+            const errorMsg = errorMap[err.message] || "Có lỗi xảy ra, vui lòng thử lại!";
 
-            if (err.message === "EMAIL_NOT_FOUND") {
-                errorMsg = "Email không tồn tại!";
-            }
-            if (err.message === "PASSWORD_ERROR") {
-                errorMsg = "Mật khẩu không đúng!";
-            }
-
-            if (isApi) return res.json({ success: false, message: errorMsg });
-            return res.render("client/pages/auth/login", {
-                pageTitle: "Đăng nhập",
-                error: errorMsg,
-                errors: [],
-                oldData: req.body
+            return respond(req, res, {
+                status: 400,
+                json: { success: false, message: errorMsg },
+                render: { view: "client/pages/auth/login", data: { pageTitle: "Đăng nhập", error: errorMsg, errors: [], oldData: req.body } }
             });
         }
     },
 
     logout: (req, res) => {
         loginService.logout(req, res);
-        res.redirect("/login");
+        return respond(req, res, {
+            status: 200,
+            json: { success: true, message: "Đăng xuất thành công!" },
+            redirect: "/login"
+        });
     }
 };

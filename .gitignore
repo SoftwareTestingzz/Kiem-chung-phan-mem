@@ -8,3 +8,10 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Jira scripts and temp files
+test-jira.js
+get-users.js
+test-parse.js
+provision-jira.js
+users.json
