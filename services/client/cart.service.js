@@ -55,7 +55,7 @@ module.exports.addToCart = async (req, productId, quantity) => {
     const product = await Product.findById(productId);
     if (!product) throw new Error("Sản phẩm không tồn tại");
 
-    if (qty <= 0) throw new Error("Số lượng không hợp lệ");
+    if (isNaN(qty) || qty <= 0) throw new Error("Số lượng không hợp lệ");
     if (qty > product.stock) throw new Error("Không đủ hàng");
 
     const price = calcPrice(product); // 👉 VND
