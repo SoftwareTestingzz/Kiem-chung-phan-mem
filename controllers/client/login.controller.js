@@ -12,9 +12,13 @@ module.exports = {
     },
 
     handleLogin: async (req, res) => {
+        // Kiểm tra xem Yêu cầu có đến từ Postman / API không
+        const isApi = req.headers.accept && req.headers.accept.includes('application/json');
+
         // 👉 BẮT LỖI VALIDATE
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
+            if (isApi) return res.json({ success: false, message: errors.array()[0].msg });
             return res.render("client/pages/auth/login", {
                 pageTitle: "Đăng nhập",
                 error: null,
@@ -25,6 +29,7 @@ module.exports = {
 
         try {
             await loginService.login(req, res);
+            if (isApi) return res.json({ success: true, message: "Đăng nhập thành công" });
             return res.redirect("/");
 
         } catch (err) {
@@ -37,6 +42,7 @@ module.exports = {
                 errorMsg = "Mật khẩu không đúng!";
             }
 
+            if (isApi) return res.json({ success: false, message: errorMsg });
             return res.render("client/pages/auth/login", {
                 pageTitle: "Đăng nhập",
                 error: errorMsg,

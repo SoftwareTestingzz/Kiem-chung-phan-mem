@@ -130,8 +130,13 @@ module.exports.clear = async (req, res) => {
    [GET] /cart  → Trang hiển thị giỏ hàng
 =================================================== */
 module.exports.index = async (req, res) => {
+    const isApi = req.headers.accept && req.headers.accept.includes('application/json');
     try {
         const result = await cartService.getCart(req);
+
+        if (isApi) {
+            return res.json({ success: true, cart: result.cart, total: result.total });
+        }
 
         return res.render("client/pages/cart/index", {
             pageTitle: "Giỏ hàng",
@@ -140,6 +145,9 @@ module.exports.index = async (req, res) => {
         });
 
     } catch (err) {
+        if (isApi) {
+            return res.json({ success: false, message: "Không thể tải giỏ hàng!!!" });
+        }
         return res.render("client/pages/cart/index", {
             pageTitle: "Giỏ hàng",
             cart: [],
