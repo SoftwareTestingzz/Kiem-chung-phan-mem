@@ -5,7 +5,7 @@ module.exports.index = (req, res) => {
     const isApi = req.headers.accept && req.headers.accept.includes('application/json');
     try {
         if (!profileService.checkLogin(req.session.user)) {
-            if (isApi) return res.json({ success: false, message: "Bạn chưa đăng nhập!" });
+            if (isApi) return res.status(400).json({ success: false, message: "Bạn chưa đăng nhập!" });
             return res.redirect("/login");
         }
 
@@ -18,7 +18,7 @@ module.exports.index = (req, res) => {
 
     } catch (err) {
         console.error("PROFILE PAGE ERROR:", err);
-        if (isApi) return res.json({ success: false, message: "Không thể tải thông tin tài khoản!" });
+        if (isApi) return res.status(400).json({ success: false, message: "Không thể tải thông tin tài khoản!" });
         return res.redirect("/login");
     }
 };

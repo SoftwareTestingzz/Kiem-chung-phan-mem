@@ -7,7 +7,7 @@ module.exports.add = async (req, res) => {
     try {
         // ✅ Kiểm tra đăng nhập
         if (!req.session.user) {
-            return res.json({
+            return res.status(400).json({
                 success: false,
                 message: "Vui lòng đăng nhập để thêm vào giỏ hàng!",
                 requireLogin: true
@@ -24,7 +24,7 @@ module.exports.add = async (req, res) => {
         });
 
     } catch (err) {
-        return res.json({
+        return res.status(400).json({
             success: false,
             message: err.message || "Lỗi thêm sản phẩm vào giỏ!"
         });
@@ -39,7 +39,7 @@ module.exports.update = async (req, res) => {
     try {
         // ✅ Kiểm tra đăng nhập
         if (!req.session.user) {
-            return res.json({
+            return res.status(400).json({
                 success: false,
                 message: "Vui lòng đăng nhập để cập nhật giỏ hàng!",
                 requireLogin: true
@@ -56,7 +56,7 @@ module.exports.update = async (req, res) => {
         });
 
     } catch (err) {
-        return res.json({
+        return res.status(400).json({
             success: false,
             message: err.message || "Lỗi cập nhật giỏ hàng!"
         });
@@ -71,7 +71,7 @@ module.exports.delete = async (req, res) => {
     try {
         // ✅ Kiểm tra đăng nhập
         if (!req.session.user) {
-            return res.json({
+            return res.status(400).json({
                 success: false,
                 message: "Vui lòng đăng nhập để xóa sản phẩm!",
                 requireLogin: true
@@ -88,7 +88,7 @@ module.exports.delete = async (req, res) => {
         });
 
     } catch (err) {
-        return res.json({
+        return res.status(400).json({
             success: false,
             message: err.message || "Lỗi xóa sản phẩm!"
         });
@@ -103,7 +103,7 @@ module.exports.clear = async (req, res) => {
     try {
         // ✅ Kiểm tra đăng nhập
         if (!req.session.user) {
-            return res.json({
+            return res.status(400).json({
                 success: false,
                 message: "Vui lòng đăng nhập để xóa giỏ hàng!",
                 requireLogin: true
@@ -118,7 +118,7 @@ module.exports.clear = async (req, res) => {
         });
 
     } catch (err) {
-        return res.json({
+        return res.status(400).json({
             success: false,
             message: err.message || "Không thể xóa giỏ hàng!"
         });
@@ -146,7 +146,7 @@ module.exports.index = async (req, res) => {
 
     } catch (err) {
         if (isApi) {
-            return res.json({ success: false, message: "Không thể tải giỏ hàng!!!" });
+            return res.status(400).json({ success: false, message: "Không thể tải giỏ hàng!!!" });
         }
         return res.render("client/pages/cart/index", {
             pageTitle: "Giỏ hàng",
