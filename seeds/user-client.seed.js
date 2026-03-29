@@ -5,7 +5,7 @@ const usersData = [
     {
         fullName: "Nguyễn Văn An",
         email: "nguyenvanan@gmail.com",
-        password: "123456",
+        password: "Client@123",
         phone: "0901234567",
         gender: "male",
         birthday: "1995-03-15",
@@ -15,7 +15,7 @@ const usersData = [
     {
         fullName: "Trần Thị Bình",
         email: "tranthiB@gmail.com",
-        password: "123456",
+        password: "Client@123",
         phone: "0912345678",
         gender: "female",
         birthday: "1990-07-22",
@@ -25,7 +25,7 @@ const usersData = [
     {
         fullName: "Phạm Minh Châu",
         email: "phamminchau@gmail.com",
-        password: "123456",
+        password: "Client@123",
         phone: "0923456789",
         gender: "female",
         birthday: "1998-11-08",
@@ -35,7 +35,7 @@ const usersData = [
     {
         fullName: "Lê Quốc Dũng",
         email: "lequocdung@gmail.com",
-        password: "123456",
+        password: "Client@123",
         phone: "0934567890",
         gender: "male",
         birthday: "1987-05-30",
@@ -45,7 +45,7 @@ const usersData = [
     {
         fullName: "Hoàng Thị Mai",
         email: "hoangthimai@gmail.com",
-        password: "123456",
+        password: "Client@123",
         phone: "0945678901",
         gender: "female",
         birthday: "2000-01-14",

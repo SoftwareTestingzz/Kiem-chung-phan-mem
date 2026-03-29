@@ -3,7 +3,6 @@ const respond = require("../../helper/respond");
 
 module.exports = {
 
-
     orderList: async (req, res) => {
         try {
             if (!req.session.user) {
@@ -32,8 +31,6 @@ module.exports = {
         }
     },
 
-
-
     orderDetail: async (req, res) => {
         try {
             if (!req.session.user) {
@@ -61,8 +58,6 @@ module.exports = {
             });
         }
     },
-
-
 
     cancelOrder: async (req, res) => {
         try {
