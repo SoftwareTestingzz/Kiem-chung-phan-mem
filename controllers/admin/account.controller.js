@@ -1,19 +1,32 @@
+
 const accountService = require('../../services/admin/account.service');
 const sysConfig = require('../../config/system');
 const respond = require('../../helper/respond');
 
+// Simple email format check
+function isValidEmail(email) {
+    return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email);
+}
+
+// Check if user is admin
+function isAdmin(req) {
+    return req.session && req.session.user && req.session.user.role === 'admin';
+}
+
 // =======================
 // [GET] /admin/accounts
 // =======================
+
 module.exports.index = async (req, res) => {
     try {
+        if (!isAdmin(req)) {
+            return res.status(403).send('Forbidden');
+        }
         const records = await accountService.getList();
-
         res.render('admin/pages/account/index', {
             pageTitle: 'Quản lý tài khoản',
             records
         });
-
     } catch (err) {
         req.flash('error', 'Có lỗi xảy ra, vui lòng thử lại!');
         res.redirect(`${sysConfig.prefixAdmin}/dashboard`);
@@ -45,6 +58,35 @@ module.exports.create = async (req, res) => {
 // =======================
 module.exports.createAccount = async (req, res) => {
     try {
+        if (!isAdmin(req)) {
+            return respond(req, res, {
+                status: 403,
+                json: { success: false, message: 'Bạn không có quyền thực hiện thao tác này!' },
+                redirect: 'back'
+            });
+        }
+        const { email, password, role } = req.body;
+        if (!email || !isValidEmail(email)) {
+            return respond(req, res, {
+                status: 422,
+                json: { success: false, message: 'Email không hợp lệ!' },
+                redirect: 'back'
+            });
+        }
+        if (!password || password.length < 6) {
+            return respond(req, res, {
+                status: 422,
+                json: { success: false, message: 'Password phải từ 6 ký tự trở lên!' },
+                redirect: 'back'
+            });
+        }
+        if (!role) {
+            return respond(req, res, {
+                status: 422,
+                json: { success: false, message: 'Role là bắt buộc!' },
+                redirect: 'back'
+            });
+        }
         await accountService.createAccount(req);
         return respond(req, res, {
             status: 200,
@@ -69,7 +111,21 @@ module.exports.createAccount = async (req, res) => {
 // =======================
 module.exports.changeStatus = async (req, res) => {
     try {
+        if (!isAdmin(req)) {
+            return respond(req, res, {
+                status: 403,
+                json: { success: false, message: 'Bạn không có quyền thực hiện thao tác này!' },
+                redirect: req.get('Referer') || `${sysConfig.prefixAdmin}/accounts`
+            });
+        }
         const { id, status } = req.params;
+        if (!['active', 'inactive'].includes(status)) {
+            return respond(req, res, {
+                status: 422,
+                json: { success: false, message: 'Trạng thái không hợp lệ!' },
+                redirect: req.get('Referer') || `${sysConfig.prefixAdmin}/accounts`
+            });
+        }
         await accountService.changeStatus(id, status);
         return respond(req, res, {
             status: 200,
@@ -87,6 +143,13 @@ module.exports.changeStatus = async (req, res) => {
 
 module.exports.deleteAccount = async (req, res) => {
     try {
+        if (!isAdmin(req)) {
+            return respond(req, res, {
+                status: 403,
+                json: { success: false, message: 'Bạn không có quyền thực hiện thao tác này!' },
+                redirect: req.get('Referer') || `${sysConfig.prefixAdmin}/accounts`
+            });
+        }
         await accountService.deleteAccount(req.params.id);
         return respond(req, res, {
             status: 200,
