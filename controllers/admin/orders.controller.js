@@ -70,40 +70,20 @@ module.exports = {
     updateStatus: async (req, res) => {
         try {
             if (!isAdmin(req)) {
-                return respond(req, res, {
-                    status: 403,
-                    json: { success: false, message: 'Bạn không có quyền thực hiện thao tác này!' },
-                    redirect: `/admin/orders/${req.params.id}`
-                });
+                return res.status(403).json({ success: false, message: 'Bạn không có quyền thực hiện thao tác này!' });
             }
             const orderId = req.params.id;
             const { status } = req.body;
             if (!isValidStatus(status)) {
-                return respond(req, res, {
-                    status: 422,
-                    json: { success: false, message: 'Trạng thái không hợp lệ!' },
-                    redirect: `/admin/orders/${orderId}`
-                });
+                return res.status(422).json({ success: false, message: 'Trạng thái không hợp lệ!' });
             }
             const result = await orderService.updateStatus(orderId, status);
             if (result.error) {
-                return respond(req, res, {
-                    status: 400,
-                    json: { success: false, message: result.error },
-                    redirect: `/admin/orders/${orderId}`
-                });
+                return res.status(400).json({ success: false, message: result.error });
             }
-            return respond(req, res, {
-                status: 200,
-                json: { success: true, message: 'Cập nhật trạng thái thành công!' },
-                redirect: `/admin/orders/${orderId}`
-            });
+            return res.status(200).json({ success: true, message: 'Cập nhật trạng thái thành công!' });
         } catch (err) {
-            return respond(req, res, {
-                status: 500,
-                json: { success: false, message: 'Lỗi cập nhật trạng thái đơn hàng!' },
-                redirect: `/admin/orders`
-            });
+            return res.status(500).json({ success: false, message: 'Lỗi cập nhật trạng thái đơn hàng!' });
         }
     }
 };
