@@ -1,5 +1,6 @@
 const Account = require('../../models/user.model')
 const bcrypt = require("bcrypt");
+const crypto = require("crypto");
 
 module.exports.loginPost = async (req, res) => {
     const { email, password } = req.body
@@ -26,6 +27,16 @@ module.exports.loginPost = async (req, res) => {
     return
 };
 
-module.exports.logout = ( res) => {
+module.exports.logout = async (req, res) => {
+    const token = req.cookies.token;
+    
+    // Xóa token trong DB để invalidate session
+    if (token) {
+        await Account.updateOne(
+            { token: token },
+            { token: null }
+        );
+    }
+    
     res.clearCookie('token');
 };

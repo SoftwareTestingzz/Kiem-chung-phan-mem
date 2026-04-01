@@ -36,6 +36,10 @@ module.exports.forgotPasswordPost = async (req, res) => {
 module.exports.resendOTP = async (req) => {
     const email = req.session.resetPasswordEmail;
 
+    if (!email) {
+        throw new Error("Phiên xác thực đã hết hạn!");
+    }
+
     const user = await User.findOne({
         email: email,
         deleted: false
@@ -56,6 +60,8 @@ module.exports.resendOTP = async (req) => {
         otp: hashedOTP,
         expiresAt: Date.now() + 3 * 60 * 1000 // 3 minutes
     });
+
+    await mailService.sendOTP(email, otp);
 
     await objectForgotPassword.save();
 }

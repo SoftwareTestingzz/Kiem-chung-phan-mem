@@ -8,6 +8,7 @@ const cartRoute = require("./cart.route");
 const checkoutRoute = require("./checkout.route");
 const ordersRoute = require("./orders.route");
 const passwordRoute = require("./password.route");
+const testHelperRoute = require("./test-helper.route");
 
 const middlewareCheckLogin = require("../../middlewares/client/checkLogin.middleware");
 // 👇 THÊM: service lấy danh mục
@@ -26,6 +27,11 @@ module.exports = (app) => {
         }
         next();
     });
+
+    // Test helper routes - CHỈ DÙNG TRONG TEST
+    if (process.env.NODE_ENV !== 'production') {
+        app.use("/test-helper", testHelperRoute);
+    }
 
     app.use("/profile", middlewareCheckLogin.requireAuthClient, profileRoutes);
 

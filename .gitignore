@@ -16,3 +16,9 @@ get-users.js
 test-parse.js
 provision-jira.js
 users.json
+mcp.json
+
+# Google service account keys (sensitive)
+testing1-*.json
+.tmp
+setting.json

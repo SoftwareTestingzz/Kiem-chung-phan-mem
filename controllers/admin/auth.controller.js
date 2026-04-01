@@ -52,8 +52,8 @@ module.exports.loginPost = async (req, res) => {
 };
 
 // [POST] /admin/auth/logout
-module.exports.logout = (req, res) => {
-    authService.logout(res);
+module.exports.logout = async (req, res) => {
+    await authService.logout(req, res);
     return respond(req, res, {
         status: 200,
         json: { success: true, message: "Đăng xuất thành công!" },

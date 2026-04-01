@@ -19,7 +19,7 @@
     },
     {
       "key": "client_password",
-      "value": "123456",
+      "value": "Client@123",
       "type": "default",
       "enabled": true,
       "description": "[Sơn/Đạt] Password client từ seed"
@@ -33,7 +33,7 @@
     },
     {
       "key": "client_password_2",
-      "value": "123456",
+      "value": "Client@123",
       "type": "default",
       "enabled": true,
       "description": "[Đạt] Password client 2 từ seed"

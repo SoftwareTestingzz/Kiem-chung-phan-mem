@@ -17,7 +17,17 @@ module.exports = {
         const errors = validationResult(req);
 
         if (!errors.isEmpty()) {
-            return res.render("client/pages/auth/register", {
+            // Check if client wants JSON response
+            const wantsJson = req.headers['accept']?.includes('application/json');
+            
+            if (wantsJson) {
+                return res.status(200).json({
+                    success: false,
+                    errors: errors.array()
+                });
+            }
+            
+            return res.status(200).render("client/pages/auth/register", {
                 pageTitle: "Đăng ký tài khoản",
                 error: null,
                 errors: errors.array(),

@@ -49,7 +49,7 @@ module.exports.detail = async (req, res) => {
         const result = await blogService.getDetail(req.params.slug);
 
         if (!result.success) {
-            return res.render("client/pages/blog/detail", {
+            return res.status(404).render("client/pages/blog/detail", {
                 pageTitle: result.message,
                 blog: null
             });
@@ -60,7 +60,7 @@ module.exports.detail = async (req, res) => {
             blog: result.data
         });
     } catch (err) {
-        res.render("client/pages/blog/detail", {
+        res.status(500).render("client/pages/blog/detail", {
             pageTitle: "Lỗi hệ thống",
             blog: null
         });
