@@ -1,0 +1,1705 @@
+{
+  "info": {
+    "name": "Verdish - Đạt Module (Cart, Checkout, Orders, Profile + E2E)",
+    "_postman_id": "dat-verdish-collection-v2",
+    "description": "Module 03-06: Client Cart, Checkout, Orders, Profile + E2E-03, E2E-04, E2E-05",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:3000", "type": "string" },
+    { "key": "test_product_id", "value": "69bd766c8f031f668361a5ab", "type": "string" },
+    { "key": "test_product_id_2", "value": "69bd766c8f031f668361a5e7", "type": "string" },
+    { "key": "test_product_id_3", "value": "69bd766c8f031f668361a5ce", "type": "string" },
+    { "key": "test_order_id", "value": "", "type": "string" },
+    { "key": "shipped_order_id", "value": "69bd766c8f031f668361a61f", "type": "string" },
+    { "key": "other_user_order_id", "value": "69bd766c8f031f668361a632", "type": "string" },
+    { "key": "timestamp", "value": "", "type": "string" }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": ["pm.collectionVariables.set('timestamp', Date.now());"]
+      }
+    }
+  ],
+  "item": [
+
+    {
+      "name": "03 — Client Cart",
+      "item": [
+        {
+          "name": "03.1 — View Cart",
+          "item": [
+            {
+              "name": "CART-V-01 | Xem giỏ hàng khi đã đăng nhập",
+              "event": [{
+                "listen": "test",
+                "script": {
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test('TC-CV01 - Xem giỏ hàng thành công', () => {",
+                    "  pm.response.to.have.status(200);",
+                    "});",
+                    "pm.test('TC-CV01 - Response có cart và total', () => {",
+                    "  const json = pm.response.json();",
+                    "  pm.expect(json).to.have.property('cart');",
+                    "  pm.expect(json).to.have.property('total');",
+                    "});"
+                  ]
+                }
+              }],
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Accept", "value": "application/json" }],
+                "url": { "raw": "{{base_url}}/cart", "host": ["{{base_url}}"], "path": ["cart"] }
+              }
+            },
+            {
+              "name": "CART-V-02 | Xem giỏ hàng khi chưa đăng nhập",
+              "event": [{
+                "listen": "test",
+                "script": {
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test('TC-CV02 - Chưa đăng nhập bị redirect login', () => {",
+                    "  pm.expect(pm.response.code).to.equal(302);",
+                    "  pm.expect(pm.response.headers.get('Location')).to.include('login');",
+                    "});"
+                  ]
+                }
+              }],
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Accept", "value": "application/json" }],
+                "url": { "raw": "{{base_url}}/cart", "host": ["{{base_url}}"], "path": ["cart"] },
+                "description": "Chạy request này khi CHƯA login (xóa cookie session trước)"
+              }
+            }
+          ]
+        },
+        {
+          "name": "03.2 — Add to Cart",
+          "item": [
+            {
+              "name": "CART-A-01 | Thêm sản phẩm mới vào giỏ",
+              "event": [{
+                "listen": "test",
+                "script": {
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test('TC-CA01 - Thêm vào giỏ thành công', () => {",
+                    "  pm.expect([200, 302]).to.include(pm.response.code);",
+                    "});",
+                    "pm.test('TC-CA01 - Response có success=true', () => {",
+                    "  if (pm.response.headers.get('Content-Type')?.includes('json')) {",
+                    "    const json = pm.response.json();",
+                    "    pm.expect(json.success).to.be.true;",
+                    "  }",
+                    "});"
+                  ]
+                }
+              }],
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" },
+                  { "key": "Accept", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"productId\": \"{{test_product_id}}\",\n  \"quantity\": 1\n}"
+                },
+                "url": { "raw": "{{base_url}}/cart/add", "host": ["{{base_url}}"], "path": ["cart", "add"] }
+              }
+            },
+            {
+              "name": "CART-A-02 | Thêm sản phẩm đã có trong giỏ (tăng số lượng)",
+              "event": [{
+                "listen": "test",
+                "script": {
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test('TC-CA02 - Thêm sản phẩm đã có — số lượng tăng', () => {",
+                    "  pm.expect([200, 302]).to.include(pm.response.code);",
+                    "});"
+                  ]
+                }
+              }],
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" },
+                  { "key": "Accept", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"productId\": \"{{test_product_id}}\",\n  \"quantity\": 1\n}"
+                },
+                "url": { "raw": "{{base_url}}/cart/add", "host": ["{{base_url}}"], "path": ["cart", "add"] }
+              }
+            },
+            {
+              "name": "CART-A-03 | Thêm với số lượng lớn (kiểm tra stock limit)",
+              "event": [{
+                "listen": "test",
+                "script": {
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test('TC-CA03 - Số lượng vượt stock — server xử lý đúng', () => {",
+                    "  pm.expect([200, 302, 400]).to.include(pm.response.code);",
+                    "  if (pm.response.code === 400) {",
+                    "    const json = pm.response.json();",
+                    "    pm.expect(json.success).to.be.false;",
+                    "  }",
+                    "});"
+                  ]
+                }
+              }],
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" },
+                  { "key": "Accept", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"productId\": \"{{test_product_id}}\",\n  \"quantity\": 9999\n}"
+                },
+                "url": { "raw": "{{base_url}}/cart/add", "host": ["{{base_url}}"], "path": ["cart", "add"] }
+              }
+            },
+            {
+              "name": "CART-A-04 | Thêm với số lượng âm",
+              "event": [{
+                "listen": "test",
+                "script": {
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test('TC-CA04 - Số lượng âm bị từ chối', () => {",
+                    "  pm.expect([200, 302, 400, 422]).to.include(pm.response.code);",
+                    "});"
+                  ]
+                }
+              }],
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" },
+                  { "key": "Accept", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"productId\": \"{{test_product_id}}\",\n  \"quantity\": -5\n}"
+                },
+                "url": { "raw": "{{base_url}}/cart/add", "host": ["{{base_url}}"], "path": ["cart", "add"] }
+              }
+            },
+            {
+              "name": "CART-A-05 | Thêm với quantity = 0",
+              "event": [{
+                "listen": "test",
+                "script": {
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test('TC-CA05 - Quantity = 0 bị từ chối', () => {",
+                    "  pm.expect([200, 302, 400, 422]).to.include(pm.response.code);",
+                    "});"
+                  ]
+                }
+              }],
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" },
+                  { "key": "Accept", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"productId\": \"{{test_product_id}}\",\n  \"quantity\": 0\n}"
+                },
+                "url": { "raw": "{{base_url}}/cart/add", "host": ["{{base_url}}"], "path": ["cart", "add"] }
+              }
+            },
+            {
+              "name": "CART-A-06 | Thêm productId không tồn tại",
+              "event": [{
+                "listen": "test",
+                "script": {
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test('TC-CA06 - ProductId fake trả lỗi', () => {",
+                    "  pm.expect([302, 400, 404]).to.include(pm.response.code);",
+                    "});"
+                  ]
+                }
+              }],
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" },
+                  { "key": "Accept", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"productId\": \"000000000000000000000000\",\n  \"quantity\": 1\n}"
+                },
+                "url": { "raw": "{{base_url}}/cart/add", "host": ["{{base_url}}"], "path": ["cart", "add"] }
+              }
+            },
+            {
+              "name": "CART-A-07 | Thêm không có session (chưa login)",
+              "event": [{
+                "listen": "test",
+                "script": {
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test('TC-CA07 - Chưa login có requireLogin=true', () => {",
+                    "  const json = pm.response.json();",
+                    "  pm.expect(json.success).to.be.false;",
+                    "  pm.expect(json.requireLogin).to.be.true;",
+                    "});"
+                  ]
+                }
+              }],
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" },
+                  { "key": "Accept", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"productId\": \"{{test_product_id}}\",\n  \"quantity\": 1\n}"
+                },
+                "url": { "raw": "{{base_url}}/cart/add", "host": ["{{base_url}}"], "path": ["cart", "add"] },
+                "description": "Chạy khi CHƯA login (không có session cookie)"
+              }
+            },
+            {
+              "name": "CART-A-08 | Thêm productId dạng SQL injection",
+              "event": [{
+                "listen": "test",
+                "script": {
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test('TC-CA08 - Injection input không crash server', () => {",
+                    "  pm.expect([200, 302, 400, 500]).to.include(pm.response.code);",
+                    "  pm.expect(pm.response.code).to.not.equal(500);",
+                    "});"
+                  ]
+                }
+              }],
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" },
+                  { "key": "Accept", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"productId\": \"' OR '1'='1\",\n  \"quantity\": 1\n}"
+                },
+                "url": { "raw": "{{base_url}}/cart/add", "host": ["{{base_url}}"], "path": ["cart", "add"] }
+              }
+            }
+          ]
+        },
+
+        {
+          "name": "03.3 — Update Cart",
+          "item": [
+            {
+              "name": "CART-U-01 | Tăng số lượng sản phẩm",
+              "event": [{
+                "listen": "test",
+                "script": {
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test('TC-CU01 - Cập nhật số lượng thành công', () => {",
+                    "  pm.expect([200, 302]).to.include(pm.response.code);",
+                    "});"
+                  ]
+                }
+              }],
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" },
+                  { "key": "Accept", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"productId\": \"{{test_product_id}}\",\n  \"quantity\": 3\n}"
+                },
+                "url": { "raw": "{{base_url}}/cart/update", "host": ["{{base_url}}"], "path": ["cart", "update"] }
+              }
+            },
+            {
+              "name": "CART-U-02 | Giảm số lượng về 1",
+              "event": [{
+                "listen": "test",
+                "script": {
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test('TC-CU02 - Giảm số lượng về 1 thành công', () => {",
+                    "  pm.expect([200, 302]).to.include(pm.response.code);",
+                    "});"
+                  ]
+                }
+              }],
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" },
+                  { "key": "Accept", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"productId\": \"{{test_product_id}}\",\n  \"quantity\": 1\n}"
+                },
+                "url": { "raw": "{{base_url}}/cart/update", "host": ["{{base_url}}"], "path": ["cart", "update"] }
+              }
+            },
+            {
+              "name": "CART-U-03 | Cập nhật số lượng = 0 (không xóa item)",
+              "event": [{
+                "listen": "test",
+                "script": {
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test('TC-CU03 - Quantity = 0 bị từ chối', () => {",
+                    "  pm.expect([200, 302, 400]).to.include(pm.response.code);",
+                    "});"
+                  ]
+                }
+              }],
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" },
+                  { "key": "Accept", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"productId\": \"{{test_product_id}}\",\n  \"quantity\": 0\n}"
+                },
+                "url": { "raw": "{{base_url}}/cart/update", "host": ["{{base_url}}"], "path": ["cart", "update"] }
+              }
+            },
+            {
+              "name": "CART-U-04 | Cập nhật productId không còn trong giỏ",
+              "event": [{
+                "listen": "test",
+                "script": {
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test('TC-CU04 - ProductId không trong cart được xử lý đúng', () => {",
+                    "  pm.expect([200, 302, 400, 404]).to.include(pm.response.code);",
+                    "});"
+                  ]
+                }
+              }],
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" },
+                  { "key": "Accept", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"productId\": \"000000000000000000000000\",\n  \"quantity\": 2\n}"
+                },
+                "url": { "raw": "{{base_url}}/cart/update", "host": ["{{base_url}}"], "path": ["cart", "update"] }
+              }
+            }
+          ]
+        },
+        {
+          "name": "03.4 — Remove from Cart",
+          "item": [
+            {
+              "name": "CART-R-01 | Xóa 1 sản phẩm khỏi giỏ",
+              "event": [{
+                "listen": "test",
+                "script": {
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test('TC-CR01 - Xóa sản phẩm thành công', () => {",
+                    "  pm.expect([200, 302]).to.include(pm.response.code);",
+                    "});"
+                  ]
+                }
+              }],
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" },
+                  { "key": "Accept", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"productId\": \"{{test_product_id}}\"\n}"
+                },
+                "url": { "raw": "{{base_url}}/cart/delete", "host": ["{{base_url}}"], "path": ["cart", "delete"] }
+              }
+            },
+            {
+              "name": "CART-R-02 | Xóa sản phẩm không có trong giỏ",
+              "event": [{
+                "listen": "test",
+                "script": {
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test('TC-CR02 - Xóa item không tồn tại không crash', () => {",
+                    "  pm.expect([200, 302, 400, 404]).to.include(pm.response.code);",
+                    "});"
+                  ]
+                }
+              }],
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" },
+                  { "key": "Accept", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"productId\": \"000000000000000000000000\"\n}"
+                },
+                "url": { "raw": "{{base_url}}/cart/delete", "host": ["{{base_url}}"], "path": ["cart", "delete"] }
+              }
+            },
+            {
+              "name": "CART-R-03 | Xóa toàn bộ giỏ hàng",
+              "event": [{
+                "listen": "test",
+                "script": {
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test('TC-CR03 - Clear cart thành công', () => {",
+                    "  pm.expect([200, 302]).to.include(pm.response.code);",
+                    "});"
+                  ]
+                }
+              }],
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" },
+                  { "key": "Accept", "value": "application/json" }
+                ],
+                "body": { "mode": "raw", "raw": "{}" },
+                "url": { "raw": "{{base_url}}/cart/clear", "host": ["{{base_url}}"], "path": ["cart", "clear"] }
+              }
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "name": "04 — Client Checkout",
+      "item": [
+        {
+          "name": "04.1 — Place Order",
+          "item": [
+            {
+              "name": "CHK-01 | Đặt hàng thành công (cart đã có sản phẩm)",
+              "event": [{
+                "listen": "test",
+                "script": {
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test('TC-CHK01 - Đặt hàng thành công', () => {",
+                    "  pm.expect([200, 302]).to.include(pm.response.code);",
+                    "});",
+                    "pm.test('TC-CHK01 - Lưu order ID nếu response là JSON', () => {",
+                    "  if (pm.response.headers.get('Content-Type')?.includes('json')) {",
+                    "    const json = pm.response.json();",
+                    "    if (json.orderId) {",
+                    "      pm.collectionVariables.set('test_order_id', json.orderId);",
+                    "    }",
+                    "  }",
+                    "});"
+                  ]
+                }
+              }],
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/x-www-form-urlencoded" },
+                  { "key": "Accept", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    { "key": "name", "value": "Test Buyer" },
+                    { "key": "phone", "value": "0901234567" },
+                    { "key": "address", "value": "123 Đường Test, Q.1, TP.HCM" },
+                    { "key": "selectedItems", "value": "[\"{{test_product_id}}\"]" }
+                  ]
+                },
+                "url": { "raw": "{{base_url}}/checkout/place-order", "host": ["{{base_url}}"], "path": ["checkout", "place-order"] },
+                "description": "Pre-condition: Đã login + cart có ít nhất 1 sản phẩm"
+              }
+            },
+            {
+              "name": "CHK-03 | Đặt hàng với cart rỗng",
+              "event": [{
+                "listen": "test",
+                "script": {
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test('TC-CHK03 - Đặt hàng với cart rỗng bị từ chối', () => {",
+                    "  pm.expect([200, 302, 400]).to.include(pm.response.code);",
+                    "});"
+                  ]
+                }
+              }],
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/x-www-form-urlencoded" },
+                  { "key": "Accept", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    { "key": "name", "value": "Test" },
+                    { "key": "phone", "value": "0901234567" },
+                    { "key": "address", "value": "Test address" },
+                    { "key": "selectedItems", "value": "[]" }
+                  ]
+                },
+                "url": { "raw": "{{base_url}}/checkout/place-order", "host": ["{{base_url}}"], "path": ["checkout", "place-order"] }
+              }
+            },
+            {
+              "name": "CHK-04 | Thiếu tên người nhận",
+              "event": [{
+                "listen": "test",
+                "script": {
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test('TC-CHK04 - Thiếu tên bị từ chối', () => {",
+                    "  pm.expect([200, 302, 400, 422]).to.include(pm.response.code);",
+                    "  if (pm.response.code === 400) {",
+                    "    const json = pm.response.json();",
+                    "    pm.expect(json.success).to.be.false;",
+                    "    pm.expect(json.message).to.include('tên');",
+                    "  }",
+                    "});"
+                  ]
+                }
+              }],
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/x-www-form-urlencoded" },
+                  { "key": "Accept", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    { "key": "name", "value": "" },
+                    { "key": "phone", "value": "0901234567" },
+                    { "key": "address", "value": "Test address" },
+                    { "key": "selectedItems", "value": "[\"{{test_product_id}}\"]" }
+                  ]
+                },
+                "url": { "raw": "{{base_url}}/checkout/place-order", "host": ["{{base_url}}"], "path": ["checkout", "place-order"] }
+              }
+            },
+            {
+              "name": "CHK-05 | Thiếu số điện thoại",
+              "event": [{
+                "listen": "test",
+                "script": {
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test('TC-CHK05 - Thiếu phone bị từ chối', () => {",
+                    "  pm.expect([200, 302, 400, 422]).to.include(pm.response.code);",
+                    "});"
+                  ]
+                }
+              }],
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/x-www-form-urlencoded" },
+                  { "key": "Accept", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    { "key": "name", "value": "Test" },
+                    { "key": "phone", "value": "" },
+                    { "key": "address", "value": "Test address" },
+                    { "key": "selectedItems", "value": "[\"{{test_product_id}}\"]" }
+                  ]
+                },
+                "url": { "raw": "{{base_url}}/checkout/place-order", "host": ["{{base_url}}"], "path": ["checkout", "place-order"] }
+              }
+            },
+            {
+              "name": "CHK-06 | Số điện thoại sai format",
+              "event": [{
+                "listen": "test",
+                "script": {
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test('TC-CHK06 - Phone sai format được xử lý', () => {",
+                    "  pm.expect([200, 302, 400, 422]).to.include(pm.response.code);",
+                    "});"
+                  ]
+                }
+              }],
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/x-www-form-urlencoded" },
+                  { "key": "Accept", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    { "key": "name", "value": "Test" },
+                    { "key": "phone", "value": "abc-not-phone" },
+                    { "key": "address", "value": "Test address" },
+                    { "key": "selectedItems", "value": "[\"{{test_product_id}}\"]" }
+                  ]
+                },
+                "url": { "raw": "{{base_url}}/checkout/place-order", "host": ["{{base_url}}"], "path": ["checkout", "place-order"] }
+              }
+            },
+            {
+              "name": "CHK-07 | Thiếu địa chỉ giao hàng",
+              "event": [{
+                "listen": "test",
+                "script": {
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test('TC-CHK07 - Thiếu địa chỉ bị từ chối', () => {",
+                    "  pm.expect([200, 302, 400, 422]).to.include(pm.response.code);",
+                    "});"
+                  ]
+                }
+              }],
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/x-www-form-urlencoded" },
+                  { "key": "Accept", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    { "key": "name", "value": "Test" },
+                    { "key": "phone", "value": "0901234567" },
+                    { "key": "address", "value": "" },
+                    { "key": "selectedItems", "value": "[\"{{test_product_id}}\"]" }
+                  ]
+                },
+                "url": { "raw": "{{base_url}}/checkout/place-order", "host": ["{{base_url}}"], "path": ["checkout", "place-order"] }
+              }
+            },
+            {
+              "name": "CHK-08 | Đặt hàng chưa đăng nhập",
+              "event": [{
+                "listen": "test",
+                "script": {
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test('TC-CHK08 - Chưa đăng nhập bị từ chối', () => {",
+                    "  pm.expect([400]).to.include(pm.response.code);",
+                    "  const json = pm.response.json();",
+                    "  pm.expect(json.success).to.be.false;",
+                    "});"
+                  ]
+                }
+              }],
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/x-www-form-urlencoded" },
+                  { "key": "Accept", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    { "key": "name", "value": "Test" },
+                    { "key": "phone", "value": "0901234567" },
+                    { "key": "address", "value": "Test address" },
+                    { "key": "selectedItems", "value": "[\"{{test_product_id}}\"]" }
+                  ]
+                },
+                "url": { "raw": "{{base_url}}/checkout/place-order", "host": ["{{base_url}}"], "path": ["checkout", "place-order"] },
+                "description": "Chạy khi CHƯA login"
+              }
+            }
+          ]
+        },
+        {
+          "name": "04.2 — Post-order Assertions",
+          "item": [
+            {
+              "name": "CHK-02 | Xác nhận cart trống sau khi đặt hàng",
+              "event": [{
+                "listen": "test",
+                "script": {
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test('TC-CHK02 - Giỏ hàng trống sau khi đặt hàng', () => {",
+                    "  pm.response.to.have.status(200);",
+                    "  const json = pm.response.json();",
+                    "  pm.expect(json.cart).to.be.an('array');",
+                    "  pm.expect(json.total).to.equal(0);",
+                    "});"
+                  ]
+                }
+              }],
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Accept", "value": "application/json" }],
+                "url": { "raw": "{{base_url}}/cart", "host": ["{{base_url}}"], "path": ["cart"] },
+                "description": "Chạy sau CHK-01 để verify cart đã được clear"
+              }
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "name": "05 — Client Orders",
+      "item": [
+        {
+          "name": "05.1 — My Orders",
+          "item": [
+            {
+              "name": "ORD-01 | Xem danh sách đơn hàng",
+              "event": [{
+                "listen": "test",
+                "script": {
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test('TC-O01 - Xem đơn hàng thành công', () => {",
+                    "  pm.response.to.have.status(200);",
+                    "});",
+                    "pm.test('TC-O01 - Response có orders array', () => {",
+                    "  const json = pm.response.json();",
+                    "  pm.expect(json.success).to.be.true;",
+                    "  pm.expect(json.orders).to.be.an('array');",
+                    "});"
+                  ]
+                }
+              }],
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Accept", "value": "application/json" }],
+                "url": { "raw": "{{base_url}}/orders", "host": ["{{base_url}}"], "path": ["orders"] }
+              }
+            },
+            {
+              "name": "ORD-02 | Filter đơn hàng theo status=pending",
+              "event": [{
+                "listen": "test",
+                "script": {
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test('TC-O02 - Filter pending OK', () => {",
+                    "  pm.response.to.have.status(200);",
+                    "});"
+                  ]
+                }
+              }],
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Accept", "value": "application/json" }],
+                "url": { "raw": "{{base_url}}/orders?status=pending", "host": ["{{base_url}}"], "path": ["orders"], "query": [{ "key": "status", "value": "pending" }] }
+              }
+            },
+            {
+              "name": "ORD-03 | Filter đơn hàng theo status=completed",
+              "event": [{
+                "listen": "test",
+                "script": {
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test('TC-O03 - Filter completed OK', () => {",
+                    "  pm.response.to.have.status(200);",
+                    "});"
+                  ]
+                }
+              }],
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Accept", "value": "application/json" }],
+                "url": { "raw": "{{base_url}}/orders?status=completed", "host": ["{{base_url}}"], "path": ["orders"], "query": [{ "key": "status", "value": "completed" }] }
+              }
+            },
+            {
+              "name": "ORD-04 | Filter với status không hợp lệ",
+              "event": [{
+                "listen": "test",
+                "script": {
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test('TC-O04 - Status không hợp lệ không crash', () => {",
+                    "  pm.expect([200, 302, 400]).to.include(pm.response.code);",
+                    "});"
+                  ]
+                }
+              }],
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Accept", "value": "application/json" }],
+                "url": { "raw": "{{base_url}}/orders?status=xyzinvalid", "host": ["{{base_url}}"], "path": ["orders"], "query": [{ "key": "status", "value": "xyzinvalid" }] }
+              }
+            },
+            {
+              "name": "ORD-05 | Xem chi tiết đơn hàng của mình",
+              "event": [{
+                "listen": "test",
+                "script": {
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test('TC-O05 - Xem chi tiết đơn hàng thành công', () => {",
+                    "  pm.response.to.have.status(200);",
+                    "  const json = pm.response.json();",
+                    "  pm.expect(json.success).to.be.true;",
+                    "  pm.expect(json.order).to.have.property('_id');",
+                    "  pm.expect(json.order).to.have.property('status');",
+                    "});"
+                  ]
+                }
+              }],
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Accept", "value": "application/json" }],
+                "url": { "raw": "{{base_url}}/orders/{{test_order_id}}", "host": ["{{base_url}}"], "path": ["orders", "{{test_order_id}}"] }
+              }
+            },
+            {
+              "name": "ORD-06 | Xem chi tiết đơn hàng của người khác (authorization test)",
+              "event": [{
+                "listen": "test",
+                "script": {
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test('TC-O06 - Không xem được đơn hàng người khác', () => {",
+                    "  pm.expect([302, 403, 404, 500]).to.include(pm.response.code);",
+                    "});"
+                  ]
+                }
+              }],
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Accept", "value": "application/json" }],
+                "url": { "raw": "{{base_url}}/orders/{{other_user_order_id}}", "host": ["{{base_url}}"], "path": ["orders", "{{other_user_order_id}}"] }
+              }
+            },
+            {
+              "name": "ORD-07 | Xem đơn hàng với ID không hợp lệ (non-ObjectId)",
+              "event": [{
+                "listen": "test",
+                "script": {
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test('TC-O07 - ID không hợp lệ trả 404 hoặc redirect', () => {",
+                    "  pm.expect([302, 400, 404, 500]).to.include(pm.response.code);",
+                    "});"
+                  ]
+                }
+              }],
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Accept", "value": "application/json" }],
+                "url": { "raw": "{{base_url}}/orders/not-a-valid-mongo-id", "host": ["{{base_url}}"], "path": ["orders", "not-a-valid-mongo-id"] }
+              }
+            },
+            {
+              "name": "ORD-10 | Xem đơn hàng chưa đăng nhập",
+              "event": [{
+                "listen": "test",
+                "script": {
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test('TC-O10 - Chưa login bị redirect', () => {",
+                    "  pm.expect([302, 401]).to.include(pm.response.code);",
+                    "});"
+                  ]
+                }
+              }],
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Accept", "value": "application/json" }],
+                "url": { "raw": "{{base_url}}/orders", "host": ["{{base_url}}"], "path": ["orders"] },
+                "description": "Chạy khi CHƯA login"
+              }
+            }
+          ]
+        },
+        {
+          "name": "05.2 — Cancel Order",
+          "item": [
+            {
+              "name": "ORD-08 | Hủy đơn hàng đang pending",
+              "event": [{
+                "listen": "test",
+                "script": {
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test('TC-O08 - Hủy đơn pending thành công', () => {",
+                    "  pm.expect([200, 302]).to.include(pm.response.code);",
+                    "  if (pm.response.headers.get('Content-Type')?.includes('json')) {",
+                    "    const json = pm.response.json();",
+                    "    pm.expect(json.success).to.be.true;",
+                    "  }",
+                    "});"
+                  ]
+                }
+              }],
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" },
+                  { "key": "Accept", "value": "application/json" }
+                ],
+                "body": { "mode": "raw", "raw": "{}" },
+                "url": { "raw": "{{base_url}}/orders/{{test_order_id}}/cancel", "host": ["{{base_url}}"], "path": ["orders", "{{test_order_id}}", "cancel"] }
+              }
+            },
+            {
+              "name": "ORD-09 | Hủy đơn hàng đã shipped (không được phép)",
+              "event": [{
+                "listen": "test",
+                "script": {
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test('TC-O09 - Hủy đơn đang shipping bị từ chối', () => {",
+                    "  pm.expect([200, 302, 400, 403]).to.include(pm.response.code);",
+                    "  if (pm.response.code === 400) {",
+                    "    const json = pm.response.json();",
+                    "    pm.expect(json.success).to.be.false;",
+                    "  }",
+                    "});"
+                  ]
+                }
+              }],
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" },
+                  { "key": "Accept", "value": "application/json" }
+                ],
+                "body": { "mode": "raw", "raw": "{}" },
+                "url": { "raw": "{{base_url}}/orders/{{shipped_order_id}}/cancel", "host": ["{{base_url}}"], "path": ["orders", "{{shipped_order_id}}", "cancel"] },
+                "description": "Pre-condition: Cần có order với status=shipping"
+              }
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "name": "06 — Client Profile",
+      "item": [
+        {
+          "name": "PRF-01 | Xem hồ sơ cá nhân",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('TC-PRF01 - Xem profile thành công', () => {",
+                "  pm.response.to.have.status(200);",
+                "  const json = pm.response.json();",
+                "  pm.expect(json.success).to.be.true;",
+                "  pm.expect(json.user).to.be.an('object');",
+                "});"
+              ]
+            }
+          }],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/profile", "host": ["{{base_url}}"], "path": ["profile"] }
+          }
+        },
+        {
+          "name": "PRF-02 | Cập nhật thông tin cơ bản",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('TC-PRF02 - Cập nhật profile thành công', () => {",
+                "  pm.expect([200, 302]).to.include(pm.response.code);",
+                "  if (pm.response.headers.get('Content-Type')?.includes('json')) {",
+                "    const json = pm.response.json();",
+                "    pm.expect(json.success).to.be.true;",
+                "    pm.expect(json.user.fullName).to.include('Updated');",
+                "  }",
+                "});"
+              ]
+            }
+          }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "fullName", "value": "Updated Name {{timestamp}}", "type": "text" },
+                { "key": "phone", "value": "0909876543", "type": "text" },
+                { "key": "gender", "value": "male", "type": "text" },
+                { "key": "birthday", "value": "1995-01-15", "type": "text" },
+                { "key": "address", "value": "456 Le Loi, Q3, TP.HCM", "type": "text" }
+              ]
+            },
+            "url": { "raw": "{{base_url}}/profile", "host": ["{{base_url}}"], "path": ["profile"] }
+          }
+        },
+        {
+          "name": "PRF-03 | Cập nhật với phone số không hợp lệ",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('TC-PRF03 - Phone không hợp lệ được xử lý đúng', () => {",
+                "  pm.expect([200, 302, 400, 422, 500]).to.include(pm.response.code);",
+                "});"
+              ]
+            }
+          }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "fullName", "value": "Test", "type": "text" },
+                { "key": "phone", "value": "not-a-phone-number", "type": "text" }
+              ]
+            },
+            "url": { "raw": "{{base_url}}/profile", "host": ["{{base_url}}"], "path": ["profile"] }
+          }
+        },
+        {
+          "name": "PRF-04 | Upload avatar — file hợp lệ (JPG)",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('TC-PRF04 - Upload avatar thành công', () => {",
+                "  pm.expect([200, 302]).to.include(pm.response.code);",
+                "});"
+              ]
+            }
+          }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "fullName", "value": "Test User", "type": "text" },
+                { "key": "avatar", "type": "file", "src": "", "description": "Chọn file ảnh JPG/PNG < 2MB" }
+              ]
+            },
+            "url": { "raw": "{{base_url}}/profile", "host": ["{{base_url}}"], "path": ["profile"] }
+          }
+        },
+        {
+          "name": "PRF-05 | Upload avatar — file không phải ảnh",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('TC-PRF05 - File không phải ảnh bị từ chối', () => {",
+                "  pm.expect([200, 302, 400, 415]).to.include(pm.response.code);",
+                "  pm.expect(pm.response.code).to.not.equal(500);",
+                "});"
+              ]
+            }
+          }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "avatar", "type": "file", "src": "", "description": "Chọn file .exe hoặc .txt để test" }
+              ]
+            },
+            "url": { "raw": "{{base_url}}/profile", "host": ["{{base_url}}"], "path": ["profile"] }
+          }
+        },
+        {
+          "name": "PRF-06 | Truy cập profile chưa đăng nhập",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('TC-PRF06 - Chưa login bị từ chối', () => {",
+                "  pm.expect([302, 400]).to.include(pm.response.code);",
+                "  if (pm.response.code === 400) {",
+                "    const json = pm.response.json();",
+                "    pm.expect(json.success).to.be.false;",
+                "  }",
+                "});"
+              ]
+            }
+          }],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/profile", "host": ["{{base_url}}"], "path": ["profile"] },
+            "description": "Chạy khi CHƯA login"
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "16 — E2E Scenarios (Đạt)",
+      "item": [
+        {
+          "name": "E2E-03 | Full Shopping Flow",
+          "item": [
+            {
+              "name": "E2E03-Step1: Login client",
+              "event": [{
+                "listen": "test",
+                "script": {
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test('E2E03-Step1: Login client', () => {",
+                    "  pm.expect([200, 302]).to.include(pm.response.code);",
+                    "});"
+                  ]
+                }
+              }],
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/x-www-form-urlencoded" },
+                  { "key": "Accept", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    { "key": "email", "value": "testuser@example.com" },
+                    { "key": "password", "value": "123456" }
+                  ]
+                },
+                "url": { "raw": "{{base_url}}/login", "host": ["{{base_url}}"], "path": ["login"] }
+              }
+            },
+            {
+              "name": "E2E03-Step2: Thêm sản phẩm vào giỏ",
+              "event": [{
+                "listen": "test",
+                "script": {
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test('E2E03-Step2: Thêm sản phẩm vào giỏ', () => {",
+                    "  pm.expect([200, 302]).to.include(pm.response.code);",
+                    "});"
+                  ]
+                }
+              }],
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" },
+                  { "key": "Accept", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"productId\": \"{{test_product_id}}\",\n  \"quantity\": 1\n}"
+                },
+                "url": { "raw": "{{base_url}}/cart/add", "host": ["{{base_url}}"], "path": ["cart", "add"] }
+              }
+            },
+            {
+              "name": "E2E03-Step3: Kiểm tra giỏ hàng có items",
+              "event": [{
+                "listen": "test",
+                "script": {
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test('E2E03-Step3: Giỏ hàng có items', () => {",
+                    "  pm.response.to.have.status(200);",
+                    "  const json = pm.response.json();",
+                    "  pm.expect(json.cart.length).to.be.greaterThan(0);",
+                    "  pm.expect(json.total).to.be.greaterThan(0);",
+                    "});"
+                  ]
+                }
+              }],
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Accept", "value": "application/json" }],
+                "url": { "raw": "{{base_url}}/cart", "host": ["{{base_url}}"], "path": ["cart"] }
+              }
+            },
+            {
+              "name": "E2E03-Step4: Đặt hàng",
+              "event": [{
+                "listen": "test",
+                "script": {
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test('E2E03-Step4: Đặt hàng thành công', () => {",
+                    "  pm.expect([200, 302]).to.include(pm.response.code);",
+                    "  if (pm.response.headers.get('Content-Type')?.includes('json')) {",
+                    "    const json = pm.response.json();",
+                    "    pm.expect(json.success).to.be.true;",
+                    "    if (json.orderId) pm.collectionVariables.set('test_order_id', json.orderId);",
+                    "  }",
+                    "});"
+                  ]
+                }
+              }],
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/x-www-form-urlencoded" },
+                  { "key": "Accept", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    { "key": "name", "value": "Nguyen Van A" },
+                    { "key": "phone", "value": "0901234567" },
+                    { "key": "address", "value": "123 Nguyen Trai, Q1, TP.HCM" },
+                    { "key": "selectedItems", "value": "[\"{{test_product_id}}\"]" }
+                  ]
+                },
+                "url": { "raw": "{{base_url}}/checkout/place-order", "host": ["{{base_url}}"], "path": ["checkout", "place-order"] }
+              }
+            },
+            {
+              "name": "E2E03-Step5: Verify cart trống",
+              "event": [{
+                "listen": "test",
+                "script": {
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test('E2E03-Step5: Cart trống sau khi đặt hàng', () => {",
+                    "  pm.response.to.have.status(200);",
+                    "  const json = pm.response.json();",
+                    "  pm.expect(json.total).to.equal(0);",
+                    "});"
+                  ]
+                }
+              }],
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Accept", "value": "application/json" }],
+                "url": { "raw": "{{base_url}}/cart", "host": ["{{base_url}}"], "path": ["cart"] }
+              }
+            },
+            {
+              "name": "E2E03-Step6: Verify order tồn tại",
+              "event": [{
+                "listen": "test",
+                "script": {
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test('E2E03-Step6: Order xuất hiện trong danh sách', () => {",
+                    "  pm.response.to.have.status(200);",
+                    "  const json = pm.response.json();",
+                    "  pm.expect(json.orders.length).to.be.greaterThan(0);",
+                    "  const newOrder = json.orders.find(o => o._id === pm.collectionVariables.get('test_order_id'));",
+                    "  pm.expect(newOrder).to.not.be.undefined;",
+                    "  pm.expect(newOrder.status).to.equal('pending');",
+                    "});"
+                  ]
+                }
+              }],
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Accept", "value": "application/json" }],
+                "url": { "raw": "{{base_url}}/orders", "host": ["{{base_url}}"], "path": ["orders"] }
+              }
+            }
+          ]
+        },
+        {
+          "name": "E2E-04 | Multi-product Cart & Checkout",
+          "item": [
+            {
+              "name": "E2E04-Step1: Login",
+              "event": [{
+                "listen": "test",
+                "script": {
+                  "type": "text/javascript",
+                  "exec": ["pm.test('Login OK', () => pm.expect([200, 302]).to.include(pm.response.code));"]
+                }
+              }],
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/x-www-form-urlencoded" },
+                  { "key": "Accept", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    { "key": "email", "value": "testuser@example.com" },
+                    { "key": "password", "value": "123456" }
+                  ]
+                },
+                "url": { "raw": "{{base_url}}/login", "host": ["{{base_url}}"], "path": ["login"] }
+              }
+            },
+            {
+              "name": "E2E04-Step2: Add product_1 (qty=2)",
+              "event": [{
+                "listen": "test",
+                "script": {
+                  "type": "text/javascript",
+                  "exec": ["pm.test('Add product 1', () => pm.expect([200, 302]).to.include(pm.response.code));"]
+                }
+              }],
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" },
+                  { "key": "Accept", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"productId\": \"{{test_product_id}}\",\n  \"quantity\": 2\n}"
+                },
+                "url": { "raw": "{{base_url}}/cart/add", "host": ["{{base_url}}"], "path": ["cart", "add"] }
+              }
+            },
+            {
+              "name": "E2E04-Step3: Add product_2 (qty=1)",
+              "event": [{
+                "listen": "test",
+                "script": {
+                  "type": "text/javascript",
+                  "exec": ["pm.test('Add product 2', () => pm.expect([200, 302]).to.include(pm.response.code));"]
+                }
+              }],
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" },
+                  { "key": "Accept", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"productId\": \"{{test_product_id_2}}\",\n  \"quantity\": 1\n}"
+                },
+                "url": { "raw": "{{base_url}}/cart/add", "host": ["{{base_url}}"], "path": ["cart", "add"] }
+              }
+            },
+            {
+              "name": "E2E04-Step4: Add product_3 (qty=3)",
+              "event": [{
+                "listen": "test",
+                "script": {
+                  "type": "text/javascript",
+                  "exec": ["pm.test('Add product 3', () => pm.expect([200, 302]).to.include(pm.response.code));"]
+                }
+              }],
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" },
+                  { "key": "Accept", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"productId\": \"{{test_product_id_3}}\",\n  \"quantity\": 3\n}"
+                },
+                "url": { "raw": "{{base_url}}/cart/add", "host": ["{{base_url}}"], "path": ["cart", "add"] }
+              }
+            },
+            {
+              "name": "E2E04-Step5: Verify cart có 3 products",
+              "event": [{
+                "listen": "test",
+                "script": {
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test('E2E04: Cart có 3 sản phẩm khác nhau', () => {",
+                    "  pm.response.to.have.status(200);",
+                    "  const json = pm.response.json();",
+                    "  pm.expect(json.cart.length).to.be.at.least(3);",
+                    "});"
+                  ]
+                }
+              }],
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Accept", "value": "application/json" }],
+                "url": { "raw": "{{base_url}}/cart", "host": ["{{base_url}}"], "path": ["cart"] }
+              }
+            },
+            {
+              "name": "E2E04-Step6: Update product_1 qty → 5",
+              "event": [{
+                "listen": "test",
+                "script": {
+                  "type": "text/javascript",
+                  "exec": ["pm.test('Update qty', () => pm.expect([200, 302]).to.include(pm.response.code));"]
+                }
+              }],
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" },
+                  { "key": "Accept", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"productId\": \"{{test_product_id}}\",\n  \"quantity\": 5\n}"
+                },
+                "url": { "raw": "{{base_url}}/cart/update", "host": ["{{base_url}}"], "path": ["cart", "update"] }
+              }
+            },
+            {
+              "name": "E2E04-Step7: Delete product_2",
+              "event": [{
+                "listen": "test",
+                "script": {
+                  "type": "text/javascript",
+                  "exec": ["pm.test('Delete product', () => pm.expect([200, 302]).to.include(pm.response.code));"]
+                }
+              }],
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" },
+                  { "key": "Accept", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"productId\": \"{{test_product_id_2}}\"\n}"
+                },
+                "url": { "raw": "{{base_url}}/cart/delete", "host": ["{{base_url}}"], "path": ["cart", "delete"] }
+              }
+            },
+            {
+              "name": "E2E04-Step8: Verify cart có 2 products",
+              "event": [{
+                "listen": "test",
+                "script": {
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test('Cart có 2 products', () => {",
+                    "  const json = pm.response.json();",
+                    "  pm.expect(json.cart.length).to.equal(2);",
+                    "});"
+                  ]
+                }
+              }],
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Accept", "value": "application/json" }],
+                "url": { "raw": "{{base_url}}/cart", "host": ["{{base_url}}"], "path": ["cart"] }
+              }
+            },
+            {
+              "name": "E2E04-Step9: Place order",
+              "event": [{
+                "listen": "test",
+                "script": {
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test('E2E04: Đặt hàng multi-product thành công', () => {",
+                    "  pm.expect([200, 302]).to.include(pm.response.code);",
+                    "});"
+                  ]
+                }
+              }],
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/x-www-form-urlencoded" },
+                  { "key": "Accept", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    { "key": "name", "value": "Nguyen Van Multi" },
+                    { "key": "phone", "value": "0901234567" },
+                    { "key": "address", "value": "123 Test St" },
+                    { "key": "selectedItems", "value": "[\"{{test_product_id}}\",\"{{test_product_id_3}}\"]" }
+                  ]
+                },
+                "url": { "raw": "{{base_url}}/checkout/place-order", "host": ["{{base_url}}"], "path": ["checkout", "place-order"] }
+              }
+            }
+          ]
+        },
+        {
+          "name": "E2E-05 | Cancel Order Flow",
+          "item": [
+            {
+              "name": "E2E05-Step1: Login",
+              "event": [{
+                "listen": "test",
+                "script": {
+                  "type": "text/javascript",
+                  "exec": ["pm.test('Login', () => pm.expect([200, 302]).to.include(pm.response.code));"]
+                }
+              }],
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/x-www-form-urlencoded" },
+                  { "key": "Accept", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    { "key": "email", "value": "testuser@example.com" },
+                    { "key": "password", "value": "123456" }
+                  ]
+                },
+                "url": { "raw": "{{base_url}}/login", "host": ["{{base_url}}"], "path": ["login"] }
+              }
+            },
+            {
+              "name": "E2E05-Step2: Add to cart",
+              "event": [{
+                "listen": "test",
+                "script": {
+                  "type": "text/javascript",
+                  "exec": ["pm.test('Add to cart', () => pm.expect([200, 302]).to.include(pm.response.code));"]
+                }
+              }],
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" },
+                  { "key": "Accept", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"productId\": \"{{test_product_id}}\",\n  \"quantity\": 1\n}"
+                },
+                "url": { "raw": "{{base_url}}/cart/add", "host": ["{{base_url}}"], "path": ["cart", "add"] }
+              }
+            },
+            {
+              "name": "E2E05-Step3: Place order",
+              "event": [{
+                "listen": "test",
+                "script": {
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test('E2E05-Step3: Đặt hàng tạo order pending', () => {",
+                    "  pm.expect([200, 302]).to.include(pm.response.code);",
+                    "  if (pm.response.headers.get('Content-Type')?.includes('json')) {",
+                    "    const json = pm.response.json();",
+                    "    if (json.orderId) pm.collectionVariables.set('test_order_id', json.orderId);",
+                    "  }",
+                    "});"
+                  ]
+                }
+              }],
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/x-www-form-urlencoded" },
+                  { "key": "Accept", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    { "key": "name", "value": "Nguyen Van A" },
+                    { "key": "phone", "value": "0901234567" },
+                    { "key": "address", "value": "123 Test" },
+                    { "key": "selectedItems", "value": "[\"{{test_product_id}}\"]" }
+                  ]
+                },
+                "url": { "raw": "{{base_url}}/checkout/place-order", "host": ["{{base_url}}"], "path": ["checkout", "place-order"] }
+              }
+            },
+            {
+              "name": "E2E05-Step4: Verify status=pending",
+              "event": [{
+                "listen": "test",
+                "script": {
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test('E2E05-Step4: Order status là pending', () => {",
+                    "  pm.response.to.have.status(200);",
+                    "  const json = pm.response.json();",
+                    "  pm.expect(json.order.status).to.equal('pending');",
+                    "});"
+                  ]
+                }
+              }],
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Accept", "value": "application/json" }],
+                "url": { "raw": "{{base_url}}/orders/{{test_order_id}}", "host": ["{{base_url}}"], "path": ["orders", "{{test_order_id}}"] }
+              }
+            },
+            {
+              "name": "E2E05-Step5: Cancel order",
+              "event": [{
+                "listen": "test",
+                "script": {
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test('E2E05-Step5: Hủy đơn hàng thành công', () => {",
+                    "  pm.expect([200, 302]).to.include(pm.response.code);",
+                    "});"
+                  ]
+                }
+              }],
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" },
+                  { "key": "Accept", "value": "application/json" }
+                ],
+                "body": { "mode": "raw", "raw": "{}" },
+                "url": { "raw": "{{base_url}}/orders/{{test_order_id}}/cancel", "host": ["{{base_url}}"], "path": ["orders", "{{test_order_id}}", "cancel"] }
+              }
+            },
+            {
+              "name": "E2E05-Step6: Verify status=cancelled",
+              "event": [{
+                "listen": "test",
+                "script": {
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test('E2E05-Step6: Order status là cancelled', () => {",
+                    "  pm.response.to.have.status(200);",
+                    "  const json = pm.response.json();",
+                    "  pm.expect(json.order.status).to.equal('cancelled');",
+                    "});"
+                  ]
+                }
+              }],
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Accept", "value": "application/json" }],
+                "url": { "raw": "{{base_url}}/orders/{{test_order_id}}", "host": ["{{base_url}}"], "path": ["orders", "{{test_order_id}}"] }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

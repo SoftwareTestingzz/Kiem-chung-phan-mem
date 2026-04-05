@@ -133,14 +133,26 @@ module.exports.updateQuantity = async (req, productId, qty) => {
    XÓA 1 SẢN PHẨM
 ====================================================== */
 module.exports.removeItem = async (req, productId) => {
+    if (!req.session.user) {
+        throw new Error("Bạn phải đăng nhập!");
+    }
+
     const userId = req.session.user._id;
 
     let cart = await Cart.findOne({ userId });
-    if (!cart) return true;
+    if (!cart) {
+        throw new Error("Giỏ hàng trống!");
+    }
 
-    cart.items = cart.items.filter(
-        i => i.productId.toString() !== productId
-    );
+    // Tìm index của sản phẩm cần xóa
+    const itemIndex = cart.items.findIndex(i => i.productId.toString() === productId);
+    
+    if (itemIndex === -1) {
+        throw new Error("Sản phẩm không có trong giỏ hàng");
+    }
+
+    // Xóa đúng 1 sản phẩm khỏi mảng items
+    cart.items.splice(itemIndex, 1);
 
     await cart.save();
     return true;
