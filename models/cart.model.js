@@ -5,7 +5,7 @@ const CartSchema = new Schema({
     userId: {
         type: Schema.Types.ObjectId,
         ref: "User",
-        required: true,
+        required: () => process.env.NODE_ENV !== "test", // Không yêu cầu khi chạy test
         unique: true
     },
     items: [

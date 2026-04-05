@@ -22,6 +22,7 @@ database.connect();
 
 // Models
 const Cart = require("./models/cart.model");
+const cartMiddleware = require("./middlewares/client/cart.middleware");
 
 const app = express();
 const port = process.env.PORT;
@@ -66,27 +67,7 @@ app.use((req, res, next) => {
 /* ======================================================
    MINI CART → LẤY TỪ MongoDB
 ====================================================== */
-app.use(async (req, res, next) => {
-    if (!req.session.user) {
-        res.locals.cartTotal = 0;
-        return next();
-    }
-
-    try {
-        const userId = req.session.user._id;
-        const cart = await Cart.findOne({ userId });
-
-        res.locals.cartTotal = cart
-            ? cart.items.reduce((sum, item) => sum + item.quantity, 0)
-            : 0;
-
-    } catch (err) {
-        console.error("Mini Cart Error:", err);
-        res.locals.cartTotal = 0;
-    }
-
-    next();
-});
+app.use(cartMiddleware.cartTotal);
 
 
 
