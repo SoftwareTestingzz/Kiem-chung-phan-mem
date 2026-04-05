@@ -1,0 +1,570 @@
+[
+    {
+        "BẢNG 2 - TEST CASE BVA ": "BVA-ACAT-12",
+        "Column2": "POST \/admin\/categories\/create | name rỗng",
+        "Column3": "Dữ liệu test: name=\"\"",
+        "Column4": "lỗi validate",
+        "Column5": "Admin đã đăng nhập và có quyền quản lý danh mục; đã có dữ liệu danh mục mẫu.",
+        "Column8": "Quyến"
+    },
+    {
+        "BẢNG 2 - TEST CASE BVA ": "BVA-ACAT-13",
+        "Column2": "POST \/admin\/categories\/create | name 1 ký tự",
+        "Column3": "Dữ liệu test: name=\"a\"",
+        "Column4": "success",
+        "Column5": "Admin đã đăng nhập và có quyền quản lý danh mục; đã có dữ liệu danh mục mẫu.",
+        "Column8": "Quyến"
+    },
+    {
+        "BẢNG 2 - TEST CASE BVA ": "BVA-ACAT-14",
+        "Column2": "POST \/admin\/categories\/create | name 255 ký tự",
+        "Column3": "Dữ liệu test: name=255 ký tự",
+        "Column4": "success",
+        "Column5": "Admin đã đăng nhập và có quyền quản lý danh mục; đã có dữ liệu danh mục mẫu.",
+        "Column8": "Quyến"
+    },
+    {
+        "BẢNG 2 - TEST CASE BVA ": "BVA-ACAT-15",
+        "Column2": "POST \/admin\/categories\/create | name 256 ký tự",
+        "Column3": "Dữ liệu test: name=256 ký tự",
+        "Column4": "lỗi",
+        "Column5": "Admin đã đăng nhập và có quyền quản lý danh mục; đã có dữ liệu danh mục mẫu.",
+        "Column8": "Quyến"
+    },
+    {
+        "BẢNG 2 - TEST CASE BVA ": "BVA-ACAT-16",
+        "Column2": "POST \/admin\/categories\/create | không gửi name",
+        "Column3": "Dữ liệu test: thiếu field name",
+        "Column4": "lỗi",
+        "Column5": "Admin đã đăng nhập và có quyền quản lý danh mục; đã có dữ liệu danh mục mẫu.",
+        "Column8": "Quyến"
+    },
+    {
+        "BẢNG 2 - TEST CASE BVA ": "BVA-ACAT-17",
+        "Column2": "POST \/admin\/categories\/create | thumbnail không upload",
+        "Column3": "Dữ liệu test: không upload file",
+        "Column4": "success (nếu optional)",
+        "Column5": "Admin đã đăng nhập và có quyền quản lý danh mục; đã có dữ liệu danh mục mẫu.",
+        "Column8": "Quyến"
+    },
+    {
+        "BẢNG 2 - TEST CASE BVA ": "BVA-ACAT-18",
+        "Column2": "POST \/admin\/categories\/create | thumbnail file ảnh hợp lệ",
+        "Column3": "Dữ liệu test: file ảnh hợp lệ",
+        "Column4": "success",
+        "Column5": "Admin đã đăng nhập và có quyền quản lý danh mục; đã có dữ liệu danh mục mẫu.",
+        "Column8": "Quyến"
+    },
+    {
+        "BẢNG 2 - TEST CASE BVA ": "BVA-ACAT-19",
+        "Column2": "POST \/admin\/categories\/create | thumbnail file sai định dạng",
+        "Column3": "Dữ liệu test: file .exe",
+        "Column4": "lỗi",
+        "Column5": "Admin đã đăng nhập và có quyền quản lý danh mục; đã có dữ liệu danh mục mẫu.",
+        "Column8": "Quyến"
+    },
+    {
+        "BẢNG 2 - TEST CASE BVA ": "BVA-ACAT-20",
+        "Column2": "POST \/admin\/categories\/create | thumbnail file vượt max size",
+        "Column3": "Dữ liệu test: file > max size",
+        "Column4": "lỗi",
+        "Column5": "Admin đã đăng nhập và có quyền quản lý danh mục; đã có dữ liệu danh mục mẫu.",
+        "Column8": "Quyến"
+    },
+    {
+        "BẢNG 2 - TEST CASE BVA ": "BVA-ACAT-21",
+        "Column2": "PATCH \/admin\/categories\/:id | id hợp lệ + data hợp lệ",
+        "Column3": "Dữ liệu test: id hợp lệ, payload hợp lệ",
+        "Column4": "success",
+        "Column5": "Admin đã đăng nhập và có quyền quản lý danh mục; đã có dữ liệu danh mục mẫu.",
+        "Column8": "Quyến"
+    },
+    {
+        "BẢNG 2 - TEST CASE BVA ": "BVA-ACAT-22",
+        "Column2": "PATCH \/admin\/categories\/:id | id sai format",
+        "Column3": "Dữ liệu test: id sai format",
+        "Column4": "lỗi",
+        "Column5": "Admin đã đăng nhập và có quyền quản lý danh mục; đã có dữ liệu danh mục mẫu.",
+        "Column8": "Quyến"
+    },
+    {
+        "BẢNG 2 - TEST CASE BVA ": "BVA-ACAT-23",
+        "Column2": "PATCH \/admin\/categories\/:id | id không tồn tại",
+        "Column3": "Dữ liệu test: id không tồn tại",
+        "Column4": "lỗi",
+        "Column5": "Admin đã đăng nhập và có quyền quản lý danh mục; đã có dữ liệu danh mục mẫu.",
+        "Column8": "Quyến"
+    },
+    {
+        "BẢNG 2 - TEST CASE BVA ": "BVA-ACAT-24",
+        "Column2": "PATCH \/admin\/categories\/:id | name rỗng",
+        "Column3": "Dữ liệu test: name=\"\"",
+        "Column4": "lỗi",
+        "Column5": "Admin đã đăng nhập và có quyền quản lý danh mục; đã có dữ liệu danh mục mẫu.",
+        "Column8": "Quyến"
+    },
+    {
+        "BẢNG 2 - TEST CASE BVA ": "BVA-ACAT-25",
+        "Column2": "PATCH \/admin\/categories\/:id | name > 255 ký tự",
+        "Column3": "Dữ liệu test: name=256 ký tự",
+        "Column4": "lỗi",
+        "Column5": "Admin đã đăng nhập và có quyền quản lý danh mục; đã có dữ liệu danh mục mẫu.",
+        "Column8": "Quyến"
+    },
+    {
+        "BẢNG 2 - TEST CASE BVA ": "BVA-ACAT-26",
+        "Column2": "PATCH \/admin\/categories\/change-status\/:status\/:id | status=active",
+        "Column3": "Dữ liệu test: status=active",
+        "Column4": "success",
+        "Column5": "Admin đã đăng nhập và có quyền quản lý danh mục; đã có dữ liệu danh mục mẫu.",
+        "Column8": "Quyến"
+    },
+    {
+        "BẢNG 2 - TEST CASE BVA ": "BVA-ACAT-27",
+        "Column2": "PATCH \/admin\/categories\/change-status\/:status\/:id | status=inactive",
+        "Column3": "Dữ liệu test: status=inactive",
+        "Column4": "success",
+        "Column5": "Admin đã đăng nhập và có quyền quản lý danh mục; đã có dữ liệu danh mục mẫu.",
+        "Column8": "Quyến"
+    },
+    {
+        "BẢNG 2 - TEST CASE BVA ": "BVA-ACAT-28",
+        "Column2": "PATCH \/admin\/categories\/change-status\/:status\/:id | status=abc",
+        "Column3": "Dữ liệu test: status=\"abc\"",
+        "Column4": "lỗi",
+        "Column5": "Admin đã đăng nhập và có quyền quản lý danh mục; đã có dữ liệu danh mục mẫu.",
+        "Column8": "Quyến"
+    },
+    {
+        "BẢNG 2 - TEST CASE BVA ": "BVA-ACAT-29",
+        "Column2": "PATCH \/admin\/categories\/change-status\/:status\/:id | id sai format",
+        "Column3": "Dữ liệu test: id sai format",
+        "Column4": "lỗi",
+        "Column5": "Admin đã đăng nhập và có quyền quản lý danh mục; đã có dữ liệu danh mục mẫu.",
+        "Column8": "Quyến"
+    },
+    {
+        "BẢNG 2 - TEST CASE BVA ": "BVA-ACAT-30",
+        "Column2": "PATCH \/admin\/categories\/change-status\/:status\/:id | id không tồn tại",
+        "Column3": "Dữ liệu test: id không tồn tại",
+        "Column4": "lỗi",
+        "Column5": "Admin đã đăng nhập và có quyền quản lý danh mục; đã có dữ liệu danh mục mẫu.",
+        "Column8": "Quyến"
+    },
+    {
+        "BẢNG 2 - TEST CASE BVA ": "BVA-ACAT-31",
+        "Column2": "PATCH \/admin\/categories\/change-multi | list rỗng",
+        "Column3": "Dữ liệu test: []",
+        "Column4": "lỗi",
+        "Column5": "Admin đã đăng nhập và có quyền quản lý danh mục; đã có dữ liệu danh mục mẫu.",
+        "Column8": "Quyến"
+    },
+    {
+        "BẢNG 2 - TEST CASE BVA ": "BVA-ACAT-32",
+        "Column2": "PATCH \/admin\/categories\/change-multi | 1 id hợp lệ",
+        "Column3": "Dữ liệu test: [1 id hợp lệ]",
+        "Column4": "success",
+        "Column5": "Admin đã đăng nhập và có quyền quản lý danh mục; đã có dữ liệu danh mục mẫu.",
+        "Column8": "Quyến"
+    },
+    {
+        "BẢNG 2 - TEST CASE BVA ": "BVA-ACAT-33",
+        "Column2": "PATCH \/admin\/categories\/change-multi | nhiều id hợp lệ",
+        "Column3": "Dữ liệu test: [nhiều id hợp lệ]",
+        "Column4": "success",
+        "Column5": "Admin đã đăng nhập và có quyền quản lý danh mục; đã có dữ liệu danh mục mẫu.",
+        "Column8": "Quyến"
+    },
+    {
+        "BẢNG 2 - TEST CASE BVA ": "BVA-ACAT-34",
+        "Column2": "PATCH \/admin\/categories\/change-multi | list có id sai",
+        "Column3": "Dữ liệu test: list có id sai",
+        "Column4": "lỗi",
+        "Column5": "Admin đã đăng nhập và có quyền quản lý danh mục; đã có dữ liệu danh mục mẫu.",
+        "Column8": "Quyến"
+    },
+    {
+        "BẢNG 2 - TEST CASE BVA ": "BVA-ACAT-35",
+        "Column2": "PATCH \/admin\/categories\/change-multi | list có id không tồn tại",
+        "Column3": "Dữ liệu test: list có id không tồn tại",
+        "Column4": "lỗi",
+        "Column5": "Admin đã đăng nhập và có quyền quản lý danh mục; đã có dữ liệu danh mục mẫu.",
+        "Column8": "Quyến"
+    },
+    {
+        "BẢNG 2 - TEST CASE BVA ": "BVA-ACAT-36",
+        "Column2": "DELETE \/admin\/categories\/:id | id hợp lệ",
+        "Column3": "Dữ liệu test: id hợp lệ",
+        "Column4": "success",
+        "Column5": "Admin đã đăng nhập và có quyền quản lý danh mục; đã có dữ liệu danh mục mẫu.",
+        "Column8": "Quyến"
+    },
+    {
+        "BẢNG 2 - TEST CASE BVA ": "BVA-ACAT-37",
+        "Column2": "DELETE \/admin\/categories\/:id | id sai format",
+        "Column3": "Dữ liệu test: id sai format",
+        "Column4": "lỗi",
+        "Column5": "Admin đã đăng nhập và có quyền quản lý danh mục; đã có dữ liệu danh mục mẫu.",
+        "Column8": "Quyến"
+    },
+    {
+        "BẢNG 2 - TEST CASE BVA ": "BVA-ACAT-38",
+        "Column2": "DELETE \/admin\/categories\/:id | id không tồn tại",
+        "Column3": "Dữ liệu test: id không tồn tại",
+        "Column4": "lỗi",
+        "Column5": "Admin đã đăng nhập và có quyền quản lý danh mục; đã có dữ liệu danh mục mẫu.",
+        "Column8": "Quyến"
+    },
+    {
+        "BẢNG 2 - TEST CASE BVA ": "BVA-APROD-11",
+        "Column2": "POST \/admin\/products\/create | name rỗng",
+        "Column3": "Dữ liệu test: name=\"\"",
+        "Column4": "lỗi",
+        "Column5": "Admin đã đăng nhập và có quyền quản lý sản phẩm; đã có category và dữ liệu mẫu.",
+        "Column8": "Quyến"
+    },
+    {
+        "BẢNG 2 - TEST CASE BVA ": "BVA-APROD-12",
+        "Column2": "POST \/admin\/products\/create | name 1 ký tự",
+        "Column3": "Dữ liệu test: name=\"a\"",
+        "Column4": "success",
+        "Column5": "Admin đã đăng nhập và có quyền quản lý sản phẩm; đã có category và dữ liệu mẫu.",
+        "Column8": "Quyến"
+    },
+    {
+        "BẢNG 2 - TEST CASE BVA ": "BVA-APROD-13",
+        "Column2": "POST \/admin\/products\/create | name 255 ký tự",
+        "Column3": "Dữ liệu test: name=255 ký tự",
+        "Column4": "success",
+        "Column5": "Admin đã đăng nhập và có quyền quản lý sản phẩm; đã có category và dữ liệu mẫu.",
+        "Column8": "Quyến"
+    },
+    {
+        "BẢNG 2 - TEST CASE BVA ": "BVA-APROD-14",
+        "Column2": "POST \/admin\/products\/create | name 256 ký tự",
+        "Column3": "Dữ liệu test: name=256 ký tự",
+        "Column4": "lỗi",
+        "Column5": "Admin đã đăng nhập và có quyền quản lý sản phẩm; đã có category và dữ liệu mẫu.",
+        "Column8": "Quyến"
+    },
+    {
+        "BẢNG 2 - TEST CASE BVA ": "BVA-APROD-15",
+        "Column2": "POST \/admin\/products\/create | price = -1",
+        "Column3": "Dữ liệu test: price=-1",
+        "Column4": "lỗi",
+        "Column5": "Admin đã đăng nhập và có quyền quản lý sản phẩm; đã có category và dữ liệu mẫu.",
+        "Column8": "Quyến"
+    },
+    {
+        "BẢNG 2 - TEST CASE BVA ": "BVA-APROD-16",
+        "Column2": "POST \/admin\/products\/create | price = 0",
+        "Column3": "Dữ liệu test: price=0",
+        "Column4": "success",
+        "Column5": "Admin đã đăng nhập và có quyền quản lý sản phẩm; đã có category và dữ liệu mẫu.",
+        "Column8": "Quyến"
+    },
+    {
+        "BẢNG 2 - TEST CASE BVA ": "BVA-APROD-17",
+        "Column2": "POST \/admin\/products\/create | price = 1",
+        "Column3": "Dữ liệu test: price=1",
+        "Column4": "success",
+        "Column5": "Admin đã đăng nhập và có quyền quản lý sản phẩm; đã có category và dữ liệu mẫu.",
+        "Column8": "Quyến"
+    },
+    {
+        "BẢNG 2 - TEST CASE BVA ": "BVA-APROD-18",
+        "Column2": "POST \/admin\/products\/create | price rất lớn",
+        "Column3": "Dữ liệu test: price rất lớn",
+        "Column4": "success",
+        "Column5": "Admin đã đăng nhập và có quyền quản lý sản phẩm; đã có category và dữ liệu mẫu.",
+        "Column8": "Quyến"
+    },
+    {
+        "BẢNG 2 - TEST CASE BVA ": "BVA-APROD-19",
+        "Column2": "POST \/admin\/products\/create | thumbnail không upload",
+        "Column3": "Dữ liệu test: không upload file",
+        "Column4": "success",
+        "Column5": "Admin đã đăng nhập và có quyền quản lý sản phẩm; đã có category và dữ liệu mẫu.",
+        "Column8": "Quyến"
+    },
+    {
+        "BẢNG 2 - TEST CASE BVA ": "BVA-APROD-20",
+        "Column2": "POST \/admin\/products\/create | thumbnail file hợp lệ",
+        "Column3": "Dữ liệu test: file ảnh hợp lệ",
+        "Column4": "success",
+        "Column5": "Admin đã đăng nhập và có quyền quản lý sản phẩm; đã có category và dữ liệu mẫu.",
+        "Column8": "Quyến"
+    },
+    {
+        "BẢNG 2 - TEST CASE BVA ": "BVA-APROD-21",
+        "Column2": "POST \/admin\/products\/create | thumbnail file sai định dạng",
+        "Column3": "Dữ liệu test: file sai định dạng",
+        "Column4": "lỗi",
+        "Column5": "Admin đã đăng nhập và có quyền quản lý sản phẩm; đã có category và dữ liệu mẫu.",
+        "Column8": "Quyến"
+    },
+    {
+        "BẢNG 2 - TEST CASE BVA ": "BVA-APROD-22",
+        "Column2": "POST \/admin\/products\/create | thumbnail file quá size",
+        "Column3": "Dữ liệu test: file quá size",
+        "Column4": "lỗi",
+        "Column5": "Admin đã đăng nhập và có quyền quản lý sản phẩm; đã có category và dữ liệu mẫu.",
+        "Column8": "Quyến"
+    },
+    {
+        "BẢNG 2 - TEST CASE BVA ": "BVA-APROD-23",
+        "Column2": "PATCH \/admin\/products\/:id | id hợp lệ",
+        "Column3": "Dữ liệu test: id hợp lệ, payload hợp lệ",
+        "Column4": "success",
+        "Column5": "Admin đã đăng nhập và có quyền quản lý sản phẩm; đã có category và dữ liệu mẫu.",
+        "Column8": "Quyến"
+    },
+    {
+        "BẢNG 2 - TEST CASE BVA ": "BVA-APROD-24",
+        "Column2": "PATCH \/admin\/products\/:id | id sai format",
+        "Column3": "Dữ liệu test: id sai format",
+        "Column4": "lỗi",
+        "Column5": "Admin đã đăng nhập và có quyền quản lý sản phẩm; đã có category và dữ liệu mẫu.",
+        "Column8": "Quyến"
+    },
+    {
+        "BẢNG 2 - TEST CASE BVA ": "BVA-APROD-25",
+        "Column2": "PATCH \/admin\/products\/:id | id không tồn tại",
+        "Column3": "Dữ liệu test: id không tồn tại",
+        "Column4": "lỗi",
+        "Column5": "Admin đã đăng nhập và có quyền quản lý sản phẩm; đã có category và dữ liệu mẫu.",
+        "Column8": "Quyến"
+    },
+    {
+        "BẢNG 2 - TEST CASE BVA ": "BVA-APROD-26",
+        "Column2": "PATCH \/admin\/products\/:id | name rỗng",
+        "Column3": "Dữ liệu test: name=\"\"",
+        "Column4": "lỗi",
+        "Column5": "Admin đã đăng nhập và có quyền quản lý sản phẩm; đã có category và dữ liệu mẫu.",
+        "Column8": "Quyến"
+    },
+    {
+        "BẢNG 2 - TEST CASE BVA ": "BVA-APROD-27",
+        "Column2": "PATCH \/admin\/products\/:id | price âm",
+        "Column3": "Dữ liệu test: price=-1",
+        "Column4": "lỗi",
+        "Column5": "Admin đã đăng nhập và có quyền quản lý sản phẩm; đã có category và dữ liệu mẫu.",
+        "Column8": "Quyến"
+    },
+    {
+        "BẢNG 2 - TEST CASE BVA ": "BVA-APROD-28",
+        "Column2": "PATCH \/admin\/products\/change-status\/:status\/:id | status hợp lệ",
+        "Column3": "Dữ liệu test: status hợp lệ",
+        "Column4": "success",
+        "Column5": "Admin đã đăng nhập và có quyền quản lý sản phẩm; đã có category và dữ liệu mẫu.",
+        "Column8": "Quyến"
+    },
+    {
+        "BẢNG 2 - TEST CASE BVA ": "BVA-APROD-29",
+        "Column2": "PATCH \/admin\/products\/change-status\/:status\/:id | status sai",
+        "Column3": "Dữ liệu test: status sai",
+        "Column4": "lỗi",
+        "Column5": "Admin đã đăng nhập và có quyền quản lý sản phẩm; đã có category và dữ liệu mẫu.",
+        "Column8": "Quyến"
+    },
+    {
+        "BẢNG 2 - TEST CASE BVA ": "BVA-APROD-30",
+        "Column2": "PATCH \/admin\/products\/change-status\/:status\/:id | id sai",
+        "Column3": "Dữ liệu test: id sai",
+        "Column4": "lỗi",
+        "Column5": "Admin đã đăng nhập và có quyền quản lý sản phẩm; đã có category và dữ liệu mẫu.",
+        "Column8": "Quyến"
+    },
+    {
+        "BẢNG 2 - TEST CASE BVA ": "BVA-APROD-31",
+        "Column2": "PATCH \/admin\/products\/change-multi | list rỗng",
+        "Column3": "Dữ liệu test: []",
+        "Column4": "lỗi",
+        "Column5": "Admin đã đăng nhập và có quyền quản lý sản phẩm; đã có category và dữ liệu mẫu.",
+        "Column8": "Quyến"
+    },
+    {
+        "BẢNG 2 - TEST CASE BVA ": "BVA-APROD-32",
+        "Column2": "PATCH \/admin\/products\/change-multi | list hợp lệ",
+        "Column3": "Dữ liệu test: list hợp lệ",
+        "Column4": "success",
+        "Column5": "Admin đã đăng nhập và có quyền quản lý sản phẩm; đã có category và dữ liệu mẫu.",
+        "Column8": "Quyến"
+    },
+    {
+        "BẢNG 2 - TEST CASE BVA ": "BVA-APROD-33",
+        "Column2": "PATCH \/admin\/products\/change-multi | list có id sai",
+        "Column3": "Dữ liệu test: list có id sai",
+        "Column4": "lỗi",
+        "Column5": "Admin đã đăng nhập và có quyền quản lý sản phẩm; đã có category và dữ liệu mẫu.",
+        "Column8": "Quyến"
+    },
+    {
+        "BẢNG 2 - TEST CASE BVA ": "BVA-APROD-34",
+        "Column2": "DELETE \/admin\/products\/:id | id hợp lệ",
+        "Column3": "Dữ liệu test: id hợp lệ",
+        "Column4": "success",
+        "Column5": "Admin đã đăng nhập và có quyền quản lý sản phẩm; đã có category và dữ liệu mẫu.",
+        "Column8": "Quyến"
+    },
+    {
+        "BẢNG 2 - TEST CASE BVA ": "BVA-APROD-35",
+        "Column2": "DELETE \/admin\/products\/:id | id sai",
+        "Column3": "Dữ liệu test: id sai",
+        "Column4": "lỗi",
+        "Column5": "Admin đã đăng nhập và có quyền quản lý sản phẩm; đã có category và dữ liệu mẫu.",
+        "Column8": "Quyến"
+    },
+    {
+        "BẢNG 2 - TEST CASE BVA ": "BVA-APROD-36",
+        "Column2": "DELETE \/admin\/products\/:id | id không tồn tại",
+        "Column3": "Dữ liệu test: id không tồn tại",
+        "Column4": "lỗi",
+        "Column5": "Admin đã đăng nhập và có quyền quản lý sản phẩm; đã có category và dữ liệu mẫu.",
+        "Column8": "Quyến"
+    },
+    {
+        "BẢNG 2 - TEST CASE BVA ": "BVA-APROD-37",
+        "Column2": "GET \/admin\/products\/:id | id hợp lệ",
+        "Column3": "Dữ liệu test: id hợp lệ",
+        "Column4": "success",
+        "Column5": "Admin đã đăng nhập và có quyền quản lý sản phẩm; đã có category và dữ liệu mẫu.",
+        "Column8": "Quyến"
+    },
+    {
+        "BẢNG 2 - TEST CASE BVA ": "BVA-APROD-38",
+        "Column2": "GET \/admin\/products\/:id | id sai format",
+        "Column3": "Dữ liệu test: id sai format",
+        "Column4": "lỗi",
+        "Column5": "Admin đã đăng nhập và có quyền quản lý sản phẩm; đã có category và dữ liệu mẫu.",
+        "Column8": "Quyến"
+    },
+    {
+        "BẢNG 2 - TEST CASE BVA ": "BVA-APROD-39",
+        "Column2": "GET \/admin\/products\/:id | id không tồn tại",
+        "Column3": "Dữ liệu test: id không tồn tại",
+        "Column4": "lỗi",
+        "Column5": "Admin đã đăng nhập và có quyền quản lý sản phẩm; đã có category và dữ liệu mẫu.",
+        "Column8": "Quyến"
+    },
+    {
+        "BẢNG 2 - TEST CASE BVA ": "BVA-CPROD-08",
+        "Column2": "GET \/products | không param",
+        "Column3": "Dữ liệu test: không truyền param",
+        "Column4": "success",
+        "Column5": "Đã seed dữ liệu sản phẩm active; endpoint danh sách và chi tiết sản phẩm hoạt động.",
+        "Column8": "Quyến"
+    },
+    {
+        "BẢNG 2 - TEST CASE BVA ": "BVA-CPROD-09",
+        "Column2": "GET \/products?page=0",
+        "Column3": "Dữ liệu test: page=0",
+        "Column4": "lỗi",
+        "Column5": "Đã seed dữ liệu sản phẩm active; endpoint danh sách và chi tiết sản phẩm hoạt động.",
+        "Column8": "Quyến"
+    },
+    {
+        "BẢNG 2 - TEST CASE BVA ": "BVA-CPROD-10",
+        "Column2": "GET \/products?page=1",
+        "Column3": "Dữ liệu test: page=1",
+        "Column4": "success",
+        "Column5": "Đã seed dữ liệu sản phẩm active; endpoint danh sách và chi tiết sản phẩm hoạt động.",
+        "Column8": "Quyến"
+    },
+    {
+        "BẢNG 2 - TEST CASE BVA ": "BVA-CPROD-11",
+        "Column2": "GET \/products?page rất lớn",
+        "Column3": "Dữ liệu test: page quá lớn",
+        "Column4": "empty list",
+        "Column5": "Đã seed dữ liệu sản phẩm active; endpoint danh sách và chi tiết sản phẩm hoạt động.",
+        "Column8": "Quyến"
+    },
+    {
+        "BẢNG 2 - TEST CASE BVA ": "BVA-CPROD-12",
+        "Column2": "GET \/products\/:slug | slug hợp lệ",
+        "Column3": "Dữ liệu test: slug hợp lệ",
+        "Column4": "success",
+        "Column5": "Đã seed dữ liệu sản phẩm active; endpoint danh sách và chi tiết sản phẩm hoạt động.",
+        "Column8": "Quyến"
+    },
+    {
+        "BẢNG 2 - TEST CASE BVA ": "BVA-CPROD-13",
+        "Column2": "GET \/products\/:slug | slug không tồn tại",
+        "Column3": "Dữ liệu test: slug không tồn tại",
+        "Column4": "lỗi",
+        "Column5": "Đã seed dữ liệu sản phẩm active; endpoint danh sách và chi tiết sản phẩm hoạt động.",
+        "Column8": "Quyến"
+    },
+    {
+        "BẢNG 2 - TEST CASE BVA ": "BVA-CPROD-14",
+        "Column2": "GET \/products\/:slug | slug rỗng",
+        "Column3": "Dữ liệu test: slug=\"\"",
+        "Column4": "lỗi",
+        "Column5": "Đã seed dữ liệu sản phẩm active; endpoint danh sách và chi tiết sản phẩm hoạt động.",
+        "Column8": "Quyến"
+    },
+    {
+        "BẢNG 2 - TEST CASE BVA ": "BVA-CPROD-15",
+        "Column2": "POST \/products\/:slug\/comments | chưa login",
+        "Column3": "Dữ liệu test: chưa login",
+        "Column4": "redirect login",
+        "Column5": "User chưa đăng nhập; sản phẩm active và trang chi tiết có thể truy cập.",
+        "Column8": "Quyến"
+    },
+    {
+        "BẢNG 2 - TEST CASE BVA ": "BVA-CPROD-16",
+        "Column2": "POST \/products\/:slug\/comments | đã login",
+        "Column3": "Dữ liệu test: đã login",
+        "Column4": "success",
+        "Column5": "User đã đăng nhập; sản phẩm active và trang chi tiết có thể truy cập.",
+        "Column8": "Quyến"
+    },
+    {
+        "BẢNG 2 - TEST CASE BVA ": "BVA-CPROD-17",
+        "Column2": "POST \/products\/:slug\/comments | comment rỗng",
+        "Column3": "Dữ liệu test: comment=\"\"",
+        "Column4": "lỗi",
+        "Column5": "User đã đăng nhập; sản phẩm active và trang chi tiết có thể truy cập.",
+        "Column8": "Quyến"
+    },
+    {
+        "BẢNG 2 - TEST CASE BVA ": "BVA-CPROD-18",
+        "Column2": "POST \/products\/:slug\/comments | comment 1 ký tự",
+        "Column3": "Dữ liệu test: comment=1 ký tự",
+        "Column4": "success",
+        "Column5": "User đã đăng nhập; sản phẩm active và trang chi tiết có thể truy cập.",
+        "Column8": "Quyến"
+    },
+    {
+        "BẢNG 2 - TEST CASE BVA ": "BVA-CPROD-19",
+        "Column2": "POST \/products\/:slug\/comments | comment dài max",
+        "Column3": "Dữ liệu test: comment dài max",
+        "Column4": "success",
+        "Column5": "User đã đăng nhập; sản phẩm active và trang chi tiết có thể truy cập.",
+        "Column8": "Quyến"
+    },
+    {
+        "BẢNG 2 - TEST CASE BVA ": "BVA-CPROD-20",
+        "Column2": "POST \/products\/:slug\/comments | comment vượt max",
+        "Column3": "Dữ liệu test: comment vượt max",
+        "Column4": "lỗi",
+        "Column5": "User đã đăng nhập; sản phẩm active và trang chi tiết có thể truy cập.",
+        "Column8": "Quyến"
+    },
+    {
+        "BẢNG 2 - TEST CASE BVA ": "BVA-CPROD-21",
+        "Column2": "POST \/products\/:slug\/comments | slug hợp lệ",
+        "Column3": "Dữ liệu test: slug hợp lệ",
+        "Column4": "success",
+        "Column5": "User đã đăng nhập; sản phẩm active và trang chi tiết có thể truy cập.",
+        "Column8": "Quyến"
+    },
+    {
+        "BẢNG 2 - TEST CASE BVA ": "BVA-CPROD-22",
+        "Column2": "POST \/products\/:slug\/comments | slug không tồn tại",
+        "Column3": "Dữ liệu test: slug không tồn tại",
+        "Column4": "lỗi",
+        "Column5": "User đã đăng nhập; sản phẩm active và trang chi tiết có thể truy cập.",
+        "Column8": "Quyến"
+    }
+]
