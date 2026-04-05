@@ -1,6 +1,25 @@
 const cartService = require("../../services/client/cart.service");
 
 /* ===================================================
+   HELPER: Sanitize error messages (bảo mật)
+=================================================== */
+function sanitizeError(err) {
+    // Ẩn thông tin kỹ thuật database
+    if (err.name === 'CastError') {
+        return "Mã sản phẩm không hợp lệ";
+    }
+    if (err.name === 'ValidationError') {
+        return "Dữ liệu không hợp lệ";
+    }
+    if (err.name === 'MongoError' || err.name === 'MongoServerError') {
+        return "Lỗi hệ thống, vui lòng thử lại sau";
+    }
+    
+    // Chỉ trả message an toàn từ service
+    return err.message || "Đã xảy ra lỗi";
+}
+
+/* ===================================================
    [POST] /cart/add  → Thêm sản phẩm vào giỏ hàng
 =================================================== */
 module.exports.add = async (req, res) => {
@@ -24,9 +43,12 @@ module.exports.add = async (req, res) => {
         });
 
     } catch (err) {
+        // ✅ Log lỗi chi tiết cho dev (không gửi cho client)
+        console.error('[CART-ADD-ERROR]', err);
+        
         return res.status(400).json({
             success: false,
-            message: err.message || "Lỗi thêm sản phẩm vào giỏ!"
+            message: sanitizeError(err)
         });
     }
 };
@@ -56,9 +78,11 @@ module.exports.update = async (req, res) => {
         });
 
     } catch (err) {
+        console.error('[CART-UPDATE-ERROR]', err);
+        
         return res.status(400).json({
             success: false,
-            message: err.message || "Lỗi cập nhật giỏ hàng!"
+            message: sanitizeError(err)
         });
     }
 };
@@ -88,9 +112,11 @@ module.exports.delete = async (req, res) => {
         });
 
     } catch (err) {
+        console.error('[CART-DELETE-ERROR]', err);
+        
         return res.status(400).json({
             success: false,
-            message: err.message || "Lỗi xóa sản phẩm!"
+            message: sanitizeError(err)
         });
     }
 };

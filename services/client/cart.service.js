@@ -1,5 +1,6 @@
 const Cart = require("../../models/cart.model");
 const Product = require("../../models/product.model");
+const mongoose = require("mongoose");
 
 /* ======================================================
    HELPER FORMAT TIỀN VND
@@ -48,6 +49,11 @@ module.exports.getCart = async (req) => {
 module.exports.addToCart = async (req, productId, quantity) => {
     if (!req.session.user)
         throw new Error("Bạn phải đăng nhập!");
+
+    // ✅ Validate ObjectId format trước khi query
+    if (!mongoose.Types.ObjectId.isValid(productId)) {
+        throw new Error("Mã sản phẩm không hợp lệ");
+    }
 
     const userId = req.session.user._id;
     const qty = parseInt(quantity);
@@ -106,6 +112,11 @@ module.exports.addToCart = async (req, productId, quantity) => {
    UPDATE SỐ LƯỢNG
 ====================================================== */
 module.exports.updateQuantity = async (req, productId, qty) => {
+    // ✅ Validate ObjectId format
+    if (!mongoose.Types.ObjectId.isValid(productId)) {
+        throw new Error("Mã sản phẩm không hợp lệ");
+    }
+
     const userId = req.session.user._id;
     const quantity = parseInt(qty);
 
@@ -135,6 +146,11 @@ module.exports.updateQuantity = async (req, productId, qty) => {
 module.exports.removeItem = async (req, productId) => {
     if (!req.session.user) {
         throw new Error("Bạn phải đăng nhập!");
+    }
+
+    // ✅ Validate ObjectId format
+    if (!mongoose.Types.ObjectId.isValid(productId)) {
+        throw new Error("Mã sản phẩm không hợp lệ");
     }
 
     const userId = req.session.user._id;
