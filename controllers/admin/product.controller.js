@@ -53,8 +53,11 @@ module.exports.changeMulti = async (req, res) => {
         });
     } catch (err) {
         return respond(req, res, {
-            status: 500,
-            json: { success: false, message: 'Có lỗi xảy ra, vui lòng thử lại!' },
+            status: err.status || 500,
+            json: {
+                success: false,
+                message: err.message || 'Có lỗi xảy ra'
+            },
             redirect: req.get('Referer') || `${sysConfig.prefixAdmin}/products`
         });
     }
@@ -71,8 +74,11 @@ module.exports.deleteProduct = async (req, res) => {
         });
     } catch (err) {
         return respond(req, res, {
-            status: 500,
-            json: { success: false, message: 'Có lỗi xảy ra, vui lòng thử lại!' },
+            status: err.status || 500,
+            json: {
+                success: false,
+                message: err.message || 'Có lỗi xảy ra'
+            },
             redirect: req.get('Referer') || `${sysConfig.prefixAdmin}/products`
         });
     }
@@ -89,11 +95,13 @@ module.exports.create = async (req, res) => {
             render: { view: 'admin/pages/product/create', data: { pageTitle: 'Thêm sản phẩm mới', categories } }
         });
     } catch (err) {
-        req.flash('error', 'Có lỗi xảy ra, vui lòng thử lại!')
         return respond(req, res, {
-            status: 500,
-            json: { success: false, message: 'Có lỗi xảy ra, vui lòng thử lại!' },
-            redirect: `${sysConfig.prefixAdmin}/products`
+            status: err.status || 500,
+            json: {
+                success: false,
+                message: err.message || 'Có lỗi xảy ra'
+            },
+            redirect: req.get('Referer') || `${sysConfig.prefixAdmin}/products`
         });
     }
 }
@@ -109,9 +117,12 @@ module.exports.createProduct = async (req, res) => {
         });
     } catch (err) {
         return respond(req, res, {
-            status: 500,
-            json: { success: false, message: 'Có lỗi xảy ra, vui lòng thử lại!' },
-            redirect: `${sysConfig.prefixAdmin}/products`
+            status: err.status || 500,
+            json: {
+                success: false,
+                message: err.message || 'Có lỗi xảy ra'
+            },
+            redirect: req.get('Referer') || `${sysConfig.prefixAdmin}/products`
         });
     }
 }
@@ -127,11 +138,13 @@ module.exports.edit = async (req, res) => {
             render: { view: 'admin/pages/product/edit', data: { pageTitle: 'Chỉnh sửa sản phẩm', ...records } }
         });
     } catch (err) {
-        req.flash('error', 'Có lỗi xảy ra, vui lòng thử lại!')
         return respond(req, res, {
-            status: 500,
-            json: { success: false, message: 'Có lỗi xảy ra, vui lòng thử lại!' },
-            redirect: `${sysConfig.prefixAdmin}/products`
+            status: err.status || 500,
+            json: {
+                success: false,
+                message: err.message || 'Có lỗi xảy ra'
+            },
+            redirect: req.get('Referer') || `${sysConfig.prefixAdmin}/products`
         });
     }
 }
@@ -154,9 +167,12 @@ module.exports.editProduct = async (req, res) => {
         });
     } catch (err) {
         return respond(req, res, {
-            status: 500,
-            json: { success: false, message: 'Có lỗi xảy ra, vui lòng thử lại!' },
-            redirect: `${sysConfig.prefixAdmin}/products`
+            status: err.status || 500,
+            json: {
+                success: false,
+                message: err.message || 'Có lỗi xảy ra'
+            },
+            redirect: req.get('Referer') || `${sysConfig.prefixAdmin}/products`
         });
     }
 }
@@ -181,12 +197,13 @@ module.exports.detail = async (req, res) => {
             render: { view: 'admin/pages/product/detail', data: { pageTitle: product.title, product } }
         });
     } catch (err) {
-        console.log(err)
-        req.flash('error', 'Có lỗi xảy ra, vui lòng thử lại!')
         return respond(req, res, {
-            status: 500,
-            json: { success: false, message: 'Có lỗi xảy ra, vui lòng thử lại!' },
-            redirect: `${sysConfig.prefixAdmin}/products`
+            status: err.status || 500,
+            json: {
+                success: false,
+                message: err.message || 'Có lỗi xảy ra'
+            },
+            redirect: req.get('Referer') || `${sysConfig.prefixAdmin}/products`
         });
     }
 }

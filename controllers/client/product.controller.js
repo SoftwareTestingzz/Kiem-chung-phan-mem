@@ -235,6 +235,14 @@ module.exports.comment = async (req, res) => {
             return sendError(400, 'Nội dung bình luận không được để trống');
         }
 
+        if (!content || !content.trim()) {
+            return sendError(400, 'Nội dung không được rỗng');
+        }
+
+        if (content.length > 500) {
+            return sendError(400, 'Nội dung quá dài');
+        }
+
         // Tạo bình luận mới (mặc định status = 'pending')
         await Comment.create({
             productId: product._id,

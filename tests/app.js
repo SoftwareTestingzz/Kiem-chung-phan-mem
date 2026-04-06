@@ -62,4 +62,17 @@ app.use((req, res, next) => {
     res.status(404).render('client/pages/error/404', { pageTitle: "404 Not Found" });
 });
 
+const multer = require('multer');
+
+app.use((err, req, res, next) => {
+    if (err instanceof multer.MulterError || err.message === 'Invalid file type') {
+        return res.status(400).json({
+            success: false,
+            message: err.message
+        });
+    }
+
+    next(err);
+});
+
 module.exports = app;

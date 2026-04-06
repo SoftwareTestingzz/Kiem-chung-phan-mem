@@ -28,10 +28,36 @@ module.exports.getList = async (query) => {
 }
 
 module.exports.changeStatus = async (id, status) => {
-    return Category.updateOne({ _id: id }, { status })
-}
+    const category = await Category.findOne({
+        _id: id,
+        deleted: false
+    });
 
-module.exports.changeMulti = async (type, ids) => {
+    if (!category) {
+        throw { status: 404, message: 'Danh mục không tồn tại' };
+    }
+
+    category.status = status;
+    await category.save();
+
+    return category;
+};
+
+module.exports.changeMulti = async (type, idsInput) => {
+    const ids = Array.isArray(idsInput)
+        ? idsInput
+        : idsInput.split(',');
+
+    if (!ids.length) {
+        throw { status: 400, message: 'Danh sách ID rỗng' };
+    }
+
+    for (const id of ids) {
+        if (!require('mongoose').Types.ObjectId.isValid(id)) {
+            throw { status: 400, message: 'ID không hợp lệ' };
+        }
+    }
+
     const actions = {
         active: { status: "active" },
         inactive: { status: "inactive" },
@@ -86,20 +112,26 @@ module.exports.changeMulti = async (type, ids) => {
 }
 
 module.exports.deleteCategory = async (id) => {
-    return Category.updateOne(
-        { _id: id },
-        {
-            deleted: true,
-            deletedAt: new Date()
-        }
-    )
-}
+    const category = await Category.findOne({
+        _id: id,
+        deleted: false
+    });
+
+    if (!category) {
+        throw { status: 404, message: 'Danh mục không tồn tại' };
+    }
+
+    category.deleted = true;
+    category.deletedAt = new Date();
+
+    await category.save();
+};
 
 module.exports.create = async (req) => {
     const find = { deleted: false }
-    
+
     const records = await Category.find(find)
-    
+
     const tree = createTreeHelper.createTree(records)
 
     return tree
@@ -130,14 +162,14 @@ module.exports.edit = async (id) => {
         deleted: false
     })
 
-    const records = await Category.find({deleted: false})
-    
+    const records = await Category.find({ deleted: false })
+
     const tree = createTreeHelper.createTree(records)
-     
-     return {
+
+    return {
         data,
         tree
-     }
+    }
 
 }
 

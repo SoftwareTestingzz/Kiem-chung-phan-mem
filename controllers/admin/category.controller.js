@@ -13,11 +13,13 @@ module.exports.index = async (req, res) => {
             render: { view: 'admin/pages/category/index', data: { pageTitle: 'Danh mục sản phẩm', ...records } }
         });
     } catch (err) {
-        req.flash('error', 'Có lỗi xảy ra, vui lòng thử lại!')
         return respond(req, res, {
-            status: 500,
-            json: { success: false, message: 'Có lỗi xảy ra, vui lòng thử lại!' },
-            redirect: `${sysConfig.prefixAdmin}/dashboard`
+            status: err.status || 500,
+            json: {
+                success: false,
+                message: err.message || 'Có lỗi xảy ra'
+            },
+            redirect: req.get('Referer') || `${sysConfig.prefixAdmin}/categories`
         });
     }
 }
@@ -34,8 +36,11 @@ module.exports.changeStatus = async (req, res) => {
         });
     } catch (err) {
         return respond(req, res, {
-            status: 500,
-            json: { success: false, message: 'Có lỗi xảy ra, vui lòng thử lại!' },
+            status: err.status || 500,
+            json: {
+                success: false,
+                message: err.message || 'Có lỗi xảy ra'
+            },
             redirect: req.get('Referer') || `${sysConfig.prefixAdmin}/categories`
         });
     }
@@ -45,7 +50,7 @@ module.exports.changeStatus = async (req, res) => {
 module.exports.changeMulti = async (req, res) => {
     try {
         const { type, ids } = req.body;
-        const result = await categoryService.changeMulti(type, ids.split(','));
+        const result = await categoryService.changeMulti(type, ids);
         return respond(req, res, {
             status: 200,
             json: { success: true, message: result.message },
@@ -53,8 +58,11 @@ module.exports.changeMulti = async (req, res) => {
         });
     } catch (err) {
         return respond(req, res, {
-            status: 500,
-            json: { success: false, message: 'Có lỗi xảy ra, vui lòng thử lại!' },
+            status: err.status || 500,
+            json: {
+                success: false,
+                message: err.message || 'Có lỗi xảy ra'
+            },
             redirect: req.get('Referer') || `${sysConfig.prefixAdmin}/categories`
         });
     }
@@ -71,8 +79,11 @@ module.exports.deleteCategory = async (req, res) => {
         });
     } catch (err) {
         return respond(req, res, {
-            status: 500,
-            json: { success: false, message: 'Có lỗi xảy ra, vui lòng thử lại!' },
+            status: err.status || 500,
+            json: {
+                success: false,
+                message: err.message || 'Có lỗi xảy ra'
+            },
             redirect: req.get('Referer') || `${sysConfig.prefixAdmin}/categories`
         });
     }
@@ -89,9 +100,12 @@ module.exports.createCategory = async (req, res) => {
         });
     } catch (err) {
         return respond(req, res, {
-            status: 500,
-            json: { success: false, message: 'Có lỗi xảy ra, vui lòng thử lại!' },
-            redirect: `${sysConfig.prefixAdmin}/categories`
+            status: err.status || 500,
+            json: {
+                success: false,
+                message: err.message || 'Có lỗi xảy ra'
+            },
+            redirect: req.get('Referer') || `${sysConfig.prefixAdmin}/categories`
         });
     }
 }
@@ -107,9 +121,12 @@ module.exports.editCategory = async (req, res) => {
         });
     } catch (err) {
         return respond(req, res, {
-            status: 500,
-            json: { success: false, message: 'Có lỗi xảy ra, vui lòng thử lại!' },
-            redirect: `${sysConfig.prefixAdmin}/categories`
+            status: err.status || 500,
+            json: {
+                success: false,
+                message: err.message || 'Có lỗi xảy ra'
+            },
+            redirect: req.get('Referer') || `${sysConfig.prefixAdmin}/categories`
         });
     }
 }
@@ -124,11 +141,13 @@ module.exports.create = async (req, res) => {
             render: { view: 'admin/pages/category/create', data: { pageTitle: 'Thêm danh mục', tree } }
         });
     } catch (err) {
-        req.flash('error', 'Có lỗi xảy ra, vui lòng thử lại!')
         return respond(req, res, {
-            status: 500,
-            json: { success: false, message: 'Có lỗi xảy ra, vui lòng thử lại!' },
-            redirect: `${sysConfig.prefixAdmin}/categories`
+            status: err.status || 500,
+            json: {
+                success: false,
+                message: err.message || 'Có lỗi xảy ra'
+            },
+            redirect: req.get('Referer') || `${sysConfig.prefixAdmin}/categories`
         });
     }
 }
@@ -143,11 +162,13 @@ module.exports.edit = async (req, res) => {
             render: { view: 'admin/pages/category/edit', data: { pageTitle: 'Chỉnh sửa danh mục', data, tree } }
         });
     } catch (err) {
-        req.flash('error', 'Có lỗi xảy ra, vui lòng thử lại!')
         return respond(req, res, {
-            status: 500,
-            json: { success: false, message: 'Có lỗi xảy ra, vui lòng thử lại!' },
-            redirect: `${sysConfig.prefixAdmin}/categories`
+            status: err.status || 500,
+            json: {
+                success: false,
+                message: err.message || 'Có lỗi xảy ra'
+            },
+            redirect: req.get('Referer') || `${sysConfig.prefixAdmin}/categories`
         });
     }
 }

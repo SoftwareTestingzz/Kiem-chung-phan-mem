@@ -1,22 +1,21 @@
-const multer = require("multer");
-const path = require("path");
-const fs = require("fs");
+const multer = require('multer');
 
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        const dir = path.join(__dirname, "../temp");
+const storage = multer.memoryStorage();
 
-        if (!fs.existsSync(dir)) {
-            fs.mkdirSync(dir, { recursive: true });
-        }
+const fileFilter = (req, file, cb) => {
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
 
-        cb(null, dir);
-    },
-    filename: (req, file, cb) => {
-        cb(null, Date.now() + path.extname(file.originalname));
+    if (!allowedTypes.includes(file.mimetype)) {
+        return cb(new Error('INVALID_FILE_TYPE'), false);
     }
-});
 
-const upload = multer({ storage });
+    cb(null, true);
+};
+
+const upload = multer({
+    storage,
+    limits: { fileSize: 2 * 1024 * 1024 }, // 2MB
+    fileFilter
+});
 
 module.exports = upload;

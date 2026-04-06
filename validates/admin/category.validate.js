@@ -12,13 +12,14 @@ module.exports.createPost = (req, res, next) => {
         });
     }
 
-    if (req.body.title.length < 3) {
-        req.flash('error', 'Tên danh mục phải có ít nhất 3 ký tự!');
-        return respond(req, res, {
-            status: 400,
-            json: { success: false, message: 'Tên danh mục phải có ít nhất 3 ký tự!' },
-            redirect: `${sysConfig.prefixAdmin}/categories/create`
-        });
+    if (!req.body.title) {
+        req.flash('error', 'Vui lòng nhập Tên danh mục!');
+        return res.status(400).json({ success: false, message: 'Vui lòng nhập Tên danh mục!' });
+    }
+
+    if (req.body.title.length > 255) {
+        req.flash('error', 'Tên danh mục tối đa 255 ký tự!');
+        return res.status(400).json({ success: false, message: 'Tên danh mục tối đa 255 ký tự!' });
     }
 
     if (req.body.description && req.body.description.length < 10) {
