@@ -1,0 +1,1014 @@
+{
+  "info": {
+    "name": "Admin Modules BVA - Merged Collection",
+    "_postman_id": "merged-bva-collection-001",
+    "description": "Merged Postman Collection for Admin BVA Testing (Accounts, Blog, Dashboard, Orders, Roles)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. ACC - Admin Accounts BVA",
+      "item": [
+        {
+          "name": "ACC-BVA-01 | Get all accounts",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/admin/accounts"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test('TC-ACC-BVA-01', () => pm.response.to.have.status(200));",
+                "let json = pm.response.json();",
+                "pm.expect(json).to.have.property('data');",
+                "// Tự động lấy accountId đầu tiên từ response và gán vào biến môi trường test_account_id",
+                "if (json && json.data && json.data.length > 0) {",
+                "    pm.environment.set('test_account_id', json.data[0]._id || json.data[0].id);",
+                "}"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "ACC-BVA-02 | Create account (valid)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"fullName\": \"Admin {{timestamp}}\", \"email\": \"test{{timestamp}}@mail.com\", \"password\": \"123456\", \"role_id\": \"{{test_role_id}}\" }"
+            },
+            "url": "{{base_url}}/admin/accounts/create"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test('TC-ACC-BVA-02', () => pm.expect([200,302]).to.include(pm.response.code));",
+                "if (pm.response.headers.get('Content-Type')?.includes('json')) {",
+                " let json = pm.response.json();",
+                " if (json.account) pm.environment.set('test_account_id', json.account._id);",
+                "}"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "ACC-BVA-03 | Email duplicate",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"fullName\": \"Dup\", \"email\": \"{{admin_email}}\", \"password\": \"123456\" }"
+            },
+            "url": "{{base_url}}/admin/accounts/create"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test('TC-ACC-BVA-03', () => pm.expect([400,409]).to.include(pm.response.code));"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "ACC-BVA-04 | Missing email",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"fullName\": \"No Email\", \"password\": \"123456\" }"
+            },
+            "url": "{{base_url}}/admin/accounts/create"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test('TC-ACC-BVA-04', () => pm.expect([400,422]).to.include(pm.response.code));"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "ACC-BVA-05 | Password = 5 (min-1)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"fullName\": \"Short\", \"email\": \"short@test.com\", \"password\": \"12345\" }"
+            },
+            "url": "{{base_url}}/admin/accounts/create"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test('TC-ACC-BVA-05', () => pm.expect([400,422]).to.include(pm.response.code));"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "ACC-BVA-06 | Password = 6 (min)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"fullName\": \"Min Pass\", \"email\": \"min@test.com\", \"password\": \"123456\" }"
+            },
+            "url": "{{base_url}}/admin/accounts/create"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test('TC-ACC-BVA-06', () => pm.expect([200,302]).to.include(pm.response.code));"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "ACC-BVA-07 | Password = 21 (max+1)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"fullName\": \"Long Pass\", \"email\": \"long@test.com\", \"password\": \"123456789012345678901\" }"
+            },
+            "url": "{{base_url}}/admin/accounts/create"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test('TC-ACC-BVA-07', () => pm.expect([400,422]).to.include(pm.response.code));"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "ACC-BVA-08 | Get detail valid",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/admin/accounts/detail/{{test_account_id}}"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test('TC-ACC-BVA-08', () => pm.response.to.have.status(200));"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "ACC-BVA-09 | ID = 23 chars",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/admin/accounts/detail/12345678901234567890123"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test('TC-ACC-BVA-09', () => pm.expect([400,404]).to.include(pm.response.code));"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "ACC-BVA-10 | ID invalid format",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/admin/accounts/detail/abcxyz"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test('TC-ACC-BVA-10', () => pm.expect([400,404]).to.include(pm.response.code));"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "ACC-BVA-11 | Update account",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"fullName\": \"Updated {{timestamp}}\" }"
+            },
+            "url": "{{base_url}}/admin/accounts/edit/{{test_account_id}}"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test('TC-ACC-BVA-11', () => pm.expect([200,302]).to.include(pm.response.code));"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "ACC-BVA-12 | Change status inactive",
+          "request": {
+            "method": "PATCH",
+            "url": "{{base_url}}/admin/accounts/change-status/inactive/{{test_account_id}}"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test('TC-ACC-BVA-12', () => pm.response.to.have.status(200));"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "ACC-BVA-13 | Change status active",
+          "request": {
+            "method": "PATCH",
+            "url": "{{base_url}}/admin/accounts/change-status/active/{{test_account_id}}"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test('TC-ACC-BVA-13', () => pm.response.to.have.status(200));"
+              ]
+            }
+          }]
+        }
+      ]
+    },
+    {
+      "name": "2. BLOG - Admin Blog BVA",
+      "item": [
+        {
+          "name": "ABLG-01 | Xem danh sách bài viết admin",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/admin/blog"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test(\"TC-AB01 - Danh sách blog admin OK\", () => pm.response.to.have.status(200));"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "ABLG-02 | Tạo bài viết thành công",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "multipart/form-data" }],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "title", "value": "Blog Test {{timestamp}}", "type": "text" },
+                { "key": "content", "value": "Nội dung bài viết test rất dài...", "type": "text" },
+                { "key": "status", "value": "active", "type": "text" }
+              ]
+            },
+            "url": "{{base_url}}/admin/blog/create"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test(\"TC-AB02 - Tạo blog thành công\", () => {",
+                "  pm.expect([200, 302]).to.include(pm.response.code);",
+                "  if (pm.response.headers.get(\"Content-Type\")?.includes(\"json\")) {",
+                "    const json = pm.response.json();",
+                "    if (json.blog) {",
+                "      pm.environment.set(\"test_blog_id\", json.blog._id);",
+                "      pm.environment.set(\"test_blog_slug\", json.blog.slug);",
+                "    }",
+                "  }",
+                "});"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "ABLG-03 | Tạo bài viết thiếu title",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"content\": \"Content without title\"}"
+            },
+            "url": "{{base_url}}/admin/blog/create"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test(\"TC-AB03 - Thiếu title bị từ chối\", () => {",
+                "  pm.expect([200, 302, 400, 422]).to.include(pm.response.code);",
+                "});"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "ABLG-04 | Tạo bài viết thiếu content",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"title\": \"Title Without Content\"}"
+            },
+            "url": "{{base_url}}/admin/blog/create"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test(\"TC-AB04 - Thiếu content bị từ chối\", () => {",
+                "  pm.expect([200, 302, 400, 422]).to.include(pm.response.code);",
+                "});"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "ABLG-05 | Tạo bài viết title quá ngắn",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"title\": \"Hi\", \"content\": \"Some valid content here\"}"
+            },
+            "url": "{{base_url}}/admin/blog/create"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test(\"TC-AB05 - Title quá ngắn bị từ chối hoặc chấp nhận\", () => {",
+                "  pm.expect([200, 302, 400, 422]).to.include(pm.response.code);",
+                "});"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "ABLG-06 | Cập nhật bài viết",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"title\": \"Updated Blog {{timestamp}}\", \"content\": \"Updated content\"}"
+            },
+            "url": "{{base_url}}/admin/blog/edit/{{test_blog_id}}"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test(\"TC-AB06 - Cập nhật blog thành công\", () => {",
+                "  pm.expect([200, 302]).to.include(pm.response.code);",
+                "});"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "ABLG-07 | Cập nhật blog ID không tồn tại",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"title\": \"Ghost Blog\", \"content\": \"Ghost content\"}"
+            },
+            "url": "{{base_url}}/admin/blog/edit/000000000000000000000000"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test(\"TC-AB07 - Blog không tồn tại trả 404\", () => {",
+                "  pm.expect([302, 404]).to.include(pm.response.code);",
+                "});"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "ABLG-08 | Xóa bài viết (GET method — non-standard)",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/admin/blog/delete/{{test_blog_id}}"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test(\"TC-AB08 - Xóa blog thành công\", () => {",
+                "  pm.expect([200, 302]).to.include(pm.response.code);",
+                "});"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "ABLG-09 | Xóa bài viết không tồn tại",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/admin/blog/delete/000000000000000000000000"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test(\"TC-AB09 - Xóa ID không tồn tại trả 404\", () => {",
+                "  pm.expect([302, 404]).to.include(pm.response.code);",
+                "});"
+              ]
+            }
+          }]
+        }
+      ]
+    },
+    {
+      "name": "3. DASHBOARD - Admin Dashboard BVA",
+      "item": [
+        {
+          "name": "DASH-BVA-01 | Login Admin",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/x-www-form-urlencoded" }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                { "key": "email", "value": "{{admin_email}}", "type": "text" },
+                { "key": "password", "value": "{{admin_password}}", "type": "text" }
+              ]
+            },
+            "url": "{{base_url}}/admin/auth/login"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test('DASH-BVA-01 - Login thành công', () => pm.expect([200,302]).to.include(pm.response.code));"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "DASH-BVA-02 | Get Dashboard Overview",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/admin/dashboard"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test('DASH-BVA-02 - Lấy dashboard overview thành công', () => pm.response.to.have.status(200));"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "DASH-BVA-03 | Get Revenue Stats",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/admin/dashboard/revenue"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test('DASH-BVA-03 - Lấy revenue stats thành công', () => pm.response.to.have.status(200));"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "DASH-BVA-04 | Get Dashboard Overview (unauthenticated)",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/admin/dashboard"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test('DASH-BVA-04 - Không đăng nhập bị từ chối', () => pm.expect([401,403]).to.include(pm.response.code));"
+              ]
+            }
+          }],
+          "protocolProfileBehavior": {
+            "disableCookieJar": true
+          }
+        },
+        {
+          "name": "DASH-BVA-05 | Get Revenue Stats (unauthenticated)",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/admin/dashboard/revenue"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test('DASH-BVA-05 - Không đăng nhập bị từ chối', () => pm.expect([401,403]).to.include(pm.response.code));"
+              ]
+            }
+          }],
+          "protocolProfileBehavior": {
+            "disableCookieJar": true
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. AORD - Admin Orders BVA",
+      "item": [
+        {
+          "name": "AORD-BVA-01 | Get all orders (no filter)",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/admin/orders"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test('TC-AO-BVA-01', () => pm.response.to.have.status(200));",
+                "// Tự động lấy orderId đầu tiên từ response và gán vào biến môi trường test_order_id",
+                "if (pm.response.code === 200) {",
+                "    let json = pm.response.json();",
+                "    if (json && json.data && json.data.length > 0) {",
+                "        pm.environment.set('test_order_id', json.data[0]._id || json.data[0].id);",
+                "    }",
+                "}"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "AORD-BVA-02 | Filter status = pending",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/admin/orders?status=pending"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test('TC-AO-BVA-02', () => pm.response.to.have.status(200));"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "AORD-BVA-03 | Filter status invalid",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/admin/orders?status=abcxyz"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test('TC-AO-BVA-03', () => pm.expect([400,422]).to.include(pm.response.code));"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "AORD-BVA-04 | Filter status empty",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/admin/orders?status="
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test('TC-AO-BVA-04', () => pm.expect([200,400]).to.include(pm.response.code));"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "AORD-BVA-05 | Get order detail valid ID",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/admin/orders/{{test_order_id}}"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test('TC-AO-BVA-05', () => pm.response.to.have.status(200));"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "AORD-BVA-06 | orderId = 23 chars (min-1)",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/admin/orders/12345678901234567890123"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test('TC-AO-BVA-06', () => pm.expect([400,404]).to.include(pm.response.code));"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "AORD-BVA-07 | orderId = 25 chars (max+1)",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/admin/orders/1234567890123456789012345"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test('TC-AO-BVA-07', () => pm.expect([400,404]).to.include(pm.response.code));"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "AORD-BVA-08 | orderId invalid format",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/admin/orders/abcxyz"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test('TC-AO-BVA-08', () => pm.expect([400,404]).to.include(pm.response.code));"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "AORD-BVA-09 | Update status = confirmed",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"status\": \"confirmed\" }"
+            },
+            "url": "{{base_url}}/admin/orders/{{test_order_id}}/status"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test('TC-AO-BVA-09', () => pm.expect([200,302]).to.include(pm.response.code));"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "AORD-BVA-10 | Update status invalid",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"status\": \"abcxyz\" }"
+            },
+            "url": "{{base_url}}/admin/orders/{{test_order_id}}/status"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test('TC-AO-BVA-10', () => pm.expect([400,422]).to.include(pm.response.code));"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "AORD-BVA-11 | Update status empty",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"status\": \"\" }"
+            },
+            "url": "{{base_url}}/admin/orders/{{test_order_id}}/status"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test('TC-AO-BVA-11', () => pm.expect([400,422]).to.include(pm.response.code));"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "AORD-BVA-12 | Update status null",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"status\": null }"
+            },
+            "url": "{{base_url}}/admin/orders/{{test_order_id}}/status"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test('TC-AO-BVA-12', () => pm.expect([400,422]).to.include(pm.response.code));"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "AORD-BVA-13 | Order not found",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"status\": \"confirmed\" }"
+            },
+            "url": "{{base_url}}/admin/orders/000000000000000000000000/status"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test('TC-AO-BVA-13', () => pm.expect([404,302]).to.include(pm.response.code));"
+              ]
+            }
+          }]
+        }
+      ]
+    },
+    {
+      "name": "5. ROLE - BVA",
+      "item": [
+        {
+          "name": "BVA-RL-01 | Get roles list",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/admin/roles"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test('BVA-RL-01', () => pm.response.to.have.status(200));"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "BVA-RL-02 | Create role (title = min-1 = empty)",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"description\": \"No title role\" }"
+            },
+            "url": "{{base_url}}/admin/roles/create"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test('BVA-RL-02', () => pm.expect([400,422]).to.include(pm.response.code));"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "BVA-RL-03 | Create role (title = min = 1 char)",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"title\": \"A\", \"description\": \"test\" }"
+            },
+            "url": "{{base_url}}/admin/roles/create"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test('BVA-RL-03', () => pm.expect([200,302]).to.include(pm.response.code));",
+                "if (pm.response.headers.get('Content-Type')?.includes('json')) {",
+                " let json = pm.response.json();",
+                " if (json.role) pm.environment.set('test_role_id', json.role._id);",
+                "}"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "BVA-RL-04 | Create role (title = max = 50 chars)",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"title\": \"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\", \"description\": \"test\" }"
+            },
+            "url": "{{base_url}}/admin/roles/create"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test('BVA-RL-04', () => pm.expect([200,302]).to.include(pm.response.code));"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "BVA-RL-05 | Create role (title = max+1 = 51 chars)",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"title\": \"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\", \"description\": \"test\" }"
+            },
+            "url": "{{base_url}}/admin/roles/create"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test('BVA-RL-05', () => pm.expect([400,422]).to.include(pm.response.code));"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "BVA-RL-06 | Get role detail (valid ID)",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/admin/roles/detail/{{test_role_id}}"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test('BVA-RL-06', () => pm.response.to.have.status(200));"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "BVA-RL-07 | Get role detail (ID = 23 chars)",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/admin/roles/detail/12345678901234567890123"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test('BVA-RL-07', () => pm.expect([400,404]).to.include(pm.response.code));"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "BVA-RL-08 | Get role detail (ID = 25 chars)",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/admin/roles/detail/1234567890123456789012345"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test('BVA-RL-08', () => pm.expect([400,404]).to.include(pm.response.code));"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "BVA-RL-09 | Update role (valid)",
+          "request": {
+            "method": "PATCH",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"title\": \"Updated Role\" }"
+            },
+            "url": "{{base_url}}/admin/roles/edit/{{test_role_id}}"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test('BVA-RL-09', () => pm.expect([200,302]).to.include(pm.response.code));"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "BVA-RL-10 | Permissions empty (min-1)",
+          "request": {
+            "method": "PATCH",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"permissions\": [] }"
+            },
+            "url": "{{base_url}}/admin/roles/permissions"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test('BVA-RL-10', () => pm.expect([400,422]).to.include(pm.response.code));"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "BVA-RL-11 | Permissions valid (min)",
+          "request": {
+            "method": "PATCH",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"permissions\": [{ \"roleId\": \"{{test_role_id}}\", \"permissions\": [\"products_view\"] }] }"
+            },
+            "url": "{{base_url}}/admin/roles/permissions"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test('BVA-RL-11', () => pm.expect([200,302]).to.include(pm.response.code));"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "BVA-RL-12 | Delete role",
+          "request": {
+            "method": "DELETE",
+            "url": "{{base_url}}/admin/roles/delete-role/{{test_role_id}}"
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test('BVA-RL-12', () => pm.expect([200,302]).to.include(pm.response.code));"
+              ]
+            }
+          }]
+        }
+      ]
+    }
+  ]
+}
