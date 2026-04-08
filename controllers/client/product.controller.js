@@ -195,16 +195,19 @@ module.exports.comment = async (req, res) => {
         const user = req.session.user;
         const { rating, content } = req.body;
 
-        const sendError = (status, msg) => {
-            const wantsJson = req.headers['accept']?.includes('application/json') || req.query._format === 'json';
-            if (wantsJson) return res.status(status).json({ success: false, message: msg });
-            return res.status(status).send(msg);
+        const handleCommentError = (status, msg) => {
+            req.flash('error', msg);
+            return respond(req, res, {
+                status: status,
+                json: { success: false, message: msg },
+                redirect: '/detail/' + slug
+            });
         };
 
         // Lấy sản phẩm
         const product = await productService.detail(slug);
         if (!product) {
-            return sendError(404, 'Product not found');
+            return handleCommentError(404, 'Sản phẩm không tồn tại');
         }
 
         // Kiểm tra đã từng review sản phẩm này chưa
@@ -214,8 +217,7 @@ module.exports.comment = async (req, res) => {
         });
 
         if (existingComment) {
-
-            return sendError(400, 'Bạn chỉ có thể đánh giá sản phẩm này một lần.');
+            return handleCommentError(400, 'Bạn chỉ có thể đánh giá sản phẩm này một lần.');
         }
 
         // Kiểm tra đã từng mua sản phẩm này chưa (đơn completed)
@@ -226,25 +228,21 @@ module.exports.comment = async (req, res) => {
         });
 
         if (!order) {
-            return sendError(403, 'Bạn cần mua sản phẩm này trước khi bình luận');
+            return handleCommentError(403, 'Bạn cần mua sản phẩm này trước khi bình luận');
         }
 
         // Validate rating + content
         const ratingNumber = Number(rating);
         if (!ratingNumber || ratingNumber < 1 || ratingNumber > 5) {
-            return sendError(400, 'Số sao không hợp lệ');
+            return handleCommentError(400, 'Số sao không hợp lệ');
         }
 
         if (!content || !content.trim()) {
-            return sendError(400, 'Nội dung bình luận không được để trống');
+            return handleCommentError(400, 'Nội dung bình luận không được để trống');
         }
 
-        if (!content || !content.trim()) {
-            return sendError(400, 'Nội dung không được rỗng');
-        }
-
-        if (content.length > 500) {
-            return sendError(400, 'Nội dung quá dài');
+        if (content.trim().length > 5000) {
+            return handleCommentError(400, 'Nội dung bình luận không được quá 5000 kí tự');
         }
 
         // Tạo bình luận mới (mặc định status = 'approved')
@@ -257,6 +255,7 @@ module.exports.comment = async (req, res) => {
             content: content.trim()
         });
 
+        req.flash('success', 'Bình luận thành công!');
         return respond(req, res, {
             status: 200,
             json: { success: true, message: 'Bình luận thành công!' },

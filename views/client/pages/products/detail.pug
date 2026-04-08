@@ -113,7 +113,11 @@ block main
                                 rows="4" 
                                 placeholder="Chia sẻ cảm nhận của bạn..."
                                 required
+                                maxlength="5000"
                             )
+                            small.text-muted.d-block.mt-1
+                                span#charCount 0
+                                | /5000 kí tự
 
                         button.btn.btn-primary(type="submit") Gửi đánh giá
                 else if hasReviewed

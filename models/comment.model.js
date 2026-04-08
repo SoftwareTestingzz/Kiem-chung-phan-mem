@@ -31,7 +31,8 @@ const CommentSchema = new Schema(
     content: {
       type: String,
       required: true,
-      trim: true
+      trim: true,
+      maxlength: 5000
     },
     status: {
       type: String,

@@ -29,9 +29,14 @@ module.exports.validateStatus = (req, res, next) => {
     const validStatus = ['active', 'inactive'];
 
     if (!validStatus.includes(status)) {
-        return res.status(400).json({
-            success: false,
-            message: 'Trạng thái không hợp lệ'
+        req.flash('error', 'Trạng thái không hợp lệ');
+        return respond(req, res, {
+            status: 400,
+            json: {
+                success: false,
+                message: 'Trạng thái không hợp lệ'
+            },
+            redirect: req.get('Referer') || `${systemConfig.prefixAdmin}/dashboard`
         });
     }
 

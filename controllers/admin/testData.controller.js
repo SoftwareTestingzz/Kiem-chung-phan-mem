@@ -1,6 +1,7 @@
 const Order = require('../../models/order.model');
 const User = require('../../models/user.model');
 const Product = require('../../models/product.model');
+const respond = require('../../helper/respond');
 
 // Tạo dữ liệu test
 module.exports.createTestData = async (req, res) => {
@@ -10,7 +11,11 @@ module.exports.createTestData = async (req, res) => {
         const product = await Product.findOne({ deleted: false });
 
         if (!user || !product) {
-            return res.status(400).json({ error: 'User or Product not found' });
+            return respond(req, res, {
+                status: 400,
+                json: { error: 'User or Product not found' },
+                redirect: '/admin/dashboard'
+            });
         }
 
         const testOrders = [];
@@ -54,13 +59,21 @@ module.exports.createTestData = async (req, res) => {
         // Thêm dữ liệu test
         const result = await Order.insertMany(testOrders);
 
-        res.json({
-            success: true,
-            message: `Đã tạo ${result.length} đơn hàng test`,
-            count: result.length
+        return respond(req, res, {
+            status: 200,
+            json: {
+                success: true,
+                message: `Đã tạo ${result.length} đơn hàng test`,
+                count: result.length
+            },
+            redirect: '/admin/dashboard'
         });
     } catch (error) {
         console.error('Error creating test data:', error);
-        res.status(500).json({ error: error.message });
+        return respond(req, res, {
+            status: 500,
+            json: { error: error.message },
+            redirect: '/admin/dashboard'
+        });
     }
 };
