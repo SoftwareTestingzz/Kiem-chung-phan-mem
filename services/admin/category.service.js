@@ -3,6 +3,7 @@ const uploadToCloud = require("../../helper/uploadCloud")
 const createTreeHelper = require('../../helper/createTree')
 const filterStatusHelper = require('../../helper/filterStatus')
 const searchHelper = require('../../helper/search')
+const Product = require('../../models/product.model')
 
 module.exports.getList = async (query) => {
 
@@ -71,6 +72,16 @@ module.exports.changeMulti = async (type, idsInput) => {
     }
 
     if (action === "delete") {
+        // ✅ Kiểm tra xem có sản phẩm nào thuộc các danh mục này không
+        const productInCategories = await Product.findOne({
+            product_category: { $in: ids },
+            deleted: false
+        });
+
+        if (productInCategories) {
+            throw { status: 400, message: 'CATEGORY_HAS_PRODUCTS' };
+        }
+
         await Category.updateMany(
             { _id: { $in: ids } },
             {
@@ -112,6 +123,16 @@ module.exports.changeMulti = async (type, idsInput) => {
 }
 
 module.exports.deleteCategory = async (id) => {
+    // ✅ Kiểm tra xem có sản phẩm nào thuộc danh mục này không
+    const productInCategory = await Product.findOne({
+        product_category: id,
+        deleted: false
+    });
+
+    if (productInCategory) {
+        throw { status: 400, message: 'CATEGORY_HAS_PRODUCTS' };
+    }
+
     const category = await Category.findOne({
         _id: id,
         deleted: false

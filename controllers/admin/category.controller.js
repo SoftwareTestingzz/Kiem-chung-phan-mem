@@ -63,11 +63,16 @@ module.exports.changeMulti = async (req, res) => {
             redirect: req.get('Referer') || `${sysConfig.prefixAdmin}/categories`
         });
     } catch (err) {
+        if (err.message === 'CATEGORY_HAS_PRODUCTS') {
+            req.flash('error', 'Không thể thao tác vì có danh mục vẫn còn sản phẩm belonging to it!');
+        } else {
+            req.flash('error', 'Có lỗi xảy ra, vui lòng thử lại!');
+        }
         return respond(req, res, {
             status: err.status || 500,
             json: {
                 success: false,
-                message: err.message || 'Có lỗi xảy ra'
+                message: err.message === 'CATEGORY_HAS_PRODUCTS' ? 'Danh mục vẫn còn sản phẩm' : (err.message || 'Có lỗi xảy ra')
             },
             redirect: req.get('Referer') || `${sysConfig.prefixAdmin}/categories`
         });
@@ -84,11 +89,16 @@ module.exports.deleteCategory = async (req, res) => {
             redirect: req.get('Referer') || `${sysConfig.prefixAdmin}/categories`
         });
     } catch (err) {
+        if (err.message === 'CATEGORY_HAS_PRODUCTS') {
+            req.flash('error', 'Không thể xóa danh mục vì vẫn còn sản phẩm thuộc danh mục này!');
+        } else {
+            req.flash('error', 'Có lỗi xảy ra, vui lòng thử lại!');
+        }
         return respond(req, res, {
             status: err.status || 500,
             json: {
                 success: false,
-                message: err.message || 'Có lỗi xảy ra'
+                message: err.message === 'CATEGORY_HAS_PRODUCTS' ? 'Danh mục vẫn còn sản phẩm' : (err.message || 'Có lỗi xảy ra')
             },
             redirect: req.get('Referer') || `${sysConfig.prefixAdmin}/categories`
         });
