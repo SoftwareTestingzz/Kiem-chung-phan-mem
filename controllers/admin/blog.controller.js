@@ -40,7 +40,7 @@ module.exports = {
         }
     },
 
-   
+
     // [GET] /admin/blog/create
     create: (req, res) => {
         res.render("admin/pages/blog/create", {
@@ -48,9 +48,9 @@ module.exports = {
         });
     },
 
-    
+
     // [POST] /admin/blog/create
- 
+
     store: async (req, res) => {
         try {
             await blogService.createBlog(req);
@@ -71,7 +71,7 @@ module.exports = {
 
 
     // [GET] /admin/blog/edit/:id
-    
+
     edit: async (req, res) => {
         try {
             const blog = await blogService.getBlog(req.params.id);
@@ -114,7 +114,7 @@ module.exports = {
     },
 
     // [GET] /admin/blog/delete/:id
-   
+
     delete: async (req, res) => {
         try {
             await blogService.deleteBlog(req.params.id);

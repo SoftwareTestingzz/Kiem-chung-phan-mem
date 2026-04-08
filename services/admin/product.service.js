@@ -42,7 +42,7 @@ module.exports.getList = async (query) => {
         .skip(pagination.skip)
         .limit(pagination.limitItems)
 
-        products.count = count
+    products.count = count
     return {
         products,
         filterStatus,
@@ -121,9 +121,9 @@ module.exports.deleteProduct = async (id) => {
 
 module.exports.create = async () => {
     const find = { deleted: false }
-    
+
     const records = await Category.find(find)
-    
+
     const categories = createTreeHelper.createTree(records)
 
     return categories
@@ -131,6 +131,16 @@ module.exports.create = async () => {
 
 module.exports.createProduct = async (req, res) => {
     const body = req.body
+
+    // ✅ Kiểm tra trùng tên sản phẩm (không tính các sản phẩm đã xóa)
+    const existingProduct = await Product.findOne({
+        title: body.title,
+        deleted: false
+    });
+
+    if (existingProduct) {
+        throw new Error("TITLE_EXISTS");
+    }
 
     body.price = parseInt(body.price) || 0
     body.discountPercentage = parseInt(body.discountPercentage) || 0
@@ -148,8 +158,12 @@ module.exports.createProduct = async (req, res) => {
         body.thumbnail = uploadResult.secure_url
     }
 
-    req.body.createdBy = {
-        account_id: res.locals.user.id,
+    const userId = res.locals.user ? (res.locals.user._id || res.locals.user.id) : null;
+    if (userId) {
+        body.createdBy = {
+            account_id: userId.toString(),
+            createdAt: new Date()
+        }
     }
 
     const product = new Product(body)
@@ -165,7 +179,7 @@ module.exports.detail = async (id) => {
 
     let categoryTitle = null;
 
-    if (product.product_category ) {
+    if (product.product_category) {
         const category = await Category.findOne({
             deleted: false,
             _id: product.product_category,
@@ -197,9 +211,9 @@ module.exports.detail = async (id) => {
 
 module.exports.edit = async (id) => {
     const find = { deleted: false }
-    
+
     const records = await Category.find(find)
-    
+
     const categories = createTreeHelper.createTree(records)
 
     const product = await Product.findOne({ deleted: false, _id: id })
@@ -211,6 +225,17 @@ module.exports.edit = async (id) => {
 
 module.exports.editProduct = async (req, id, res) => {
     const body = req.body
+
+    // ✅ Kiểm tra trùng tên sản phẩm (không tính sản phẩm hiện tại và các sản phẩm đã xóa)
+    const existingProduct = await Product.findOne({
+        _id: { $ne: id },
+        title: body.title,
+        deleted: false
+    });
+
+    if (existingProduct) {
+        throw new Error("TITLE_EXISTS");
+    }
 
     body.price = parseInt(body.price) || 0
     body.discountPercentage = parseInt(body.discountPercentage) || 0
@@ -226,10 +251,14 @@ module.exports.editProduct = async (req, id, res) => {
         body.thumbnail = uploadResult.secure_url
     }
 
-    req.body.updatedBy = {
-        account_id: res.locals.user.id,
-        updatedAt: new Date()
+    const userId = res.locals.user ? (res.locals.user._id || res.locals.user.id) : null;
+    if (userId) {
+        body.updatedBy = {
+            account_id: userId.toString(),
+            updatedAt: new Date()
+        }
     }
+
     const result = await Product.updateOne({ _id: id }, body)
     return result.modifiedCount > 0
 }

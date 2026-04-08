@@ -116,17 +116,24 @@ module.exports.create = async (req, res) => {
 module.exports.createProduct = async (req, res) => {
     try {
         const product = await productService.createProduct(req, res);
+        req.flash('success', 'Thêm sản phẩm thành công!');
         return respond(req, res, {
             status: 200,
             json: { success: true, message: 'Thêm sản phẩm thành công!', data: product },
             redirect: `${sysConfig.prefixAdmin}/products`
         });
     } catch (err) {
+        console.error("CREATE PRODUCT ERROR:", err);
+        if (err.message === "TITLE_EXISTS") {
+            req.flash('error', 'Tên sản phẩm đã tồn tại, vui lòng nhập tên khác!');
+        } else {
+            req.flash('error', 'Có lỗi xảy ra, vui lòng thử lại!');
+        }
         return respond(req, res, {
-            status: err.status || 500,
+            status: 400,
             json: {
                 success: false,
-                message: err.message || 'Có lỗi xảy ra'
+                message: err.message === 'TITLE_EXISTS' ? 'Tên sản phẩm đã tồn tại!' : 'Có lỗi xảy ra'
             },
             redirect: req.get('Referer') || `${sysConfig.prefixAdmin}/products`
         });
@@ -160,23 +167,31 @@ module.exports.editProduct = async (req, res) => {
     try {
         const updated = await productService.editProduct(req, req.params.id, res);
         if (!updated) {
+            req.flash('error', 'Sản phẩm không tồn tại!');
             return respond(req, res, {
                 status: 404,
                 json: { success: false, message: 'Sản phẩm không tồn tại!' },
                 redirect: `${sysConfig.prefixAdmin}/products`
             });
         }
+        req.flash('success', 'Cập nhật sản phẩm thành công!');
         return respond(req, res, {
             status: 200,
             json: { success: true, message: 'Cập nhật sản phẩm thành công!' },
             redirect: req.get('Referer') || `${sysConfig.prefixAdmin}/products/edit/${req.params.id}`
         });
     } catch (err) {
+        console.error("EDIT PRODUCT ERROR:", err);
+        if (err.message === "TITLE_EXISTS") {
+            req.flash('error', 'Tên sản phẩm đã tồn tại, vui lòng nhập tên khác!');
+        } else {
+            req.flash('error', 'Có lỗi xảy ra, vui lòng thử lại!');
+        }
         return respond(req, res, {
-            status: err.status || 500,
+            status: 400,
             json: {
                 success: false,
-                message: err.message || 'Có lỗi xảy ra'
+                message: err.message === 'TITLE_EXISTS' ? 'Tên sản phẩm đã tồn tại!' : 'Có lỗi xảy ra'
             },
             redirect: req.get('Referer') || `${sysConfig.prefixAdmin}/products`
         });

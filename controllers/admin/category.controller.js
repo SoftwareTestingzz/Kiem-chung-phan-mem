@@ -6,7 +6,7 @@ const respond = require('../../helper/respond');
 module.exports.index = async (req, res) => {
     try {
         const records = await categoryService.getList(req.query)
-        
+
         // Nếu có keyword mà không tìm thấy danh mục nào
         if (req.query.keyword && records.categories.length === 0) {
             req.flash("error", `Không tìm thấy danh mục nào với từ khóa: "${req.query.keyword}"`);
