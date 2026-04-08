@@ -112,7 +112,11 @@ module.exports.detail = async (req, res) => {
         }
 
         // Lấy bình luận đã được duyệt của sản phẩm
-        const comments = await Comment.find({ productId: product._id, deleted: false, status: 'approved' })
+        const comments = await Comment.find({
+            productId: product._id,
+            deleted: false,
+            status: { $ne: 'rejected' }
+        })
             .sort({ createdAt: -1 })
             .lean();
 
@@ -243,7 +247,7 @@ module.exports.comment = async (req, res) => {
             return sendError(400, 'Nội dung quá dài');
         }
 
-        // Tạo bình luận mới (mặc định status = 'pending')
+        // Tạo bình luận mới (mặc định status = 'approved')
         await Comment.create({
             productId: product._id,
             userId: user._id,
