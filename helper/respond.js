@@ -20,12 +20,23 @@ module.exports = function respond(req, res, { status = 200, json, render, redire
     if (redirect) return res.redirect(redirect);
     if (render) return res.render(render.view, render.data);
 
-    // 👇 fallback thông minh hơn
+    // 👇 fallback thông minh hơn cho browser
     if (json) {
-        // nếu là browser → redirect về trước
-        const referer = req.get('Referer');
-        if (referer) return res.redirect(referer);
+        // Nếu là browser request (không muốn JSON)
+        if (!wantsJson) {
+            // 1. Nếu là 404 -> render trang 404
+            if (status === 404) {
+                return res.status(404).render('client/pages/error/404', {
+                    pageTitle: '404 Not Found'
+                });
+            }
 
+            // 2. Nếu có Referer -> redirect về trang trước
+            const referer = req.get('Referer');
+            if (referer) return res.redirect(referer);
+        }
+
+        // 3. Cuối cùng mới trả về JSON (cho API hoặc fallback cuối cùng)
         return res.status(status).json(json);
     }
 };
