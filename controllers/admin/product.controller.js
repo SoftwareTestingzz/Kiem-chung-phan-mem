@@ -7,6 +7,12 @@ module.exports.index = async (req, res) => {
     try {
         const data = await productService.getList(req.query)
 
+        // Nếu có keyword mà không tìm thấy sản phẩm nào
+        if (req.query.keyword && data.products.length === 0) {
+            req.flash("error", `Không tìm thấy sản phẩm nào với từ khóa: "${req.query.keyword}"`);
+            return res.redirect(`${sysConfig.prefixAdmin}/products`);
+        }
+
         return respond(req, res, {
             status: 200,
             json: { success: true, message: 'Lấy dữ liệu thành công', data },
