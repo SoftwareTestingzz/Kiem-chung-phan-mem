@@ -9,8 +9,8 @@ function isValidEmail(email) {
 }
 
 // Check if user is admin
-function isAdmin(req) {
-    return req.session && req.session.user && req.session.user.role === 'admin';
+function hasPermission(res, permission) {
+    return res.locals.roleUser && res.locals.roleUser.permissions.includes(permission);
 }
 
 // =======================
@@ -19,7 +19,7 @@ function isAdmin(req) {
 
 module.exports.index = async (req, res) => {
     try {
-        if (!isAdmin(req)) {
+        if (!hasPermission(res, 'accounts_view')) {
             return res.status(403).send('Forbidden');
         }
         const records = await accountService.getList();
@@ -58,7 +58,7 @@ module.exports.create = async (req, res) => {
 // =======================
 module.exports.createAccount = async (req, res) => {
     try {
-        if (!isAdmin(req)) {
+        if (!hasPermission(res, 'accounts_create')) {
             return res.status(403).json({ success: false, message: 'Bạn không có quyền thực hiện thao tác này!' });
         }
         const { email, password, role } = req.body;
@@ -86,7 +86,7 @@ module.exports.createAccount = async (req, res) => {
 // =======================
 module.exports.lockAccount = async (req, res) => {
     try {
-        if (!isAdmin(req)) {
+        if (!hasPermission(res, 'accounts_edit')) {
             return res.status(403).json({ success: false, message: 'Bạn không có quyền thực hiện thao tác này!' });
         }
         const { email } = req.body;
@@ -105,7 +105,7 @@ module.exports.lockAccount = async (req, res) => {
 // =======================
 module.exports.unlockAccount = async (req, res) => {
     try {
-        if (!isAdmin(req)) {
+        if (!hasPermission(res, 'accounts_edit')) {
             return res.status(403).json({ success: false, message: 'Bạn không có quyền thực hiện thao tác này!' });
         }
         const { email } = req.body;
@@ -124,7 +124,7 @@ module.exports.unlockAccount = async (req, res) => {
 // =======================
 module.exports.deleteAccount = async (req, res) => {
     try {
-        if (!isAdmin(req)) {
+        if (!hasPermission(res, 'accounts_delete')) {
             return res.status(403).json({ success: false, message: 'Bạn không có quyền thực hiện thao tác này!' });
         }
         const { email } = req.body;
@@ -144,7 +144,7 @@ module.exports.deleteAccount = async (req, res) => {
 // =======================
 module.exports.changeStatus = async (req, res) => {
     try {
-        if (!isAdmin(req)) {
+        if (!hasPermission(res, 'accounts_edit')) {
             return respond(req, res, {
                 status: 403,
                 json: { success: false, message: 'Bạn không có quyền thực hiện thao tác này!' },
@@ -176,7 +176,7 @@ module.exports.changeStatus = async (req, res) => {
 
 module.exports.deleteAccount = async (req, res) => {
     try {
-        if (!isAdmin(req)) {
+        if (!hasPermission(res, 'accounts_delete')) {
             return respond(req, res, {
                 status: 403,
                 json: { success: false, message: 'Bạn không có quyền thực hiện thao tác này!' },

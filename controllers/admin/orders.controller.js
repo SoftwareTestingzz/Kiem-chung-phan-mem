@@ -2,8 +2,8 @@
 const orderService = require("../../services/admin/orders.service");
 const respond = require("../../helper/respond");
 
-function isAdmin(req) {
-    return req.session && req.session.user && req.session.user.role === 'admin';
+function hasPermission(res, permission) {
+    return res.locals.roleUser && res.locals.roleUser.permissions.includes(permission);
 }
 
 function isValidStatus(status) {
@@ -16,7 +16,7 @@ module.exports = {
     // ======================= DANH SÁCH ĐƠN =======================
     index: async (req, res) => {
         try {
-            if (!isAdmin(req)) {
+            if (!hasPermission(res, "orders_view")) {
                 return res.status(403).send('Forbidden');
             }
             const result = await orderService.getList(req.query);
@@ -49,7 +49,7 @@ module.exports = {
     // ======================= CHI TIẾT =======================
     detail: async (req, res) => {
         try {
-            if (!isAdmin(req)) {
+            if (!hasPermission(res, "orders_view")) {
                 return res.status(403).send('Forbidden');
             }
             const order = await orderService.getDetail(req.params.id);
@@ -69,7 +69,7 @@ module.exports = {
     // ======================= UPDATE STATUS =======================
     updateStatus: async (req, res) => {
         try {
-            if (!isAdmin(req)) {
+            if (!hasPermission(res, "orders_edit")) {
                 return res.status(403).json({ success: false, message: 'Bạn không có quyền thực hiện thao tác này!' });
             }
             const orderId = req.params.id;
