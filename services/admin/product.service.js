@@ -130,7 +130,9 @@ module.exports.create = async () => {
 }
 
 module.exports.createProduct = async (req, res) => {
+    console.log("--- CREATE PRODUCT SERVICE START ---");
     const body = req.body
+    console.log("Body:", body);
 
     // ✅ Kiểm tra trùng tên sản phẩm (không tính các sản phẩm đã xóa)
     const existingProduct = await Product.findOne({
@@ -139,6 +141,7 @@ module.exports.createProduct = async (req, res) => {
     });
 
     if (existingProduct) {
+        console.log("Error: TITLE_EXISTS");
         throw new Error("TITLE_EXISTS");
     }
 
@@ -224,7 +227,9 @@ module.exports.edit = async (id) => {
 }
 
 module.exports.editProduct = async (req, id, res) => {
+    console.log("--- EDIT PRODUCT SERVICE START ---", id);
     const body = req.body
+    console.log("Body:", body);
 
     // ✅ Kiểm tra trùng tên sản phẩm (không tính sản phẩm hiện tại và các sản phẩm đã xóa)
     const existingProduct = await Product.findOne({
@@ -234,6 +239,7 @@ module.exports.editProduct = async (req, id, res) => {
     });
 
     if (existingProduct) {
+        console.log("Error: TITLE_EXISTS");
         throw new Error("TITLE_EXISTS");
     }
 
@@ -260,5 +266,5 @@ module.exports.editProduct = async (req, id, res) => {
     }
 
     const result = await Product.updateOne({ _id: id }, body)
-    return result.modifiedCount > 0
+    return result.matchedCount > 0
 }

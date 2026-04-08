@@ -138,7 +138,9 @@ module.exports.create = async (req) => {
 }
 
 module.exports.createCategory = async (req) => {
+    console.log("--- CREATE CATEGORY SERVICE START ---");
     const body = req.body
+    console.log("Body:", body);
 
     if (!body.position || body.position === "") {
         const count = await Category.countDocuments({ deleted: false })
@@ -174,7 +176,9 @@ module.exports.edit = async (id) => {
 }
 
 module.exports.editCategory = async (req) => {
+    console.log("--- EDIT CATEGORY SERVICE START ---", req.params.id);
     const id = req.params.id
+    console.log("Body:", req.body);
 
     if (req.body.position) {
         req.body.position = parseInt(req.body.position)

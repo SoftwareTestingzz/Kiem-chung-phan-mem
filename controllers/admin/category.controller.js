@@ -99,17 +99,20 @@ module.exports.deleteCategory = async (req, res) => {
 module.exports.createCategory = async (req, res) => {
     try {
         const category = await categoryService.createCategory(req);
+        req.flash('success', 'Thêm danh mục thành công!');
         return respond(req, res, {
             status: 200,
             json: { success: true, message: 'Thêm danh mục thành công!', data: category },
             redirect: `${sysConfig.prefixAdmin}/categories`
         });
     } catch (err) {
+        console.error("CREATE CATEGORY ERROR:", err);
+        req.flash('error', 'Có lỗi xảy ra, vui lòng thử lại!');
         return respond(req, res, {
-            status: err.status || 500,
+            status: 500,
             json: {
                 success: false,
-                message: err.message || 'Có lỗi xảy ra'
+                message: 'Có lỗi xảy ra'
             },
             redirect: req.get('Referer') || `${sysConfig.prefixAdmin}/categories`
         });
@@ -120,17 +123,20 @@ module.exports.createCategory = async (req, res) => {
 module.exports.editCategory = async (req, res) => {
     try {
         await categoryService.editCategory(req);
+        req.flash('success', 'Cập nhật danh mục thành công!');
         return respond(req, res, {
             status: 200,
             json: { success: true, message: 'Cập nhật danh mục thành công!' },
             redirect: req.get('Referer') || `${sysConfig.prefixAdmin}/categories/edit/${req.params.id}`
         });
     } catch (err) {
+        console.error("EDIT CATEGORY ERROR:", err);
+        req.flash('error', 'Có lỗi xảy ra, vui lòng thử lại!');
         return respond(req, res, {
-            status: err.status || 500,
+            status: 500,
             json: {
                 success: false,
-                message: err.message || 'Có lỗi xảy ra'
+                message: 'Có lỗi xảy ra'
             },
             redirect: req.get('Referer') || `${sysConfig.prefixAdmin}/categories`
         });

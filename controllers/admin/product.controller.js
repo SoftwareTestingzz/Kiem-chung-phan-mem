@@ -114,8 +114,11 @@ module.exports.create = async (req, res) => {
 
 // [POST] /admin/products/create
 module.exports.createProduct = async (req, res) => {
+    console.log("--- CREATE PRODUCT CONTROLLER START ---");
+    console.log("Headers:", req.headers['accept']);
     try {
         const product = await productService.createProduct(req, res);
+        console.log("Create Success:", product._id);
         req.flash('success', 'Thêm sản phẩm thành công!');
         return respond(req, res, {
             status: 200,
@@ -164,8 +167,11 @@ module.exports.edit = async (req, res) => {
 
 // [PATCH] /admin/products/edit/:id
 module.exports.editProduct = async (req, res) => {
+    console.log("--- EDIT PRODUCT CONTROLLER START ---", req.params.id);
+    console.log("Headers:", req.headers['accept']);
     try {
         const updated = await productService.editProduct(req, req.params.id, res);
+        console.log("Update Success Result:", updated);
         if (!updated) {
             req.flash('error', 'Sản phẩm không tồn tại!');
             return respond(req, res, {
