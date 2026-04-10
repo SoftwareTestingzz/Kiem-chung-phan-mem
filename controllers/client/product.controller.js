@@ -49,7 +49,16 @@ module.exports.index = async (req, res) => {
         const categoriesMenu = await categoryService.getMenuCategories();
 
         // PAGINATION
-        const page = Math.max(1, parseInt(req.query.page) || 1);
+        const pageRaw = req.query.page;
+
+        if (pageRaw !== undefined && Number(pageRaw) < 1) {
+            return respond(req, res, {
+                status: 400,
+                json: { success: false, message: 'Page không hợp lệ' }
+            });
+        }
+
+        const page = Number(pageRaw) || 1;
         const perPage = Math.max(1, parseInt(req.query.perPage) || parseInt(req.query.limit) || 10);
         const totalItems = products.length;
         const totalPages = Math.max(1, Math.ceil(totalItems / perPage));

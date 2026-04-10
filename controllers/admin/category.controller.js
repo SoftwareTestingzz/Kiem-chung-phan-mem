@@ -20,7 +20,7 @@ module.exports.index = async (req, res) => {
         });
     } catch (err) {
         return respond(req, res, {
-            status: err.status || 500,
+            status: err.status || 400,
             json: {
                 success: false,
                 message: err.message || 'Có lỗi xảy ra'
@@ -42,7 +42,7 @@ module.exports.changeStatus = async (req, res) => {
         });
     } catch (err) {
         return respond(req, res, {
-            status: err.status || 500,
+            status: err.status || 400,
             json: {
                 success: false,
                 message: err.message || 'Có lỗi xảy ra'
@@ -69,7 +69,7 @@ module.exports.changeMulti = async (req, res) => {
             req.flash('error', 'Có lỗi xảy ra, vui lòng thử lại!');
         }
         return respond(req, res, {
-            status: err.status || 500,
+            status: err.status || 400,
             json: {
                 success: false,
                 message: err.message === 'CATEGORY_HAS_PRODUCTS' ? 'Danh mục vẫn còn sản phẩm' : (err.message || 'Có lỗi xảy ra')
@@ -95,7 +95,7 @@ module.exports.deleteCategory = async (req, res) => {
             req.flash('error', 'Có lỗi xảy ra, vui lòng thử lại!');
         }
         return respond(req, res, {
-            status: err.status || 500,
+            status: err.status || 400,
             json: {
                 success: false,
                 message: err.message === 'CATEGORY_HAS_PRODUCTS' ? 'Danh mục vẫn còn sản phẩm' : (err.message || 'Có lỗi xảy ra')
@@ -119,7 +119,7 @@ module.exports.createCategory = async (req, res) => {
         console.error("CREATE CATEGORY ERROR:", err);
         req.flash('error', 'Có lỗi xảy ra, vui lòng thử lại!');
         return respond(req, res, {
-            status: 500,
+            status: err.status || 400,
             json: {
                 success: false,
                 message: 'Có lỗi xảy ra'
@@ -143,7 +143,7 @@ module.exports.editCategory = async (req, res) => {
         console.error("EDIT CATEGORY ERROR:", err);
         req.flash('error', 'Có lỗi xảy ra, vui lòng thử lại!');
         return respond(req, res, {
-            status: 500,
+            status: err.status || 400,
             json: {
                 success: false,
                 message: 'Có lỗi xảy ra'
@@ -164,7 +164,7 @@ module.exports.create = async (req, res) => {
         });
     } catch (err) {
         return respond(req, res, {
-            status: err.status || 500,
+            status: err.status || 400,
             json: {
                 success: false,
                 message: err.message || 'Có lỗi xảy ra'
@@ -185,7 +185,7 @@ module.exports.edit = async (req, res) => {
         });
     } catch (err) {
         return respond(req, res, {
-            status: err.status || 500,
+            status: err.status || 400,
             json: {
                 success: false,
                 message: err.message || 'Có lỗi xảy ra'

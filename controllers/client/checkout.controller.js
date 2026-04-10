@@ -77,7 +77,7 @@ module.exports = {
 
         } catch (err) {
             console.error("Checkout Render Error:", err);
-            
+
             return res.redirect("/cart");
         }
     },

@@ -12,11 +12,6 @@ module.exports.createPost = (req, res, next) => {
         });
     }
 
-    if (!req.body.title) {
-        req.flash('error', 'Vui lòng nhập Tên danh mục!');
-        return res.status(400).json({ success: false, message: 'Vui lòng nhập Tên danh mục!' });
-    }
-
     if (req.body.title.length > 255) {
         req.flash('error', 'Tên danh mục tối đa 255 ký tự!');
         return res.status(400).json({ success: false, message: 'Tên danh mục tối đa 255 ký tự!' });
@@ -42,12 +37,10 @@ module.exports.createPost = (req, res, next) => {
     }
 
 
-    if (!['active', 'inactive'].includes(req.body.status)) {
-        req.flash('error', 'Trạng thái không hợp lệ!');
+    if (req.body.status && !['active', 'inactive'].includes(req.body.status)) {
         return respond(req, res, {
             status: 400,
-            json: { success: false, message: 'Trạng thái không hợp lệ!' },
-            redirect: `${sysConfig.prefixAdmin}/categories/create`
+            json: { success: false, message: 'Status không hợp lệ' }
         });
     }
 

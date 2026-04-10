@@ -8,7 +8,7 @@ module.exports.validateId = (req, res, next) => {
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
         return respond(req, res, {
-            status: 404,
+            status: 400,
             json: {
                 success: false,
                 message: 'ID không hợp lệ'

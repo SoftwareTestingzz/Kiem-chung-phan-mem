@@ -21,7 +21,7 @@ module.exports.index = async (req, res) => {
     } catch (err) {
         req.flash('error', 'Có lỗi xảy ra, vui lòng thử lại!')
         return respond(req, res, {
-            status: 500,
+            status: 400,
             json: { success: false, message: 'Có lỗi xảy ra, vui lòng thử lại!' },
             redirect: `${sysConfig.prefixAdmin}/dashboard`
         });
@@ -40,7 +40,7 @@ module.exports.changeStatus = async (req, res) => {
         });
     } catch (err) {
         return respond(req, res, {
-            status: 500,
+            status: 400,
             json: { success: false, message: 'Có lỗi xảy ra, vui lòng thử lại!' },
             redirect: req.get('Referer') || `${sysConfig.prefixAdmin}/products`
         });
@@ -51,7 +51,16 @@ module.exports.changeStatus = async (req, res) => {
 module.exports.changeMulti = async (req, res) => {
     try {
         const { type, ids } = req.body;
-        const result = await productService.changeMulti(type, ids.split(','));
+        const idsArray = Array.isArray(ids) ? ids : ids.split(',');
+
+        if (!idsArray || idsArray.length === 0) {
+            return respond(req, res, {
+                status: 400,
+                json: { success: false, message: 'Danh sách rỗng' }
+            });
+        }
+
+        const result = await productService.changeMulti(type, idsArray);
         return respond(req, res, {
             status: 200,
             json: { success: true, message: result.message },
@@ -59,7 +68,7 @@ module.exports.changeMulti = async (req, res) => {
         });
     } catch (err) {
         return respond(req, res, {
-            status: err.status || 500,
+            status: err.status || 400,
             json: {
                 success: false,
                 message: err.message || 'Có lỗi xảy ra'
@@ -80,7 +89,7 @@ module.exports.deleteProduct = async (req, res) => {
         });
     } catch (err) {
         return respond(req, res, {
-            status: err.status || 500,
+            status: err.status || 400,
             json: {
                 success: false,
                 message: err.message || 'Có lỗi xảy ra'
@@ -102,7 +111,7 @@ module.exports.create = async (req, res) => {
         });
     } catch (err) {
         return respond(req, res, {
-            status: err.status || 500,
+            status: err.status || 400,
             json: {
                 success: false,
                 message: err.message || 'Có lỗi xảy ra'
@@ -155,7 +164,7 @@ module.exports.edit = async (req, res) => {
         });
     } catch (err) {
         return respond(req, res, {
-            status: err.status || 500,
+            status: err.status || 400,
             json: {
                 success: false,
                 message: err.message || 'Có lỗi xảy ra'
@@ -225,7 +234,7 @@ module.exports.detail = async (req, res) => {
         });
     } catch (err) {
         return respond(req, res, {
-            status: err.status || 500,
+            status: err.status || 400,
             json: {
                 success: false,
                 message: err.message || 'Có lỗi xảy ra'

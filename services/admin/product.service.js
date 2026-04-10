@@ -56,6 +56,14 @@ module.exports.changeStatus = async (id, status) => {
 }
 
 module.exports.changeMulti = async (type, ids) => {
+    const found = await Product.find({ _id: { $in: ids } });
+
+    if (found.length !== ids.length) {
+        const err = new Error('NOT_FOUND');
+        err.status = 404;
+        throw err;
+    }
+
     const actions = {
         active: { status: "active" },
         inactive: { status: "inactive" },
@@ -110,14 +118,22 @@ module.exports.changeMulti = async (type, ids) => {
 }
 
 module.exports.deleteProduct = async (id) => {
+    const found = await Product.findOne({ _id: id, deleted: false });
+
+    if (!found) {
+        const err = new Error("NOT_FOUND");
+        err.status = 404;
+        throw err;
+    }
+
     return Product.updateOne(
         { _id: id },
         {
             deleted: true,
             deletedAt: new Date()
         }
-    )
-}
+    );
+};
 
 module.exports.create = async () => {
     const find = { deleted: false }

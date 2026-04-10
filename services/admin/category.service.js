@@ -50,13 +50,19 @@ module.exports.changeMulti = async (type, idsInput) => {
         : idsInput.split(',');
 
     if (!ids.length) {
-        throw { status: 400, message: 'Danh sách ID rỗng' };
+        throw { status: 404, message: 'Danh sách ID rỗng' };
     }
 
     for (const id of ids) {
         if (!require('mongoose').Types.ObjectId.isValid(id)) {
             throw { status: 400, message: 'ID không hợp lệ' };
         }
+    }
+
+    const found = await Category.find({ _id: { $in: ids } });
+
+    if (found.length !== ids.length) {
+        throw { status: 404, message: 'Danh mục không tồn tại' };
     }
 
     const actions = {
