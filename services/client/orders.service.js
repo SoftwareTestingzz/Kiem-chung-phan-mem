@@ -15,6 +15,12 @@ module.exports = {
     // Lấy chi tiết đơn hàng theo user
     // ====================================================
     getOrderDetail: async (userId, orderId) => {
+        // Validate ObjectId format
+        const mongoose = require('mongoose');
+        if (!mongoose.Types.ObjectId.isValid(orderId)) {
+            throw new Error("ID đơn hàng không hợp lệ");
+        }
+
         const order = await Order.findOne({
             _id: orderId,
             userId
@@ -29,6 +35,12 @@ module.exports = {
     // HỦY ĐƠN HÀNG (CLIENT)
     // ====================================================
     cancelOrder: async (userId, orderId) => {
+        // Validate ObjectId format
+        const mongoose = require('mongoose');
+        if (!mongoose.Types.ObjectId.isValid(orderId)) {
+            throw new Error("ID đơn hàng không hợp lệ");
+        }
+
         const order = await Order.findOne({
             _id: orderId,
             userId

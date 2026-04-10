@@ -51,7 +51,16 @@ module.exports = {
 
         } catch (err) {
             console.error("Order Detail Error:", err.message);
-            req.flash("error", "Không thể xem chi tiết đơn hàng!");
+            
+            // Phân loại lỗi
+            if (err.message === "ID đơn hàng không hợp lệ") {
+                req.flash("error", "ID đơn hàng không hợp lệ!");
+            } else if (err.message === "Không tìm thấy đơn hàng") {
+                req.flash("error", "Không tìm thấy đơn hàng!");
+            } else {
+                req.flash("error", "Không thể xem chi tiết đơn hàng!");
+            }
+            
             return res.redirect("/orders");
         }
     },
