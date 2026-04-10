@@ -10,19 +10,27 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+# documentation files (local only)
+docs/*.md
+docs/*.txt
+docs/*.json
+docs/*.py
+docs/*.js
+
 # Jira scripts and temp files
 test-jira.js
 get-users.js
 test-parse.js
 provision-jira.js
 users.json
-<<<<<<< HEAD
+
+# MCP config
 mcp.json
 
 # Google service account keys (sensitive)
 testing1-*.json
+
+# Temp files
 .tmp
 setting.json
-
-
 ./temp

@@ -14,6 +14,12 @@ module.exports.placeOrderValidates = [
     body("address")
         .notEmpty().withMessage("Vui lòng nhập địa chỉ nhận hàng"),
 
-    body("selectedItems")
-        .notEmpty().withMessage("Không có sản phẩm nào được chọn")
+    // Cho phép selectedItems HOẶC directItems
+    body()
+        .custom((value, { req }) => {
+            if (!req.body.selectedItems && !req.body.directItems) {
+                throw new Error("Không có sản phẩm nào được chọn");
+            }
+            return true;
+        })
 ];

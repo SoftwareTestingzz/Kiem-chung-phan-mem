@@ -49,6 +49,12 @@ module.exports.addToCart = async (req, productId, quantity) => {
     if (!req.session.user)
         throw new Error("Bạn phải đăng nhập!");
 
+    // Validate ObjectId format
+    const mongoose = require('mongoose');
+    if (!mongoose.Types.ObjectId.isValid(productId)) {
+        throw new Error("Mã sản phẩm không hợp lệ!");
+    }
+
     const userId = req.session.user._id;
     const qty = parseInt(quantity);
 
@@ -106,6 +112,12 @@ module.exports.addToCart = async (req, productId, quantity) => {
    UPDATE SỐ LƯỢNG
 ====================================================== */
 module.exports.updateQuantity = async (req, productId, qty) => {
+    // Validate ObjectId format
+    const mongoose = require('mongoose');
+    if (!mongoose.Types.ObjectId.isValid(productId)) {
+        throw new Error("Mã sản phẩm không hợp lệ!");
+    }
+
     const userId = req.session.user._id;
     const quantity = parseInt(qty);
 
@@ -133,11 +145,27 @@ module.exports.updateQuantity = async (req, productId, qty) => {
    XÓA 1 SẢN PHẨM
 ====================================================== */
 module.exports.removeItem = async (req, productId) => {
+    // Validate ObjectId format
+    const mongoose = require('mongoose');
+    if (!mongoose.Types.ObjectId.isValid(productId)) {
+        throw new Error("Mã sản phẩm không hợp lệ!");
+    }
+
     const userId = req.session.user._id;
 
     let cart = await Cart.findOne({ userId });
-    if (!cart) return true;
+    if (!cart) throw new Error("Giỏ hàng trống!");
 
+    // Kiểm tra sản phẩm có tồn tại trong giỏ không
+    const itemIndex = cart.items.findIndex(
+        i => i.productId.toString() === productId
+    );
+
+    if (itemIndex === -1) {
+        throw new Error("Sản phẩm không có trong giỏ hàng");
+    }
+
+    // Xóa sản phẩm
     cart.items = cart.items.filter(
         i => i.productId.toString() !== productId
     );
@@ -151,6 +179,12 @@ module.exports.removeItem = async (req, productId) => {
 ====================================================== */
 module.exports.clearCart = async (req) => {
     const userId = req.session.user._id;
+    
+    let cart = await Cart.findOne({ userId });
+    if (!cart) {
+        throw new Error("Giỏ hàng trống!");
+    }
+    
     await Cart.deleteOne({ userId });
     return true;
 };
