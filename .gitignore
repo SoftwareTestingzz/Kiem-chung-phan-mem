@@ -8,3 +8,10 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# documentation files (local only)
+docs/*.md
+docs/*.txt
+docs/*.json
+docs/*.py
+docs/*.js
