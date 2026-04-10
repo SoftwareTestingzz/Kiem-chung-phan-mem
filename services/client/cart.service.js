@@ -137,8 +137,18 @@ module.exports.removeItem = async (req, productId) => {
     const userId = req.session.user._id;
 
     let cart = await Cart.findOne({ userId });
-    if (!cart) return true;
+    if (!cart) throw new Error("Giỏ hàng trống!");
 
+    // Kiểm tra sản phẩm có tồn tại trong giỏ không
+    const itemIndex = cart.items.findIndex(
+        i => i.productId.toString() === productId
+    );
+
+    if (itemIndex === -1) {
+        throw new Error("Sản phẩm không có trong giỏ hàng");
+    }
+
+    // Xóa sản phẩm
     cart.items = cart.items.filter(
         i => i.productId.toString() !== productId
     );
