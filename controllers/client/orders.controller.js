@@ -34,8 +34,16 @@ module.exports = {
 
 
     orderDetail: async (req, res) => {
+        const isAPI = req.headers.accept && req.headers.accept.includes('application/json');
+        
         try {
             if (!req.session.user) {
+                if (isAPI) {
+                    return res.status(401).json({
+                        success: false,
+                        message: "Bạn chưa đăng nhập!"
+                    });
+                }
                 return res.redirect("/login");
             }
 
@@ -43,6 +51,13 @@ module.exports = {
             const orderId = req.params.id;
 
             const order = await ordersService.getOrderDetail(userId, orderId);
+
+            if (isAPI) {
+                return res.json({
+                    success: true,
+                    order
+                });
+            }
 
             return res.render("client/pages/orders/detail", {
                 pageTitle: "Chi tiết đơn hàng",
@@ -52,7 +67,27 @@ module.exports = {
         } catch (err) {
             console.error("Order Detail Error:", err.message);
             
-            // Phân loại lỗi
+            if (isAPI) {
+                // API response với status code đúng
+                if (err.message === "ID đơn hàng không hợp lệ") {
+                    return res.status(400).json({
+                        success: false,
+                        message: "ID đơn hàng không hợp lệ!"
+                    });
+                } else if (err.message === "Không tìm thấy đơn hàng") {
+                    return res.status(404).json({
+                        success: false,
+                        message: "Không tìm thấy đơn hàng!"
+                    });
+                } else {
+                    return res.status(500).json({
+                        success: false,
+                        message: "Lỗi hệ thống!"
+                    });
+                }
+            }
+            
+            // HTML response
             if (err.message === "ID đơn hàng không hợp lệ") {
                 req.flash("error", "ID đơn hàng không hợp lệ!");
             } else if (err.message === "Không tìm thấy đơn hàng") {
