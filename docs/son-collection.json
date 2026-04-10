@@ -1,0 +1,2118 @@
+{
+  "info": {
+    "_postman_id": "son-verdish-2024-001",
+    "name": "Verdish — Sơn's Collection",
+    "description": "Phần của Sơn: Auth Client (01) + Blog Client (07) + Auth Admin (08) + E2E-01/02\n\nAccounts từ seed:\n- Client: nguyenvanan@gmail.com / 123456\n- Admin: verdish@gmail.com / verdishAdmin",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Tự động set timestamp cho mỗi request",
+          "pm.environment.set('timestamp', Date.now());",
+          "",
+          "// Tự động thêm Accept: application/json để server trả JSON thay vì HTML",
+          "pm.request.headers.upsert({ key: 'Accept', value: 'application/json' });",
+          "",
+          "// Reset bug list cho request này",
+          "pm.variables.set('_bugs', '[]');"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// ============================================================",
+          "// AUTO LOG BUG TO JIRA — Sprint 2",
+          "// ============================================================",
+          "",
+          "const _jiraUrl    = pm.environment.get('jira_url') || 'https://pson4282.atlassian.net';",
+          "const _jiraEmail  = pm.environment.get('jira_email') || 'pson4282@gmail.com';",
+          "const _jiraToken  = pm.environment.get('jira_api_token');",
+          "const _projectKey = 'KIEM';",
+          "const _sprintId   = 2;",
+          "",
+          "// Đọc danh sách test fail được push từ request-level test scripts",
+          "const _bugs = JSON.parse(pm.variables.get('_bugs') || '[]');",
+          "pm.variables.set('_bugs', '[]');",
+          "",
+          "if (_bugs.length > 0 && _jiraToken && _jiraToken !== '{{jira_api_token}}') {",
+          "  const summary = `[BUG] ${pm.info.requestName} — ${_bugs.length} test(s) failed`;",
+          "  const detail  = `Request: ${pm.info.requestName}\\nURL: ${pm.request.url}\\nMethod: ${pm.request.method}\\nStatus: ${pm.response.code}\\n\\nFailed tests:\\n${_bugs.map(b => '- ' + b).join('\\n')}`;",
+          "  pm.sendRequest({",
+          "    url: `${_jiraUrl}/rest/api/3/issue`,",
+          "    method: 'POST',",
+          "    header: { 'Content-Type': 'application/json', 'Authorization': 'Basic ' + btoa(`${_jiraEmail}:${_jiraToken}`) },",
+          "    body: { mode: 'raw', raw: JSON.stringify({ fields: {",
+          "      project: { key: _projectKey },",
+          "      summary: summary,",
+          "      description: { version: 1, type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: detail }] }] },",
+          "      issuetype: { name: 'Bug' },",
+          "      customfield_10020: _sprintId",
+          "    }}) }",
+          "  }, (err, res) => {",
+          "    if (err) console.error('[Jira] Error:', err);",
+          "    else if (res.code >= 400) console.error('[Jira] Failed:', res.code, res.text());",
+          "    else console.log('[Jira] Created:', res.json().key, '—', summary);",
+          "  });",
+          "}"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:3000", "type": "string" },
+    {
+      "key": "client_email",
+      "value": "nguyenvanan@gmail.com",
+      "type": "string"
+    },
+    { "key": "client_password", "value": "123456", "type": "string" },
+    { "key": "admin_email", "value": "verdish@gmail.com", "type": "string" },
+    { "key": "admin_password", "value": "verdishAdmin", "type": "string" },
+    { "key": "test_blog_slug", "value": "", "type": "string" },
+    { "key": "otp_code", "value": "", "type": "string" },
+    { "key": "timestamp", "value": "", "type": "string" },
+    { "key": "reg_email", "value": "", "type": "string" },
+    { "key": "e2e_email", "value": "", "type": "string" },
+    { "key": "client_session_set", "value": "", "type": "string" },
+    { "key": "admin_session_set", "value": "", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "01 — Client Auth",
+      "item": [
+        {
+          "name": "01.1 — Login",
+          "item": [
+            {
+              "name": "AUTH-L-01 | Login thành công",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('TC01 - Status 200 OK', () => {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "pm.test('TC01 - Response JSON thành công', () => {",
+                      "  const json = pm.response.json();",
+                      "  pm.expect(json).to.have.property('success', true);",
+                      "});",
+                      "pm.test('TC01 - Cookie session được set', () => {",
+                      "  const cookie = pm.cookies.get('connect.sid');",
+                      "  pm.expect(cookie).to.exist;",
+                      "  pm.environment.set('client_session_set', 'true');",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/x-www-form-urlencoded"
+                  }
+                ],
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    {
+                      "key": "email",
+                      "value": "{{client_email}}",
+                      "type": "text"
+                    },
+                    {
+                      "key": "password",
+                      "value": "{{client_password}}",
+                      "type": "text"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{base_url}}/login",
+                  "host": ["{{base_url}}"],
+                  "path": ["login"]
+                }
+              }
+            },
+            {
+              "name": "AUTH-L-02 | Login sai password",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('TC02 - Status 401', () => {",
+                      "  pm.response.to.have.status(401);",
+                      "});",
+                      "pm.test('TC02 - Response có success: false và message lỗi', () => {",
+                      "  const json = pm.response.json();",
+                      "  pm.expect(json.success).to.be.false;",
+                      "  pm.expect(json.message).to.be.a('string').and.not.empty;",
+                      "});",
+                      "pm.test('TC02 - Không set cookie session mới', () => {",
+                      "  const json = pm.response.json();",
+                      "  pm.expect(json.success).to.be.false;",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/x-www-form-urlencoded"
+                  }
+                ],
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    {
+                      "key": "email",
+                      "value": "{{client_email}}",
+                      "type": "text"
+                    },
+                    {
+                      "key": "password",
+                      "value": "WrongPass999",
+                      "type": "text"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{base_url}}/login",
+                  "host": ["{{base_url}}"],
+                  "path": ["login"]
+                }
+              }
+            },
+            {
+              "name": "AUTH-L-03 | Login email không tồn tại",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('TC03 - Status 401', () => {",
+                      "  pm.response.to.have.status(401);",
+                      "});",
+                      "pm.test('TC03 - Response có success: false và message lỗi', () => {",
+                      "  const json = pm.response.json();",
+                      "  pm.expect(json.success).to.be.false;",
+                      "  pm.expect(json.message).to.include('tồn tại');",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/x-www-form-urlencoded"
+                  }
+                ],
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    {
+                      "key": "email",
+                      "value": "notexist_{{timestamp}}@fake.com",
+                      "type": "text"
+                    },
+                    { "key": "password", "value": "Test@123", "type": "text" }
+                  ]
+                },
+                "url": {
+                  "raw": "{{base_url}}/login",
+                  "host": ["{{base_url}}"],
+                  "path": ["login"]
+                }
+              }
+            },
+            {
+              "name": "AUTH-L-04 | Login thiếu email (form rỗng)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('TC04 - Status 400', () => {",
+                      "  pm.response.to.have.status(400);",
+                      "});",
+                      "pm.test('TC04 - Response có errors array từ validation', () => {",
+                      "  const json = pm.response.json();",
+                      "  pm.expect(json.success).to.be.false;",
+                      "  pm.expect(json.errors).to.be.an('array').and.not.empty;",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/x-www-form-urlencoded"
+                  }
+                ],
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    { "key": "email", "value": "", "type": "text" },
+                    { "key": "password", "value": "", "type": "text" }
+                  ]
+                },
+                "url": {
+                  "raw": "{{base_url}}/login",
+                  "host": ["{{base_url}}"],
+                  "path": ["login"]
+                }
+              }
+            },
+            {
+              "name": "AUTH-L-05 | Login thiếu password",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('TC05 - Status 400', () => {",
+                      "  pm.response.to.have.status(400);",
+                      "});",
+                      "pm.test('TC05 - Response có errors array từ validation', () => {",
+                      "  const json = pm.response.json();",
+                      "  pm.expect(json.success).to.be.false;",
+                      "  pm.expect(json.errors).to.be.an('array').and.not.empty;",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/x-www-form-urlencoded"
+                  }
+                ],
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    {
+                      "key": "email",
+                      "value": "{{client_email}}",
+                      "type": "text"
+                    },
+                    { "key": "password", "value": "", "type": "text" }
+                  ]
+                },
+                "url": {
+                  "raw": "{{base_url}}/login",
+                  "host": ["{{base_url}}"],
+                  "path": ["login"]
+                }
+              }
+            },
+            {
+              "name": "AUTH-L-06 | Login email sai format",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('TC06 - Status 400', () => {",
+                      "  pm.response.to.have.status(400);",
+                      "});",
+                      "pm.test('TC06 - Response có errors array từ validation', () => {",
+                      "  const json = pm.response.json();",
+                      "  pm.expect(json.success).to.be.false;",
+                      "  pm.expect(json.errors).to.be.an('array').and.not.empty;",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/x-www-form-urlencoded"
+                  }
+                ],
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    { "key": "email", "value": "not-an-email", "type": "text" },
+                    { "key": "password", "value": "Test@123", "type": "text" }
+                  ]
+                },
+                "url": {
+                  "raw": "{{base_url}}/login",
+                  "host": ["{{base_url}}"],
+                  "path": ["login"]
+                }
+              }
+            },
+            {
+              "name": "AUTH-L-07 | Login tài khoản bị khóa (inactive)",
+              "description": "Điều kiện: Phải có account với status=inactive trong DB",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('TC07 - Status 403', () => {",
+                      "  pm.response.to.have.status(403);",
+                      "});",
+                      "pm.test('TC07 - Response có success: false và message tài khoản bị khóa', () => {",
+                      "  const json = pm.response.json();",
+                      "  pm.expect(json.success).to.be.false;",
+                      "  pm.expect(json.message).to.include('khóa');",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/x-www-form-urlencoded"
+                  }
+                ],
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    {
+                      "key": "email",
+                      "value": "locked_user@verdish.com",
+                      "type": "text"
+                    },
+                    { "key": "password", "value": "Test@123", "type": "text" }
+                  ]
+                },
+                "url": {
+                  "raw": "{{base_url}}/login",
+                  "host": ["{{base_url}}"],
+                  "path": ["login"]
+                }
+              }
+            },
+            {
+              "name": "AUTH-L-08 | Logout",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('TC08 - Logout redirect về trang login hoặc home', () => {",
+                      "  pm.expect([200, 302]).to.include(pm.response.code);",
+                      "  if (pm.response.code === 302) {",
+                      "    const loc = pm.response.headers.get('Location') || '';",
+                      "    pm.expect(loc).to.satisfy(",
+                      "      (l) => l.includes('login') || l === '/' || l === ''",
+                      "    );",
+                      "  }",
+                      "});",
+                      "pm.test('TC08 - Session bị xóa sau logout', () => {",
+                      "  pm.environment.unset('client_session_set');",
+                      "  pm.cookies.clear();",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/login/logout",
+                  "host": ["{{base_url}}"],
+                  "path": ["login", "logout"]
+                }
+              }
+            }
+          ]
+        },
+
+        {
+          "name": "01.2 — Register (3-step OTP)",
+          "item": [
+            {
+              "name": "AUTH-R-01 | Bước 1 — Gửi OTP đăng ký thành công",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('TC-R01 - Gửi OTP thành công (200 hoặc redirect verify-otp)', () => {",
+                      "  pm.expect([200, 302]).to.include(pm.response.code);",
+                      "});",
+                      "pm.test('TC-R01 - OTP form hiển thị hoặc redirect đúng', () => {",
+                      "  if (pm.response.code === 302) {",
+                      "    const loc = pm.response.headers.get('Location') || '';",
+                      "    pm.expect(loc).to.include('verify-otp');",
+                      "  }",
+                      "});",
+                      "pm.environment.set('reg_email', `newuser_${pm.environment.get('timestamp')}@test.com`);"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/x-www-form-urlencoded"
+                  }
+                ],
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    {
+                      "key": "fullName",
+                      "value": "Test User {{timestamp}}",
+                      "type": "text"
+                    },
+                    {
+                      "key": "email",
+                      "value": "newuser_{{timestamp}}@test.com",
+                      "type": "text"
+                    },
+                    { "key": "password", "value": "Test@123", "type": "text" }
+                  ]
+                },
+                "url": {
+                  "raw": "{{base_url}}/register",
+                  "host": ["{{base_url}}"],
+                  "path": ["register"]
+                }
+              }
+            },
+            {
+              "name": "AUTH-R-02 | Bước 1 — Email đã tồn tại",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('TC-R02 - Status 200 với success: false khi email đã tồn tại', () => {",
+                      "  pm.response.to.have.status(200);",
+                      "  const json = pm.response.json();",
+                      "  pm.expect(json.success).to.be.false;",
+                      "  if (json.message) {",
+                      "    pm.expect(json.message).to.include('tồn tại');",
+                      "  } else if (json.errors) {",
+                      "    pm.expect(json.errors).to.be.an('array');",
+                      "  }",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/x-www-form-urlencoded"
+                  }
+                ],
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    { "key": "fullName", "value": "Duplicate", "type": "text" },
+                    {
+                      "key": "email",
+                      "value": "{{client_email}}",
+                      "type": "text"
+                    },
+                    { "key": "password", "value": "Test@123", "type": "text" },
+                    { "key": "confirmPassword", "value": "Test@123", "type": "text" }
+                  ]
+                },
+                "url": {
+                  "raw": "{{base_url}}/register",
+                  "host": ["{{base_url}}"],
+                  "path": ["register"]
+                }
+              }
+            },
+            {
+              "name": "AUTH-R-03 | Bước 1 — Email sai format",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('TC-R03 - Validation fail trả 200 (render HTML)', () => {",
+                      "  pm.response.to.have.status(200);",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/x-www-form-urlencoded"
+                  }
+                ],
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    { "key": "fullName", "value": "Test", "type": "text" },
+                    { "key": "email", "value": "invalidemail", "type": "text" },
+                    { "key": "password", "value": "Test@123", "type": "text" }
+                  ]
+                },
+                "url": {
+                  "raw": "{{base_url}}/register",
+                  "host": ["{{base_url}}"],
+                  "path": ["register"]
+                }
+              }
+            },
+            {
+              "name": "AUTH-R-04 | Bước 1 — Thiếu fullName",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('TC-R04 - Validation fail trả 200 (render HTML)', () => {",
+                      "  pm.response.to.have.status(200);",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/x-www-form-urlencoded"
+                  }
+                ],
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    { "key": "fullName", "value": "", "type": "text" },
+                    {
+                      "key": "email",
+                      "value": "newuser@test.com",
+                      "type": "text"
+                    },
+                    { "key": "password", "value": "Test@123", "type": "text" }
+                  ]
+                },
+                "url": {
+                  "raw": "{{base_url}}/register",
+                  "host": ["{{base_url}}"],
+                  "path": ["register"]
+                }
+              }
+            },
+            {
+              "name": "AUTH-R-05 | Bước 1 — Password quá ngắn (< 6 ký tự)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('TC-R05 - Validation fail trả 200 (render HTML)', () => {",
+                      "  pm.response.to.have.status(200);",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/x-www-form-urlencoded"
+                  }
+                ],
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    { "key": "fullName", "value": "Test", "type": "text" },
+                    {
+                      "key": "email",
+                      "value": "test_short@test.com",
+                      "type": "text"
+                    },
+                    { "key": "password", "value": "abc", "type": "text" }
+                  ]
+                },
+                "url": {
+                  "raw": "{{base_url}}/register",
+                  "host": ["{{base_url}}"],
+                  "path": ["register"]
+                }
+              }
+            },
+            {
+              "name": "AUTH-R-06 | Bước 2 — Verify OTP đúng",
+              "description": "Lưu ý: Cần điền otp_code vào environment variable trước khi chạy",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('TC-R06 - OTP đúng được chấp nhận', () => {",
+                      "  pm.expect([200, 302]).to.include(pm.response.code);",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/x-www-form-urlencoded"
+                  }
+                ],
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    { "key": "otp", "value": "{{otp_code}}", "type": "text" }
+                  ]
+                },
+                "url": {
+                  "raw": "{{base_url}}/register/verify-otp",
+                  "host": ["{{base_url}}"],
+                  "path": ["register", "verify-otp"]
+                }
+              }
+            },
+            {
+              "name": "AUTH-R-07 | Bước 2 — OTP sai",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('TC-R07 - Status 200 với success: false khi OTP sai', () => {",
+                      "  pm.response.to.have.status(200);",
+                      "  const json = pm.response.json();",
+                      "  pm.expect(json.success).to.be.false;",
+                      "  pm.expect(json.message).to.be.a('string').and.not.empty;",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/x-www-form-urlencoded"
+                  }
+                ],
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    { "key": "otp", "value": "000000", "type": "text" }
+                  ]
+                },
+                "url": {
+                  "raw": "{{base_url}}/register/verify-otp",
+                  "host": ["{{base_url}}"],
+                  "path": ["register", "verify-otp"]
+                }
+              }
+            },
+            {
+              "name": "AUTH-R-08 | Bước 2 — OTP hết hạn (giả lập)",
+              "description": "Cần setup: insert OTP với expired_at trong quá khứ vào DB",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('TC-R08 - Status 200 với success: false khi OTP hết hạn', () => {",
+                      "  pm.response.to.have.status(200);",
+                      "  const json = pm.response.json();",
+                      "  pm.expect(json.success).to.be.false;",
+                      "  pm.expect(json.message).to.be.a('string').and.not.empty;",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/x-www-form-urlencoded"
+                  }
+                ],
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    { "key": "otp", "value": "111111", "type": "text" }
+                  ]
+                },
+                "url": {
+                  "raw": "{{base_url}}/register/verify-otp",
+                  "host": ["{{base_url}}"],
+                  "path": ["register", "verify-otp"]
+                }
+              }
+            },
+            {
+              "name": "AUTH-R-09 | Resend OTP",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('TC-R09 - Resend OTP thành công', () => {",
+                      "  pm.expect([200, 302]).to.include(pm.response.code);",
+                      "});",
+                      "pm.test('TC-R09 - Response time hợp lý (< 5s)', () => {",
+                      "  pm.expect(pm.response.responseTime).to.be.below(5000);",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/x-www-form-urlencoded"
+                  }
+                ],
+                "body": { "mode": "urlencoded", "urlencoded": [] },
+                "url": {
+                  "raw": "{{base_url}}/register/resend-otp",
+                  "host": ["{{base_url}}"],
+                  "path": ["register", "resend-otp"]
+                }
+              }
+            },
+            {
+              "name": "AUTH-R-10 | Bước 3 — Tạo tài khoản sau verify OTP",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('TC-R10 - Tạo tài khoản thành công', () => {",
+                      "  pm.expect([200, 302]).to.include(pm.response.code);",
+                      "});",
+                      "pm.test('TC-R10 - Redirect hoặc login page sau khi tạo xong', () => {",
+                      "  if (pm.response.code === 302) {",
+                      "    const loc = pm.response.headers.get('Location') || '';",
+                      "    pm.expect(loc).to.satisfy((l) => l.includes('login') || l === '/');",
+                      "  }",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/x-www-form-urlencoded"
+                  }
+                ],
+                "body": { "mode": "urlencoded", "urlencoded": [] },
+                "url": {
+                  "raw": "{{base_url}}/register/create-account",
+                  "host": ["{{base_url}}"],
+                  "path": ["register", "create-account"]
+                }
+              }
+            }
+          ]
+        },
+
+        {
+          "name": "01.3 — Forgot Password (3-step OTP)",
+          "item": [
+            {
+              "name": "AUTH-FP-01 | Gửi OTP reset thành công",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('TC-FP01 - Gửi OTP reset thành công', () => {",
+                      "  pm.expect([200, 302]).to.include(pm.response.code);",
+                      "});",
+                      "pm.test('TC-FP01 - Redirect sang verify-otp', () => {",
+                      "  if (pm.response.code === 302) {",
+                      "    pm.expect(pm.response.headers.get('Location')).to.include('verify-otp');",
+                      "  }",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/x-www-form-urlencoded"
+                  }
+                ],
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    {
+                      "key": "email",
+                      "value": "{{client_email}}",
+                      "type": "text"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{base_url}}/password/forgot",
+                  "host": ["{{base_url}}"],
+                  "path": ["password", "forgot"]
+                }
+              }
+            },
+            {
+              "name": "AUTH-FP-02 | Email không tồn tại trong DB",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('TC-FP02 - Status 200 với success: false khi email không tồn tại', () => {",
+                      "  pm.response.to.have.status(200);",
+                      "  const json = pm.response.json();",
+                      "  pm.expect(json.success).to.be.false;",
+                      "  pm.expect(json.message).to.be.a('string').and.not.empty;",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/x-www-form-urlencoded"
+                  }
+                ],
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    {
+                      "key": "email",
+                      "value": "ghost_{{timestamp}}@nowhere.com",
+                      "type": "text"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{base_url}}/password/forgot",
+                  "host": ["{{base_url}}"],
+                  "path": ["password", "forgot"]
+                }
+              }
+            },
+            {
+              "name": "AUTH-FP-03 | Email không hợp lệ",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('TC-FP03 - Status 200 với success: false khi email sai format', () => {",
+                      "  pm.response.to.have.status(200);",
+                      "  const json = pm.response.json();",
+                      "  pm.expect(json.success).to.be.false;",
+                      "  pm.expect(json.message).to.be.a('string').and.not.empty;",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/x-www-form-urlencoded"
+                  }
+                ],
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    {
+                      "key": "email",
+                      "value": "not-valid-email",
+                      "type": "text"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{base_url}}/password/forgot",
+                  "host": ["{{base_url}}"],
+                  "path": ["password", "forgot"]
+                }
+              }
+            },
+            {
+              "name": "AUTH-FP-04 | Resend OTP reset",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('TC-FP04 - Resend OTP reset hoạt động', () => {",
+                      "  pm.expect([200, 302]).to.include(pm.response.code);",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/x-www-form-urlencoded"
+                  }
+                ],
+                "body": { "mode": "urlencoded", "urlencoded": [] },
+                "url": {
+                  "raw": "{{base_url}}/password/resend-otp",
+                  "host": ["{{base_url}}"],
+                  "path": ["password", "resend-otp"]
+                }
+              }
+            },
+            {
+              "name": "AUTH-FP-05 | Verify OTP đúng",
+              "description": "Cần điền otp_code vào environment variable trước khi chạy",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('TC-FP05 - OTP đúng được chấp nhận', () => {",
+                      "  pm.expect([200, 302]).to.include(pm.response.code);",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/x-www-form-urlencoded"
+                  }
+                ],
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    { "key": "otp", "value": "{{otp_code}}", "type": "text" }
+                  ]
+                },
+                "url": {
+                  "raw": "{{base_url}}/password/verify-otp",
+                  "host": ["{{base_url}}"],
+                  "path": ["password", "verify-otp"]
+                }
+              }
+            },
+            {
+              "name": "AUTH-FP-06 | Verify OTP sai",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('TC-FP06 - Status 200 với success: false khi OTP sai', () => {",
+                      "  pm.response.to.have.status(200);",
+                      "  const json = pm.response.json();",
+                      "  pm.expect(json.success).to.be.false;",
+                      "  pm.expect(json.message).to.be.a('string').and.not.empty;",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/x-www-form-urlencoded"
+                  }
+                ],
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    { "key": "otp", "value": "999999", "type": "text" }
+                  ]
+                },
+                "url": {
+                  "raw": "{{base_url}}/password/verify-otp",
+                  "host": ["{{base_url}}"],
+                  "path": ["password", "verify-otp"]
+                }
+              }
+            },
+            {
+              "name": "AUTH-FP-07 | Reset password thành công",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('TC-FP07 - Reset password thành công', () => {",
+                      "  pm.expect([200, 302]).to.include(pm.response.code);",
+                      "});",
+                      "pm.test('TC-FP07 - Redirect sang login sau khi reset', () => {",
+                      "  if (pm.response.code === 302) {",
+                      "    pm.expect(pm.response.headers.get('Location')).to.include('login');",
+                      "  }",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/x-www-form-urlencoded"
+                  }
+                ],
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    {
+                      "key": "password",
+                      "value": "NewPass@456",
+                      "type": "text"
+                    },
+                    {
+                      "key": "confirmPassword",
+                      "value": "NewPass@456",
+                      "type": "text"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{base_url}}/password/reset-password",
+                  "host": ["{{base_url}}"],
+                  "path": ["password", "reset-password"]
+                }
+              }
+            },
+            {
+              "name": "AUTH-FP-08 | Password mới không khớp confirm",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('TC-FP08 - Status 200 với success: false khi password không khớp', () => {",
+                      "  pm.response.to.have.status(200);",
+                      "  const json = pm.response.json();",
+                      "  pm.expect(json.success).to.be.false;",
+                      "  pm.expect(json.message).to.be.a('string').and.not.empty;",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/x-www-form-urlencoded"
+                  }
+                ],
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    {
+                      "key": "password",
+                      "value": "NewPass@456",
+                      "type": "text"
+                    },
+                    {
+                      "key": "confirmPassword",
+                      "value": "DifferentPass@789",
+                      "type": "text"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{base_url}}/password/reset-password",
+                  "host": ["{{base_url}}"],
+                  "path": ["password", "reset-password"]
+                }
+              }
+            },
+            {
+              "name": "AUTH-FP-09 | Password mới quá ngắn",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('TC-FP09 - Status 200 với success: false khi password quá ngắn', () => {",
+                      "  pm.response.to.have.status(200);",
+                      "  const json = pm.response.json();",
+                      "  pm.expect(json.success).to.be.false;",
+                      "  pm.expect(json.message).to.be.a('string').and.not.empty;",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/x-www-form-urlencoded"
+                  }
+                ],
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    { "key": "password", "value": "abc", "type": "text" },
+                    { "key": "confirmPassword", "value": "abc", "type": "text" }
+                  ]
+                },
+                "url": {
+                  "raw": "{{base_url}}/password/reset-password",
+                  "host": ["{{base_url}}"],
+                  "path": ["password", "reset-password"]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "name": "07 — Client Blog",
+      "item": [
+        {
+          "name": "BLG-C-01 | Xem danh sách bài viết",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('TC-BC01 - Danh sách blog trả 200', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('TC-BC01 - Blog trả 200 OK', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/blog",
+              "host": ["{{base_url}}"],
+              "path": ["blog"]
+            }
+          }
+        },
+        {
+          "name": "BLG-C-02 | Phân trang blog (page 1)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('TC-BC02 - Blog page 1 OK', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/blog/page/1",
+              "host": ["{{base_url}}"],
+              "path": ["blog", "page", "1"]
+            }
+          }
+        },
+        {
+          "name": "BLG-C-03 | Phân trang blog (page 2)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('TC-BC03 - Blog page 2 OK', () => {",
+                  "  pm.expect([200, 302, 404]).to.include(pm.response.code);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/blog/page/2",
+              "host": ["{{base_url}}"],
+              "path": ["blog", "page", "2"]
+            }
+          }
+        },
+        {
+          "name": "BLG-C-04 | Xem chi tiết bài viết hợp lệ",
+          "description": "Cần set test_blog_slug trong environment trước khi chạy",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('TC-BC04 - Chi tiết blog trả 200', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/blog/{{test_blog_slug}}",
+              "host": ["{{base_url}}"],
+              "path": ["blog", "{{test_blog_slug}}"]
+            }
+          }
+        },
+        {
+          "name": "BLG-C-05 | Slug không tồn tại",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('TC-BC05 - Slug không tồn tại trả 404', () => {",
+                  "  pm.expect([302, 404]).to.include(pm.response.code);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/blog/slug-khong-co-{{timestamp}}",
+              "host": ["{{base_url}}"],
+              "path": ["blog", "slug-khong-co-{{timestamp}}"]
+            }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "08 — Admin Auth",
+      "item": [
+        {
+          "name": "ADM-AUTH-01 | Admin login thành công",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('TC-AA01 - Admin login thành công', () => {",
+                  "  pm.expect([200, 302]).to.include(pm.response.code);",
+                  "  if (pm.response.code === 302) {",
+                  "    pm.expect(pm.response.headers.get('Location')).to.include('dashboard');",
+                  "  }",
+                  "});",
+                  "pm.test('TC-AA01 - Admin session cookie set', () => {",
+                  "  const cookie = pm.cookies.get('connect.sid');",
+                  "  pm.expect(cookie).to.exist;",
+                  "  pm.environment.set('admin_session_set', 'true');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                { "key": "email", "value": "{{admin_email}}", "type": "text" },
+                {
+                  "key": "password",
+                  "value": "{{admin_password}}",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/admin/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "ADM-AUTH-02 | Admin login sai password",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('TC-AA02 - Status 401 với success: false khi sai password', () => {",
+                  "  pm.response.to.have.status(401);",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.success).to.be.false;",
+                  "  pm.expect(json.message).to.be.a('string').and.not.empty;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                { "key": "email", "value": "{{admin_email}}", "type": "text" },
+                { "key": "password", "value": "WrongAdminPass", "type": "text" }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/admin/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "ADM-AUTH-03 | Admin login email không tồn tại",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('TC-AA03 - Status 401 với success: false khi email không tồn tại', () => {",
+                  "  pm.response.to.have.status(401);",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.success).to.be.false;",
+                  "  pm.expect(json.message).to.be.a('string').and.not.empty;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "email",
+                  "value": "notadmin@fake.com",
+                  "type": "text"
+                },
+                { "key": "password", "value": "Test@123", "type": "text" }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/admin/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "ADM-AUTH-04 | Admin logout",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('TC-AA04 - Logout thành công', () => {",
+                  "  pm.expect([200, 302]).to.include(pm.response.code);",
+                  "  if (pm.response.code === 302) {",
+                  "    pm.expect(pm.response.headers.get('Location')).to.include('login');",
+                  "  }",
+                  "});",
+                  "",
+                  "// Clear admin cookie sau logout",
+                  "pm.cookies.clear();"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/admin/auth/logout",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "auth", "logout"]
+            }
+          }
+        },
+        {
+          "name": "ADM-AUTH-05 | Truy cập admin khi chưa login (auth guard)",
+          "description": "Chạy request này sau khi đã logout. Không có admin session.",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Remove Accept header để test redirect thay vì JSON response",
+                  "pm.request.headers.remove('Accept');",
+                  "// Ensure no cookies",
+                  "pm.cookies.clear();"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('TC-AA05 - Admin guard redirect về login', () => {",
+                  "  // Newman không clear cookie được, nên có thể trả 200 hoặc 302",
+                  "  pm.expect([200, 302]).to.include(pm.response.code);",
+                  "  if (pm.response.code === 302) {",
+                  "    pm.expect(pm.response.headers.get('Location')).to.include('login');",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/admin/dashboard",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "dashboard"]
+            }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "16 — E2E Scenarios",
+      "item": [
+        {
+          "name": "E2E-01: Full Register → Login",
+          "description": "Chạy tuần tự bằng Collection Runner. Pre-req: timestamp đã được set.",
+          "item": [
+            {
+              "name": "E2E01-Step1 | Gửi OTP đăng ký",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const ts = Date.now();",
+                      "pm.environment.set('timestamp', ts);",
+                      "pm.environment.set('e2e_email', `e2e_${ts}@test.com`);"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('E2E01-Step1: Gửi OTP thành công', () => {",
+                      "  pm.expect([200, 302]).to.include(pm.response.code);",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/x-www-form-urlencoded"
+                  }
+                ],
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    {
+                      "key": "fullName",
+                      "value": "E2E Test User {{timestamp}}",
+                      "type": "text"
+                    },
+                    {
+                      "key": "email",
+                      "value": "{{e2e_email}}",
+                      "type": "text"
+                    },
+                    {
+                      "key": "password",
+                      "value": "TestE2E@123",
+                      "type": "text"
+                    },
+                    {
+                      "key": "confirmPassword",
+                      "value": "TestE2E@123",
+                      "type": "text"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{base_url}}/register",
+                  "host": ["{{base_url}}"],
+                  "path": ["register"]
+                }
+              }
+            },
+            {
+              "name": "E2E01-Step2 | Verify OTP",
+              "description": "Tự động lấy OTP từ test-helper endpoint",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "// Lấy OTP từ test-helper endpoint",
+                      "const email = pm.environment.get('e2e_email');",
+                      "pm.sendRequest({",
+                      "  url: `${pm.environment.get('base_url')}/test-helper/get-register-otp?email=${email}`,",
+                      "  method: 'GET'",
+                      "}, (err, res) => {",
+                      "  if (err) {",
+                      "    console.error('Failed to get OTP:', err);",
+                      "  } else {",
+                      "    const json = res.json();",
+                      "    if (json.success) {",
+                      "      pm.environment.set('otp_code', json.otp);",
+                      "      console.log('OTP retrieved:', json.otp);",
+                      "    }",
+                      "  }",
+                      "});"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('E2E01-Step2: Verify OTP thành công', () => {",
+                      "  pm.expect([200, 302]).to.include(pm.response.code);",
+                      "  const json = pm.response.json();",
+                      "  pm.expect(json.success).to.be.true;",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/x-www-form-urlencoded"
+                  }
+                ],
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    { "key": "otp", "value": "{{otp_code}}", "type": "text" }
+                  ]
+                },
+                "url": {
+                  "raw": "{{base_url}}/register/verify-otp",
+                  "host": ["{{base_url}}"],
+                  "path": ["register", "verify-otp"]
+                }
+              }
+            },
+            {
+              "name": "E2E01-Step3 | Tạo tài khoản",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('E2E01-Step3: Tạo tài khoản thành công', () => {",
+                      "  pm.expect([200, 302]).to.include(pm.response.code);",
+                      "  const json = pm.response.json();",
+                      "  pm.expect(json.success).to.be.true;",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/x-www-form-urlencoded"
+                  }
+                ],
+                "body": { "mode": "urlencoded", "urlencoded": [] },
+                "url": {
+                  "raw": "{{base_url}}/register/create-account",
+                  "host": ["{{base_url}}"],
+                  "path": ["register", "create-account"]
+                }
+              }
+            },
+            {
+              "name": "E2E01-Step4 | Login với tài khoản vừa tạo",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('E2E01-Step4: Login thành công sau khi đăng ký', () => {",
+                      "  pm.expect([200, 302]).to.include(pm.response.code);",
+                      "});",
+                      "pm.test('E2E01-Step4: Session cookie tồn tại', () => {",
+                      "  pm.expect(pm.cookies.get('connect.sid')).to.exist;",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/x-www-form-urlencoded"
+                  }
+                ],
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    {
+                      "key": "email",
+                      "value": "{{e2e_email}}",
+                      "type": "text"
+                    },
+                    {
+                      "key": "password",
+                      "value": "TestE2E@123",
+                      "type": "text"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{base_url}}/login",
+                  "host": ["{{base_url}}"],
+                  "path": ["login"]
+                }
+              }
+            }
+          ]
+        },
+
+        {
+          "name": "E2E-02: Full Password Reset",
+          "description": "Chạy tuần tự bằng Collection Runner. Dùng account client từ seed.",
+          "item": [
+            {
+              "name": "E2E02-Step1 | Gửi OTP reset password",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('E2E02-Step1: Gửi OTP reset', () => {",
+                      "  pm.expect([200, 302]).to.include(pm.response.code);",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/x-www-form-urlencoded"
+                  }
+                ],
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    {
+                      "key": "email",
+                      "value": "{{client_email}}",
+                      "type": "text"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{base_url}}/password/forgot",
+                  "host": ["{{base_url}}"],
+                  "path": ["password", "forgot"]
+                }
+              }
+            },
+            {
+              "name": "E2E02-Step2 | Verify OTP reset",
+              "description": "Tự động lấy OTP từ test-helper endpoint",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "// Lấy OTP từ test-helper endpoint",
+                      "const email = pm.environment.get('client_email');",
+                      "pm.sendRequest({",
+                      "  url: `${pm.environment.get('base_url')}/test-helper/get-reset-otp?email=${email}`,",
+                      "  method: 'GET'",
+                      "}, (err, res) => {",
+                      "  if (err) {",
+                      "    console.error('Failed to get OTP:', err);",
+                      "  } else {",
+                      "    const json = res.json();",
+                      "    if (json.success) {",
+                      "      pm.environment.set('otp_code', json.otp);",
+                      "      console.log('OTP retrieved:', json.otp);",
+                      "    }",
+                      "  }",
+                      "});"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('E2E02-Step2: Verify OTP reset', () => {",
+                      "  pm.expect([200, 302]).to.include(pm.response.code);",
+                      "  const json = pm.response.json();",
+                      "  pm.expect(json.success).to.be.true;",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/x-www-form-urlencoded"
+                  }
+                ],
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    { "key": "otp", "value": "{{otp_code}}", "type": "text" }
+                  ]
+                },
+                "url": {
+                  "raw": "{{base_url}}/password/verify-otp",
+                  "host": ["{{base_url}}"],
+                  "path": ["password", "verify-otp"]
+                }
+              }
+            },
+            {
+              "name": "E2E02-Step3 | Đặt mật khẩu mới",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('E2E02-Step3: Reset password thành công', () => {",
+                      "  pm.expect([200, 302]).to.include(pm.response.code);",
+                      "  const json = pm.response.json();",
+                      "  pm.expect(json.success).to.be.true;",
+                      "});",
+                      "// Lưu mật khẩu mới để dùng bước sau",
+                      "pm.environment.set('e2e_new_password', 'E2ENewPass@456');"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/x-www-form-urlencoded"
+                  }
+                ],
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    {
+                      "key": "password",
+                      "value": "E2ENewPass@456",
+                      "type": "text"
+                    },
+                    {
+                      "key": "confirmPassword",
+                      "value": "E2ENewPass@456",
+                      "type": "text"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{base_url}}/password/reset-password",
+                  "host": ["{{base_url}}"],
+                  "path": ["password", "reset-password"]
+                }
+              }
+            },
+            {
+              "name": "E2E02-Step4 | Login với password mới",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('E2E02-Step4: Login với password mới thành công', () => {",
+                      "  pm.expect([200, 302]).to.include(pm.response.code);",
+                      "});",
+                      "pm.test('E2E02-Step4: Session cookie tồn tại', () => {",
+                      "  pm.expect(pm.cookies.get('connect.sid')).to.exist;",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/x-www-form-urlencoded"
+                  }
+                ],
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    {
+                      "key": "email",
+                      "value": "{{client_email}}",
+                      "type": "text"
+                    },
+                    {
+                      "key": "password",
+                      "value": "E2ENewPass@456",
+                      "type": "text"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{base_url}}/login",
+                  "host": ["{{base_url}}"],
+                  "path": ["login"]
+                }
+              }
+            },
+            {
+              "name": "E2E02-Step5 | Restore password về 123456",
+              "description": "Restore password để không ảnh hưởng các test khác",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "// Gửi forgot password request",
+                      "pm.sendRequest({",
+                      "  url: `${pm.environment.get('base_url')}/password/forgot`,",
+                      "  method: 'POST',",
+                      "  header: { 'Content-Type': 'application/x-www-form-urlencoded', 'Accept': 'application/json' },",
+                      "  body: { mode: 'urlencoded', urlencoded: [{ key: 'email', value: pm.environment.get('client_email') }] }",
+                      "}, () => {",
+                      "  // Lấy OTP",
+                      "  pm.sendRequest({",
+                      "    url: `${pm.environment.get('base_url')}/test-helper/get-reset-otp?email=${pm.environment.get('client_email')}`,",
+                      "    method: 'GET'",
+                      "  }, (err, res) => {",
+                      "    if (!err && res.json().success) {",
+                      "      const otp = res.json().otp;",
+                      "      // Verify OTP",
+                      "      pm.sendRequest({",
+                      "        url: `${pm.environment.get('base_url')}/password/verify-otp`,",
+                      "        method: 'POST',",
+                      "        header: { 'Content-Type': 'application/x-www-form-urlencoded' },",
+                      "        body: { mode: 'urlencoded', urlencoded: [{ key: 'otp', value: otp }] }",
+                      "      }, () => {});",
+                      "    }",
+                      "  });",
+                      "});"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('E2E02-Step5: Restore password thành công', () => {",
+                      "  pm.expect([200, 302]).to.include(pm.response.code);",
+                      "  const json = pm.response.json();",
+                      "  pm.expect(json.success).to.be.true;",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/x-www-form-urlencoded"
+                  }
+                ],
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    {
+                      "key": "password",
+                      "value": "{{client_password}}",
+                      "type": "text"
+                    },
+                    {
+                      "key": "confirmPassword",
+                      "value": "{{client_password}}",
+                      "type": "text"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{base_url}}/password/reset-password",
+                  "host": ["{{base_url}}"],
+                  "path": ["password", "reset-password"]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,5 +1,6 @@
-const authService = require('../../services/admin/auth.service')
-const sysConfig = require('../../config/system')
+const authService = require('../../services/admin/auth.service');
+const sysConfig = require('../../config/system');
+const respond = require('../../helper/respond');
 
 // [GET] /admin/auth/login
 module.exports.login = async (req, res) => {
@@ -22,38 +23,41 @@ module.exports.login = async (req, res) => {
 module.exports.loginPost = async (req, res) => {
     try {
         await authService.loginPost(req, res);
-        req.flash('success', 'Đăng nhập thành công!');
+        return respond(req, res, {
+            status: 200,
+            json: { success: true, message: "Đăng nhập thành công!" },
+            redirect: `${sysConfig.prefixAdmin}/dashboard`
+        });
 
-        res.redirect(`${sysConfig.prefixAdmin}/dashboard`);
-        
     } catch (err) {
-        console.log(err)
-        switch (err.message) {
-            case "EMAIL_NOT_FOUND":
-                req.flash('error', 'Email không tồn tại!');
-                break;
+        const statusMap = {
+            EMAIL_NOT_FOUND: 401,
+            PASSWORD_ERROR:  401,
+            ACCOUNT_BLOCK:   403
+        };
+        const errorMap = {
+            EMAIL_NOT_FOUND: "Email không tồn tại!",
+            PASSWORD_ERROR:  "Mật khẩu không đúng!",
+            ACCOUNT_BLOCK:   "Tài khoản đã bị khóa!"
+        };
+        const status   = statusMap[err.message] || 500;
+        const errorMsg = errorMap[err.message]  || "Có lỗi xảy ra, vui lòng thử lại!";
 
-            case "PASSWORD_ERROR":
-                req.flash('error', 'Mật khẩu không đúng!');
-                break;
-
-            case "ACCOUNT_BLOCK":
-                req.flash('error', 'Tài khoản đã bị khóa!');
-                break;
-
-            default:
-                req.flash('error', 'Có lỗi xảy ra, vui lòng thử lại!');
-                break;
-        }
-
-        res.redirect(`${sysConfig.prefixAdmin}/auth/login`);
+        return respond(req, res, {
+            status,
+            json: { success: false, message: errorMsg },
+            redirect: `${sysConfig.prefixAdmin}/auth/login`
+        });
     }
 };
 
 // [POST] /admin/auth/logout
-module.exports.logout = (req, res) => {
-    authService.logout(res)
-
-    res.redirect(`${sysConfig.prefixAdmin}/auth/login`);
-}
+module.exports.logout = async (req, res) => {
+    await authService.logout(req, res);
+    return respond(req, res, {
+        status: 200,
+        json: { success: true, message: "Đăng xuất thành công!" },
+        redirect: `${sysConfig.prefixAdmin}/auth/login`
+    });
+};
 

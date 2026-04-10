@@ -102,19 +102,17 @@ module.exports.resendOtpRegister = async (req) => {
         throw new Error("Phiên đăng ký đã hết hạn!");
     }
 
-    await PendingRegistration.deleteOne({ email });
+    const pending = await PendingRegistration.findOne({ email });
+    
+    if (!pending) {
+        throw new Error("Thông tin đăng ký không hợp lệ!");
+    }
 
     const otp = generateOTP();
     const hashedOTP = await bcrypt.hash(otp, 10);
 
-    const pending = new PendingRegistration({
-        fullName: (await PendingRegistration.findOne({ email }))?.fullName,
-        email,
-        password: (await PendingRegistration.findOne({ email }))?.password,
-        otp: hashedOTP,
-        expiresAt: Date.now() + 3 * 60 * 1000
-    });
-
+    pending.otp = hashedOTP;
+    pending.expiresAt = Date.now() + 3 * 60 * 1000;
     await pending.save();
 
     await mailService.sendOTP(email, otp);

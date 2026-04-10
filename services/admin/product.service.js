@@ -132,9 +132,9 @@ module.exports.create = async () => {
 module.exports.createProduct = async (req, res) => {
     const body = req.body
 
-    body.price = parseInt(body.price)
-    body.discountPercentage = parseInt(body.discountPercentage)
-    body.stock = parseInt(body.stock)
+    body.price = parseInt(body.price) || 0
+    body.discountPercentage = parseInt(body.discountPercentage) || 0
+    body.stock = parseInt(body.stock) || 0
 
     if (!body.position || body.position === "") {
         const count = await Product.countDocuments({ deleted: false })
@@ -212,10 +212,10 @@ module.exports.edit = async (id) => {
 module.exports.editProduct = async (req, id, res) => {
     const body = req.body
 
-    body.price = parseInt(body.price)
-    body.discountPercentage = parseInt(body.discountPercentage)
-    body.stock = parseInt(body.stock)
-    body.position = parseInt(body.position)
+    body.price = parseInt(body.price) || 0
+    body.discountPercentage = parseInt(body.discountPercentage) || 0
+    body.stock = parseInt(body.stock) || 0
+    body.position = parseInt(body.position) || 0
 
     if (body.removeThumbnail === "1") {
         body.thumbnail = ""

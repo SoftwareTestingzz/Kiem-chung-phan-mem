@@ -15,6 +15,7 @@ Một nền tảng thương mại điện tử hiện đại để bán các s�
 - [Database Schema](#database-schema)
 - [Các tính năng nâng cao](#các-tính-năng-nâng-cao)
 - [Hướng dẫn phát triển](#hướng-dẫn-phát-triển)
+- [Kết nối Jira (MCP)](#kết-nối-jira-mcp)
 
 ---
 
@@ -800,6 +801,22 @@ productSchema.index({ slug: 1 });
 orderSchema.index({ userId: 1, createdAt: -1 });
 ```
 
+## 🔗 Kết nối Jira (MCP)
+
+Dự án này được kết nối với Jira qua MCP (Model Context Protocol).
+
+### **Thông tin dự án Jira**
+- **Project Key**: `KIEM`
+- **Project Name**: `KiemThuPhanMem`
+- **Jira URL**: [https://pson4282.atlassian.net/jira/software/projects/KIEM](https://pson4282.atlassian.net/jira/software/projects/KIEM)
+
+### **Các lệnh Jira MCP hỗ trợ**
+- **`mcp_jira-mcp_getIssuesByJQL`**: Truy vấn issues bằng JQL.
+- **`mcp_jira-mcp_createIssue`**: Tạo issue mới trực tiếp từ coding assistant.
+- **`mcp_jira-mcp_getBoards`**: Xem danh sách boards.
+
+Cấu hình chi tiết được lưu tại [`.agent/jira_config.json`](file:///d:/Kiem-chung-phan-mem/.agent/jira_config.json).
+
 2. **Use pagination** (không load toàn bộ)
 3. **Cache categories menu** (static data)
 4. **Compress images** trước upload
@@ -868,3 +885,4 @@ Dự án này được sử dụng cho mục đích giáo dục.
 ---
 
 **Cảm ơn vì sử dụng Verdish! 🎉**
+node scripts/newman-jira-reporter.js

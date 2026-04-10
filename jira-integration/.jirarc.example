@@ -1,0 +1,7 @@
+{
+  "jiraUrl": "https://pson4282.atlassian.net",
+  "jiraEmail": "pson4282@gmail.com",
+  "jiraToken": "YOUR_JIRA_API_TOKEN_HERE",
+  "projectKey": "KIEM",
+  "sprintId": 2
+}

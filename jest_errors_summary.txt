@@ -1,0 +1,26 @@
+
+=== Suite: \tests\client-products.test.js ===
+
+x TEST: BVA-CPROD-12: slug hß╗úp lß╗ç
+ERROR: Error: expect(received).toBe(expected) // Object.is equality
+Expected: 200
+Received: 404
+
+=== Suite: \tests\admin-categories.test.js ===
+
+x TEST: BVA-ACAT-23: PATCH /admin/categories/edit/:id | id kh├┤ng tß╗ôn tß║íi
+ERROR: Error: expect(received).toBe(expected) // Object.is equality
+Expected: 404
+Received: 200
+
+=== Suite: \tests\admin-products.test.js ===
+
+x TEST: BVA-APROD-20: thumbnail file hß╗úp lß╗ç
+ERROR: Error: expect(received).toContain(expected) // indexOf
+Expected value: 500
+Received array: [200, 302, 201]
+
+x TEST: BVA-APROD-21: thumbnail file sai ─æß╗ïnh dß║íng
+ERROR: Error: expect(received).toBe(expected) // Object.is equality
+Expected: 400
+Received: 500

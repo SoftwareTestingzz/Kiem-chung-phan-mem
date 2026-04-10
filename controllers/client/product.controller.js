@@ -5,6 +5,7 @@ const Comment = require('../../models/comment.model');
 // Dùng lại helper search + service danh mục
 const searchHelper = require('../../helper/search');
 const categoryService = require('../../services/client/category.service');
+const respond = require('../../helper/respond');
 
 // Hàm bỏ dấu tiếng Việt (giống bên products.js)
 const normalizeText = (str = "") =>
@@ -61,20 +62,25 @@ module.exports.index = async (req, res) => {
         const pagedProducts = products.slice(start, end);
 
         // 4. Render ra trang products
-        res.render('client/pages/products/index', {
+        const renderData = {
             pageTitle: 'Trang danh sách sản phẩm',
             products: pagedProducts,
             categoriesMenu,
-            // cho Pug/JS dùng lại keyword ban đầu (nếu muốn set vào ô search)
             keyword,
-            // pagination meta
             page: currentPage,
             perPage,
             totalPages,
             totalItems
+        };
+        return respond(req, res, {
+            status: 200,
+            json: { success: true, message: 'Lấy dữ liệu thành công', data: renderData },
+            render: { view: 'client/pages/products/index', data: renderData }
         });
     } catch (error) {
         console.log(error);
+        const wantsJson = req.headers['accept']?.includes('application/json') || req.query._format === 'json';
+        if (wantsJson) return res.status(500).json({ success: false, message: 'Internal Server Error' });
         res.status(500).send('Internal Server Error');
     }
 };
@@ -89,7 +95,7 @@ module.exports.detail = async (req, res) => {
         const categoriesMenu = await categoryService.getMenuCategories();
 
         if (!product) {
-            return res.render('client/pages/products/detail', {
+            const renderData = {
                 pageTitle: 'Sản phẩm không tồn tại',
                 product: null,
                 comments: [],
@@ -97,11 +103,20 @@ module.exports.detail = async (req, res) => {
                 canReview: false,
                 hasReviewed: false,
                 categoriesMenu
+            };
+            return respond(req, res, {
+                status: 404,
+                json: { success: false, message: 'Sản phẩm không tồn tại!', data: renderData },
+                render: { view: 'client/pages/products/detail', data: renderData }
             });
         }
 
         // Lấy bình luận đã được duyệt của sản phẩm
-        const comments = await Comment.find({ productId: product._id, deleted: false, status: 'approved' })
+        const comments = await Comment.find({
+            productId: product._id,
+            deleted: false,
+            status: { $ne: 'rejected' }
+        })
             .sort({ createdAt: -1 })
             .lean();
 
@@ -141,7 +156,7 @@ module.exports.detail = async (req, res) => {
             }
         }
 
-        res.render('client/pages/products/detail', {
+        const renderData = {
             pageTitle: product.title,
             product,
             comments,
@@ -149,9 +164,16 @@ module.exports.detail = async (req, res) => {
             canReview,
             hasReviewed,
             categoriesMenu
+        };
+        return respond(req, res, {
+            status: 200,
+            json: { success: true, message: 'Lấy dữ liệu thành công', data: renderData },
+            render: { view: 'client/pages/products/detail', data: renderData }
         });
     } catch (error) {
         console.log(error);
+        const wantsJson = req.headers['accept']?.includes('application/json') || req.query._format === 'json';
+        if (wantsJson) return res.status(500).json({ success: false, message: 'Internal Server Error' });
         res.status(500).send('Internal Server Error');
     }
 };
@@ -163,16 +185,26 @@ module.exports.comment = async (req, res) => {
 
         // Chưa đăng nhập thì cho về trang login
         if (!req.session || !req.session.user) {
-            return res.redirect('/login');
+            return respond(req, res, {
+                status: 401,
+                json: { success: false, message: 'Vui lòng đăng nhập' },
+                redirect: '/login'
+            });
         }
 
         const user = req.session.user;
         const { rating, content } = req.body;
 
+        const sendError = (status, msg) => {
+            const wantsJson = req.headers['accept']?.includes('application/json') || req.query._format === 'json';
+            if (wantsJson) return res.status(status).json({ success: false, message: msg });
+            return res.status(status).send(msg);
+        };
+
         // Lấy sản phẩm
         const product = await productService.detail(slug);
         if (!product) {
-            return res.status(404).send('Product not found');
+            return sendError(404, 'Product not found');
         }
 
         // Kiểm tra đã từng review sản phẩm này chưa
@@ -182,8 +214,8 @@ module.exports.comment = async (req, res) => {
         });
 
         if (existingComment) {
-            
-            return res.status(400).send('Bạn chỉ có thể đánh giá sản phẩm này một lần.');
+
+            return sendError(400, 'Bạn chỉ có thể đánh giá sản phẩm này một lần.');
         }
 
         // Kiểm tra đã từng mua sản phẩm này chưa (đơn completed)
@@ -194,20 +226,28 @@ module.exports.comment = async (req, res) => {
         });
 
         if (!order) {
-            return res.status(403).send('Bạn cần mua sản phẩm này trước khi bình luận');
+            return sendError(403, 'Bạn cần mua sản phẩm này trước khi bình luận');
         }
 
         // Validate rating + content
         const ratingNumber = Number(rating);
         if (!ratingNumber || ratingNumber < 1 || ratingNumber > 5) {
-            return res.status(400).send('Số sao không hợp lệ');
+            return sendError(400, 'Số sao không hợp lệ');
         }
 
         if (!content || !content.trim()) {
-            return res.status(400).send('Nội dung bình luận không được để trống');
+            return sendError(400, 'Nội dung bình luận không được để trống');
         }
 
-        // Tạo bình luận mới (mặc định status = 'pending')
+        if (!content || !content.trim()) {
+            return sendError(400, 'Nội dung không được rỗng');
+        }
+
+        if (content.length > 500) {
+            return sendError(400, 'Nội dung quá dài');
+        }
+
+        // Tạo bình luận mới (mặc định status = 'approved')
         await Comment.create({
             productId: product._id,
             userId: user._id,
@@ -217,9 +257,15 @@ module.exports.comment = async (req, res) => {
             content: content.trim()
         });
 
-        res.redirect('/detail/' + slug);
+        return respond(req, res, {
+            status: 200,
+            json: { success: true, message: 'Bình luận thành công!' },
+            redirect: '/detail/' + slug
+        });
     } catch (error) {
         console.log(error);
+        const wantsJson = req.headers['accept']?.includes('application/json') || req.query._format === 'json';
+        if (wantsJson) return res.status(500).json({ success: false, message: 'Internal Server Error' });
         res.status(500).send('Internal Server Error');
     }
 };

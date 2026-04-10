@@ -2,7 +2,6 @@ const ordersService = require("../../services/client/orders.service");
 
 module.exports = {
 
-
     orderList: async (req, res) => {
         try {
             // Chưa đăng nhập → không cho xem đơn hàng
@@ -30,8 +29,6 @@ module.exports = {
             });
         }
     },
-
-
 
     orderDetail: async (req, res) => {
         const isAPI = req.headers.accept && req.headers.accept.includes('application/json');
@@ -99,8 +96,6 @@ module.exports = {
             return res.redirect("/orders");
         }
     },
-
-
 
     cancelOrder: async (req, res) => {
         const isAPI = req.headers.accept && req.headers.accept.includes('application/json');

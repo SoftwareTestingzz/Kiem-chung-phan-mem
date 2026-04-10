@@ -1,12 +1,25 @@
+
 const orderService = require("../../services/admin/orders.service");
+const respond = require("../../helper/respond");
+
+function hasPermission(res, permission) {
+    return res.locals.roleUser && res.locals.roleUser.permissions.includes(permission);
+}
+
+function isValidStatus(status) {
+    // Chỉnh lại các trạng thái hợp lệ theo hệ thống của bạn
+    return ["pending", "processing", "completed", "cancelled"].includes(status);
+}
 
 module.exports = {
 
     // ======================= DANH SÁCH ĐƠN =======================
     index: async (req, res) => {
         try {
+            if (!hasPermission(res, "orders_view")) {
+                return res.status(403).send('Forbidden');
+            }
             const result = await orderService.getList(req.query);
-
             res.render("admin/pages/orders/index", {
                 pageTitle: "Quản lý đơn hàng",
                 orders: result.docs,
@@ -17,10 +30,8 @@ module.exports = {
                 years: result.years,
                 query: req.query
             });
-
         } catch (err) {
             console.error("Admin Order List Error:", err);
-
             res.render("admin/pages/orders/index", {
                 pageTitle: "Quản lý đơn hàng",
                 orders: [],
@@ -38,40 +49,41 @@ module.exports = {
     // ======================= CHI TIẾT =======================
     detail: async (req, res) => {
         try {
-            const order = await orderService.getDetail(req.params.id);
-
-            if (!order) {
-                return res.send("Đơn hàng không tồn tại hoặc đã bị khách hủy!");
+            if (!hasPermission(res, "orders_view")) {
+                return res.status(403).send('Forbidden');
             }
-
+            const order = await orderService.getDetail(req.params.id);
+            if (!order) {
+                return res.status(404).send("Đơn hàng không tồn tại hoặc đã bị khách huỷ!");
+            }
             res.render("admin/pages/orders/detail", {
                 pageTitle: "Chi tiết đơn hàng",
                 order
             });
-
         } catch (err) {
             console.error("Admin Order Detail Error:", err);
-            res.send("Lỗi khi tải chi tiết đơn hàng!");
+            res.status(500).send("Lỗi khi tải chi tiết đơn hàng!");
         }
     },
 
     // ======================= UPDATE STATUS =======================
     updateStatus: async (req, res) => {
         try {
+            if (!hasPermission(res, "orders_edit")) {
+                return res.status(403).json({ success: false, message: 'Bạn không có quyền thực hiện thao tác này!' });
+            }
             const orderId = req.params.id;
             const { status } = req.body;
-
-            const result = await orderService.updateStatus(orderId, status);
-
-            if (result.error) {
-                return res.send(result.error);
+            if (!isValidStatus(status)) {
+                return res.status(422).json({ success: false, message: 'Trạng thái không hợp lệ!' });
             }
-
-            res.redirect(`/admin/orders/${orderId}`);
-
+            const result = await orderService.updateStatus(orderId, status);
+            if (result.error) {
+                return res.status(400).json({ success: false, message: result.error });
+            }
+            return res.status(200).json({ success: true, message: 'Cập nhật trạng thái thành công!' });
         } catch (err) {
-            console.error("Update Status Error:", err);
-            res.send("Lỗi cập nhật trạng thái đơn hàng!");
+            return res.status(500).json({ success: false, message: 'Lỗi cập nhật trạng thái đơn hàng!' });
         }
     }
 };

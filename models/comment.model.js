@@ -18,6 +18,10 @@ const CommentSchema = new Schema(
       required: true,
       trim: true
     },
+    userEmail: {
+      type: String,
+      trim: true
+    },
     rating: {
       type: Number,
       min: 1,
@@ -28,6 +32,15 @@ const CommentSchema = new Schema(
       type: String,
       required: true,
       trim: true
+    },
+    status: {
+      type: String,
+      enum: ['pending', 'approved', 'rejected'],
+      default: 'approved'
+    },
+    deleted: {
+      type: Boolean,
+      default: false
     }
   },
   {

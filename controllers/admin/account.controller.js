@@ -1,18 +1,32 @@
+
 const accountService = require('../../services/admin/account.service');
 const sysConfig = require('../../config/system');
+const respond = require('../../helper/respond');
+
+// Simple email format check
+function isValidEmail(email) {
+    return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email);
+}
+
+// Check if user is admin
+function hasPermission(res, permission) {
+    return res.locals.roleUser && res.locals.roleUser.permissions.includes(permission);
+}
 
 // =======================
 // [GET] /admin/accounts
 // =======================
+
 module.exports.index = async (req, res) => {
     try {
+        if (!hasPermission(res, 'accounts_view')) {
+            return res.status(403).send('Forbidden');
+        }
         const records = await accountService.getList();
-
         res.render('admin/pages/account/index', {
             pageTitle: 'Quản lý tài khoản',
             records
         });
-
     } catch (err) {
         req.flash('error', 'Có lỗi xảy ra, vui lòng thử lại!');
         res.redirect(`${sysConfig.prefixAdmin}/dashboard`);
@@ -40,23 +54,87 @@ module.exports.create = async (req, res) => {
 
 
 // =======================
-// [POST] /admin/accounts/create
+// [POST] /admin/account/create
 // =======================
 module.exports.createAccount = async (req, res) => {
     try {
-        await accountService.createAccount(req);
-
-        req.flash('success', 'Tạo tài khoản thành công!');
-        return res.redirect(`${sysConfig.prefixAdmin}/accounts`);
-
-    } catch (err) {
-        if (err.message === "EMAIL_EXISTS") {
-            req.flash('error', 'Email đã tồn tại, vui lòng chọn email khác!');
-        } else {
-            req.flash('error', 'Có lỗi xảy ra, vui lòng thử lại!');
+        if (!hasPermission(res, 'accounts_create')) {
+            return res.status(403).json({ success: false, message: 'Bạn không có quyền thực hiện thao tác này!' });
         }
+        const { email, password, role } = req.body;
+        if (!email || !isValidEmail(email)) {
+            return res.status(422).json({ success: false, message: 'Email không hợp lệ!' });
+        }
+        if (!password || password.length < 6) {
+            return res.status(422).json({ success: false, message: 'Password phải từ 6 ký tự trở lên!' });
+        }
+        if (!role) {
+            return res.status(422).json({ success: false, message: 'Role là bắt buộc!' });
+        }
+        await accountService.createAccount(req);
+        return res.status(200).json({ success: true, message: 'Tạo tài khoản thành công!' });
+    } catch (err) {
+        const msg = err.message === "EMAIL_EXISTS"
+            ? 'Email đã tồn tại, vui lòng chọn email khác!'
+            : 'Có lỗi xảy ra, vui lòng thử lại!';
+        return res.status(400).json({ success: false, message: msg });
+    }
+};
 
-        return res.redirect('back');
+// =======================
+// [PATCH] /admin/account/lock
+// =======================
+module.exports.lockAccount = async (req, res) => {
+    try {
+        if (!hasPermission(res, 'accounts_edit')) {
+            return res.status(403).json({ success: false, message: 'Bạn không có quyền thực hiện thao tác này!' });
+        }
+        const { email } = req.body;
+        if (!email || !isValidEmail(email)) {
+            return res.status(422).json({ success: false, message: 'Email không hợp lệ!' });
+        }
+        await accountService.changeStatusByEmail(email, 'inactive');
+        return res.status(200).json({ success: true, message: 'Đã khóa tài khoản!' });
+    } catch (err) {
+        return res.status(500).json({ success: false, message: 'Có lỗi xảy ra, vui lòng thử lại!' });
+    }
+};
+
+// =======================
+// [PATCH] /admin/account/unlock
+// =======================
+module.exports.unlockAccount = async (req, res) => {
+    try {
+        if (!hasPermission(res, 'accounts_edit')) {
+            return res.status(403).json({ success: false, message: 'Bạn không có quyền thực hiện thao tác này!' });
+        }
+        const { email } = req.body;
+        if (!email || !isValidEmail(email)) {
+            return res.status(422).json({ success: false, message: 'Email không hợp lệ!' });
+        }
+        await accountService.changeStatusByEmail(email, 'active');
+        return res.status(200).json({ success: true, message: 'Đã mở khóa tài khoản!' });
+    } catch (err) {
+        return res.status(500).json({ success: false, message: 'Có lỗi xảy ra, vui lòng thử lại!' });
+    }
+};
+
+// =======================
+// [DELETE] /admin/account/delete
+// =======================
+module.exports.deleteAccount = async (req, res) => {
+    try {
+        if (!hasPermission(res, 'accounts_delete')) {
+            return res.status(403).json({ success: false, message: 'Bạn không có quyền thực hiện thao tác này!' });
+        }
+        const { email } = req.body;
+        if (!email || !isValidEmail(email)) {
+            return res.status(422).json({ success: false, message: 'Email không hợp lệ!' });
+        }
+        await accountService.deleteAccountByEmail(email);
+        return res.status(200).json({ success: true, message: 'Xóa tài khoản thành công!' });
+    } catch (err) {
+        return res.status(500).json({ success: false, message: 'Có lỗi xảy ra, vui lòng thử lại!' });
     }
 };
 
@@ -66,31 +144,58 @@ module.exports.createAccount = async (req, res) => {
 // =======================
 module.exports.changeStatus = async (req, res) => {
     try {
+        if (!hasPermission(res, 'accounts_edit')) {
+            return respond(req, res, {
+                status: 403,
+                json: { success: false, message: 'Bạn không có quyền thực hiện thao tác này!' },
+                redirect: req.get('Referer') || `${sysConfig.prefixAdmin}/accounts`
+            });
+        }
         const { id, status } = req.params;
+        if (!['active', 'inactive'].includes(status)) {
+            return respond(req, res, {
+                status: 422,
+                json: { success: false, message: 'Trạng thái không hợp lệ!' },
+                redirect: req.get('Referer') || `${sysConfig.prefixAdmin}/accounts`
+            });
+        }
         await accountService.changeStatus(id, status);
-
-        req.flash('success', 'Cập nhật trạng thái thành công!');
+        return respond(req, res, {
+            status: 200,
+            json: { success: true, message: 'Cập nhật trạng thái thành công!' },
+            redirect: req.get('Referer') || `${sysConfig.prefixAdmin}/accounts`
+        });
     } catch (err) {
-        req.flash('error', 'Có lỗi xảy ra, vui lòng thử lại!');
+        return respond(req, res, {
+            status: 500,
+            json: { success: false, message: 'Có lỗi xảy ra, vui lòng thử lại!' },
+            redirect: req.get('Referer') || `${sysConfig.prefixAdmin}/accounts`
+        });
     }
-
-    res.redirect(req.get('Referer') || `${sysConfig.prefixAdmin}/accounts`);
 };
 
-
-// =======================
-// [DELETE] /admin/accounts/delete-account/:id
-// =======================
 module.exports.deleteAccount = async (req, res) => {
     try {
+        if (!hasPermission(res, 'accounts_delete')) {
+            return respond(req, res, {
+                status: 403,
+                json: { success: false, message: 'Bạn không có quyền thực hiện thao tác này!' },
+                redirect: req.get('Referer') || `${sysConfig.prefixAdmin}/accounts`
+            });
+        }
         await accountService.deleteAccount(req.params.id);
-
-        req.flash('success', 'Xóa tài khoản thành công!');
+        return respond(req, res, {
+            status: 200,
+            json: { success: true, message: 'Xóa tài khoản thành công!' },
+            redirect: req.get('Referer') || `${sysConfig.prefixAdmin}/accounts`
+        });
     } catch (err) {
-        req.flash('error', 'Có lỗi xảy ra, vui lòng thử lại!');
+        return respond(req, res, {
+            status: 500,
+            json: { success: false, message: 'Có lỗi xảy ra, vui lòng thử lại!' },
+            redirect: req.get('Referer') || `${sysConfig.prefixAdmin}/accounts`
+        });
     }
-
-    res.redirect(req.get('Referer') || `${sysConfig.prefixAdmin}/accounts`);
 };
 
 
@@ -119,12 +224,8 @@ module.exports.edit = async (req, res) => {
 // =======================
 module.exports.editAccount = async (req, res) => {
     try {
-        // ⚠️ service PHẢI return account sau update
         const updatedAccount = await accountService.editAccount(req);
 
-        // ===============================
-        // 🔥 CẬP NHẬT SESSION USER
-        // ===============================
         if (
             req.session.user &&
             req.session.user._id &&
@@ -136,19 +237,21 @@ module.exports.editAccount = async (req, res) => {
             req.session.user.address = updatedAccount.address;
         }
 
-        req.flash('success', 'Cập nhật tài khoản thành công!');
-
+        return respond(req, res, {
+            status: 200,
+            json: { success: true, message: 'Cập nhật tài khoản thành công!' },
+            redirect: `${sysConfig.prefixAdmin}/accounts/edit/${req.params.id}`
+        });
     } catch (err) {
-        console.log(err);
-
-        if (err.message === "EMAIL_EXISTS") {
-            req.flash('error', 'Email đã tồn tại, vui lòng chọn email khác!');
-        } else {
-            req.flash('error', 'Có lỗi xảy ra, vui lòng thử lại!');
-        }
+        const msg = err.message === "EMAIL_EXISTS"
+            ? 'Email đã tồn tại, vui lòng chọn email khác!'
+            : 'Có lỗi xảy ra, vui lòng thử lại!';
+        return respond(req, res, {
+            status: 400,
+            json: { success: false, message: msg },
+            redirect: `${sysConfig.prefixAdmin}/accounts/edit/${req.params.id}`
+        });
     }
-
-    res.redirect(`${sysConfig.prefixAdmin}/accounts/edit/${req.params.id}`);
 };
 
 

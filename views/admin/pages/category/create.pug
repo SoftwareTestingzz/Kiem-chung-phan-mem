@@ -19,8 +19,8 @@ block main
                 label.form-label(for="parent_category") Danh mục cha
                 select.form-control(id="parent_category" name="parent_category")
                     option(value='') -- Chọn danh mục --
-                    if records
-                        +select-tree(records)
+                    if tree
+                        +select-tree(tree)
 
             .form-group.mb-3
                 label.form-label(for="desc") Mô tả danh mục

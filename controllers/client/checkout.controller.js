@@ -92,7 +92,7 @@ module.exports = {
         // Bắt lỗi validate (số điện thoại, địa chỉ, ...)
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            return res.json({
+            return res.status(400).json({
                 success: false,
                 message: errors.array()[0].msg
             });
@@ -100,7 +100,7 @@ module.exports = {
 
         // Chưa đăng nhập
         if (!req.session.user) {
-            return res.json({
+            return res.status(400).json({
                 success: false,
                 message: "Bạn cần đăng nhập để đặt hàng!"
             });
@@ -116,11 +116,11 @@ module.exports = {
                 ids = JSON.parse(req.body.selectedItems);
             }
         } catch (err) {
-            return res.json({ success: false, message: 'Dữ liệu không hợp lệ' });
+            return res.status(400).json({ success: false, message: 'Dữ liệu không hợp lệ' });
         }
 
         if (!Array.isArray(ids) || ids.length === 0) {
-            return res.json({ success: false, message: 'Không có sản phẩm để đặt hàng' });
+            return res.status(400).json({ success: false, message: 'Không có sản phẩm để đặt hàng' });
         }
 
         try {
@@ -135,7 +135,7 @@ module.exports = {
 
         } catch (err) {
             console.error("Place Order Error:", err);
-            return res.json({
+            return res.status(400).json({
                 success: false,
                 message: err.message || "Lỗi hệ thống khi đặt hàng!"
             });
