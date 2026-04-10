@@ -21,6 +21,17 @@ module.exports.index = (req, res) => {
 // [POST] /profile
 module.exports.updateProfile = async (req, res) => {
     try {
+        // Kiểm tra validation errors
+        const { validationResult } = require("express-validator");
+        const errors = validationResult(req);
+        
+        if (!errors.isEmpty()) {
+            return res.status(400).json({
+                success: false,
+                message: errors.array()[0].msg
+            });
+        }
+
         if (!req.session.user || !req.session.user._id) {
             return res.status(401).json({
                 success: false,
