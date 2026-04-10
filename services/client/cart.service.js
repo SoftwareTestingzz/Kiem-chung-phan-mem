@@ -162,6 +162,12 @@ module.exports.removeItem = async (req, productId) => {
 ====================================================== */
 module.exports.clearCart = async (req) => {
     const userId = req.session.user._id;
+    
+    let cart = await Cart.findOne({ userId });
+    if (!cart) {
+        throw new Error("Giỏ hàng trống!");
+    }
+    
     await Cart.deleteOne({ userId });
     return true;
 };
