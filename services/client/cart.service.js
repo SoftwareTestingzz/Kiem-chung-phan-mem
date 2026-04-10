@@ -49,6 +49,12 @@ module.exports.addToCart = async (req, productId, quantity) => {
     if (!req.session.user)
         throw new Error("Bạn phải đăng nhập!");
 
+    // Validate ObjectId format
+    const mongoose = require('mongoose');
+    if (!mongoose.Types.ObjectId.isValid(productId)) {
+        throw new Error("Mã sản phẩm không hợp lệ!");
+    }
+
     const userId = req.session.user._id;
     const qty = parseInt(quantity);
 
@@ -106,6 +112,12 @@ module.exports.addToCart = async (req, productId, quantity) => {
    UPDATE SỐ LƯỢNG
 ====================================================== */
 module.exports.updateQuantity = async (req, productId, qty) => {
+    // Validate ObjectId format
+    const mongoose = require('mongoose');
+    if (!mongoose.Types.ObjectId.isValid(productId)) {
+        throw new Error("Mã sản phẩm không hợp lệ!");
+    }
+
     const userId = req.session.user._id;
     const quantity = parseInt(qty);
 
@@ -134,6 +146,12 @@ module.exports.updateQuantity = async (req, productId, qty) => {
    XÓA 1 SẢN PHẨM
 ====================================================== */
 module.exports.removeItem = async (req, productId) => {
+    // Validate ObjectId format
+    const mongoose = require('mongoose');
+    if (!mongoose.Types.ObjectId.isValid(productId)) {
+        throw new Error("Mã sản phẩm không hợp lệ!");
+    }
+
     const userId = req.session.user._id;
 
     let cart = await Cart.findOne({ userId });
