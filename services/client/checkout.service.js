@@ -19,12 +19,12 @@ module.exports.getSelectedItems = async (req, selectedItems) => {
         }
 
         if (!Array.isArray(selectedItems) || selectedItems.length === 0) {
-            
+            throw new Error("Không có sản phẩm nào được chọn!");
         }
 
         const cart = await Cart.findOne({ userId });
         if (!cart || !cart.items || cart.items.length === 0) {
-            
+            throw new Error("Giỏ hàng của bạn đang trống!");
         }
 
         // Lọc các item được chọn
@@ -33,7 +33,7 @@ module.exports.getSelectedItems = async (req, selectedItems) => {
         );
 
         if (selected.length === 0) {
-            
+            throw new Error("Không tìm thấy sản phẩm được chọn trong giỏ hàng!");
         }
 
         const total = selected.reduce(
@@ -65,7 +65,7 @@ module.exports.createOrder = async (req, selectedItems) => {
         }
 
         if (!Array.isArray(selectedItems) || selectedItems.length === 0) {
-            
+            throw new Error("Không có sản phẩm nào được chọn!");
         }
 
         const { name, phone, address } = req.body;
@@ -77,7 +77,7 @@ module.exports.createOrder = async (req, selectedItems) => {
 
         const cart = await Cart.findOne({ userId });
         if (!cart || !cart.items || cart.items.length === 0) {
-            
+            throw new Error("Giỏ hàng của bạn đang trống, không thể đặt hàng!");
         }
 
         // Lọc các item được chọn
@@ -86,7 +86,7 @@ module.exports.createOrder = async (req, selectedItems) => {
         );
 
         if (selected.length === 0) {
-          
+            throw new Error("Không tìm thấy sản phẩm được chọn trong giỏ hàng!");
         }
 
         /* ======================================================
@@ -96,13 +96,11 @@ module.exports.createOrder = async (req, selectedItems) => {
             const product = await Product.findById(item.productId);
 
             if (!product) {
-                
+                throw new Error(`Sản phẩm ${item.title} không tồn tại!`);
             }
 
             if (product.stock < item.quantity) {
-                throw new Error(
-                  
-                );
+                throw new Error(`Không đủ hàng cho sản phẩm: ${product.title}`);
             }
         }
 
