@@ -3,11 +3,12 @@ const router = express.Router();
 
 const upload = require("../../config/multer")
 const profileController = require("../../controllers/client/profile.controller");
+const { updateProfileValidates } = require("../../validates/client/profile.validates");
 
 // Hiển thị profile
 router.get("/", profileController.index);
 
 // Cập nhật profile (AJAX)
-router.post("/", upload.single("avatar"), profileController.updateProfile);
+router.post("/", upload.single("avatar"), updateProfileValidates, profileController.updateProfile);
 
 module.exports = router;
