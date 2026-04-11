@@ -7,9 +7,70 @@ function isAdmin(req) {
 }
 
 function isValidStatus(status) {
-    // Chỉnh lại các trạng thái hợp lệ theo hệ thống của bạn
-    return ["pending", "processing", "completed", "cancelled"].includes(status);
+    // Đúng enum trong model
+    return ["pending", "confirmed", "shipping", "completed", "cancelled"].includes(status);
 }
+    // ======================= API: LẤY DANH SÁCH ĐƠN (JSON) =======================
+    indexApi: async (req, res) => {
+        try {
+            if (!isAdmin(req)) {
+                return res.status(403).json({ success: false, message: 'Forbidden' });
+            }
+            const result = await orderService.getList(req.query);
+            res.json({
+                success: true,
+                data: {
+                    orders: result.docs,
+                    total: result.total,
+                    page: result.page,
+                    limit: result.limit,
+                    totalPages: result.totalPages,
+                    years: result.years
+                }
+            });
+        } catch (err) {
+            console.error("Admin Order List Error:", err);
+            res.status(500).json({ success: false, message: "Không thể tải danh sách đơn!" });
+        }
+    },
+
+    // ======================= API: CHI TIẾT ĐƠN (JSON) =======================
+    detailApi: async (req, res) => {
+        try {
+            if (!isAdmin(req)) {
+                return res.status(403).json({ success: false, message: 'Forbidden' });
+            }
+            const order = await orderService.getDetail(req.params.id);
+            if (!order) {
+                return res.status(404).json({ success: false, message: "Đơn hàng không tồn tại hoặc đã bị khách huỷ!" });
+            }
+            res.json({ success: true, data: order });
+        } catch (err) {
+            console.error("Admin Order Detail Error:", err);
+            res.status(500).json({ success: false, message: "Lỗi khi tải chi tiết đơn hàng!" });
+        }
+    },
+
+    // ======================= API: UPDATE STATUS (JSON) =======================
+    updateStatusApi: async (req, res) => {
+        try {
+            if (!isAdmin(req)) {
+                return res.status(403).json({ success: false, message: 'Bạn không có quyền thực hiện thao tác này!' });
+            }
+            const orderId = req.params.id;
+            const { status } = req.body;
+            if (!isValidStatus(status)) {
+                return res.status(422).json({ success: false, message: 'Trạng thái không hợp lệ!' });
+            }
+            const result = await orderService.updateStatus(orderId, status);
+            if (result.error) {
+                return res.status(400).json({ success: false, message: result.error });
+            }
+            return res.json({ success: true, message: 'Cập nhật trạng thái thành công!' });
+        } catch (err) {
+            return res.status(500).json({ success: false, message: 'Lỗi cập nhật trạng thái đơn hàng!' });
+        }
+    },
 
 module.exports = {
 
@@ -70,20 +131,40 @@ module.exports = {
     updateStatus: async (req, res) => {
         try {
             if (!isAdmin(req)) {
-                return res.status(403).json({ success: false, message: 'Bạn không có quyền thực hiện thao tác này!' });
+                return respond(req, res, {
+                    status: 403,
+                    json: { success: false, message: 'Bạn không có quyền thực hiện thao tác này!' },
+                    redirect: `/admin/orders/${req.params.id}`
+                });
             }
             const orderId = req.params.id;
             const { status } = req.body;
             if (!isValidStatus(status)) {
-                return res.status(422).json({ success: false, message: 'Trạng thái không hợp lệ!' });
+                return respond(req, res, {
+                    status: 422,
+                    json: { success: false, message: 'Trạng thái không hợp lệ!' },
+                    redirect: `/admin/orders/${orderId}`
+                });
             }
             const result = await orderService.updateStatus(orderId, status);
             if (result.error) {
-                return res.status(400).json({ success: false, message: result.error });
+                return respond(req, res, {
+                    status: 400,
+                    json: { success: false, message: result.error },
+                    redirect: `/admin/orders/${orderId}`
+                });
             }
-            return res.status(200).json({ success: true, message: 'Cập nhật trạng thái thành công!' });
+            return respond(req, res, {
+                status: 200,
+                json: { success: true, message: 'Cập nhật trạng thái thành công!' },
+                redirect: `/admin/orders/${orderId}`
+            });
         } catch (err) {
-            return res.status(500).json({ success: false, message: 'Lỗi cập nhật trạng thái đơn hàng!' });
+            return respond(req, res, {
+                status: 500,
+                json: { success: false, message: 'Lỗi cập nhật trạng thái đơn hàng!' },
+                redirect: `/admin/orders`
+            });
         }
     }
 };
