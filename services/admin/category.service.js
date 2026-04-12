@@ -191,8 +191,14 @@ module.exports.editCategory = async (req) => {
         req.body.thumbnail = uploadResult.secure_url
     }
 
-    await Category.updateOne({
+    const result = await Category.updateOne({
         _id: id
-    }, req.body)
+    }, req.body);
+
+    if (!result.matchedCount) {
+        const err = new Error('Danh mục không tồn tại');
+        err.status = 404;
+        throw err;
+    }
 
 }
