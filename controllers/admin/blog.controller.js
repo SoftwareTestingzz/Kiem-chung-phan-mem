@@ -16,35 +16,61 @@ module.exports = {
             qs.delete("page"); // không cho page trùng
             const baseQuery = qs.toString();
 
-            res.render("admin/pages/blog/index", {
-                pageTitle: "Quản lý Blog",
-                blogs: result.docs,
-                totalBlogs: result.total,
-                page: result.page,
-                totalPages: result.totalPages,
+            return respond(req, res, {
+                status: 200,
+                json: {
+                    success: true,
+                    blogs: result.docs,
+                    totalBlogs: result.total,
+                    page: result.page,
+                    totalPages: result.totalPages,
+                    keyword: req.query.keyword || "",
+                    sort: req.query.sort || "newest",
+                    filterMonth: req.query.month || "",
+                    filterYear: req.query.year || "",
+                    yearOptions: result.years,
+                    baseQuery 
+                },
+                render: {
+                    view: "admin/pages/blog/index",
+                    data: {
+                        pageTitle: "Quản lý Blog",
+                        blogs: result.docs,
+                        totalBlogs: result.total,
+                        page: result.page,
+                        totalPages: result.totalPages,
 
-                // giữ trạng thái filter
-                keyword: req.query.keyword || "",
-                sort: req.query.sort || "newest",
-                filterMonth: req.query.month || "",
-                filterYear: req.query.year || "",
+                        // giữ trạng thái filter
+                        keyword: req.query.keyword || "",
+                        sort: req.query.sort || "newest",
+                        filterMonth: req.query.month || "",
+                        filterYear: req.query.year || "",
 
-                yearOptions: result.years,
-                baseQuery
+                        yearOptions: result.years,
+                        baseQuery
+                    }
+                }
             });
 
         } catch (err) {
             console.error("BLOG INDEX ERROR:", err);
             req.flash("error", "Không thể tải danh sách blog!");
-            res.redirect(`${sysConfig.prefixAdmin}/dashboard`);
+            return respond(req, res, { status: 500, json: { success: false, message: 'Không thể tải danh sách blog!' }, redirect: `${sysConfig.prefixAdmin}/dashboard` });
         }
     },
 
 
     // [GET] /admin/blog/create
     create: (req, res) => {
-        res.render("admin/pages/blog/create", {
-            pageTitle: "Thêm bài viết"
+        return respond(req, res, {
+            status: 200,
+            json: { success: true, message: 'Form thêm bài viết' },
+            render: {
+                view: "admin/pages/blog/create",
+                data: {
+                    pageTitle: "Thêm bài viết"
+                }
+            }
         });
     },
 
@@ -78,18 +104,25 @@ module.exports = {
 
             if (!blog) {
                 req.flash("error", "Bài viết không tồn tại!");
-                return res.redirect("/admin/blog");
+                return respond(req, res, { status: 404, json: { success: false, message: 'Bài viết không tồn tại!' }, redirect: "/admin/blog" });
             }
 
-            res.render("admin/pages/blog/edit", {
-                pageTitle: "Sửa bài viết",
-                blog
+            return respond(req, res, {
+                status: 200,
+                json: { success: true, blog },
+                render: {
+                    view: "admin/pages/blog/edit",
+                    data: {
+                        pageTitle: "Sửa bài viết",
+                        blog
+                    }
+                }
             });
 
         } catch (err) {
             console.error("BLOG EDIT ERROR:", err);
             req.flash("error", "Không thể tải bài viết!");
-            res.redirect("/admin/blog");
+            return respond(req, res, { status: 500, json: { success: false, message: 'Không thể tải bài viết!' }, redirect: "/admin/blog" });
         }
     },
 
