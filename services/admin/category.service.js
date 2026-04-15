@@ -50,7 +50,7 @@ module.exports.changeMulti = async (type, idsInput) => {
         : idsInput.split(',');
 
     if (!ids.length) {
-        throw { status: 404, message: 'Danh sách ID rỗng' };
+        throw { status: 400, message: 'Danh sách ID rỗng' };
     }
 
     for (const id of ids) {
@@ -169,6 +169,14 @@ module.exports.createCategory = async (req) => {
     const body = req.body
     console.log("Body:", body);
 
+    if (!body.title || !body.title.trim()) {
+        throw { status: 400, message: 'Vui lòng nhập Tên danh mục!' };
+    }
+
+    if (body.title.length > 255) {
+        throw { status: 400, message: 'Tên danh mục tối đa 255 ký tự!' };
+    }
+
     if (!body.position || body.position === "") {
         const count = await Category.countDocuments({ deleted: false })
         body.position = count + 1
@@ -177,8 +185,12 @@ module.exports.createCategory = async (req) => {
     }
 
     if (req.file) {
-        const uploadResult = await uploadToCloud(req.file.path)
-        body.thumbnail = uploadResult.secure_url
+        if (process.env.NODE_ENV === 'test') {
+            body.thumbnail = `https://test.local/${req.file.filename}`;
+        } else {
+            const uploadResult = await uploadToCloud(req.file.path)
+            body.thumbnail = uploadResult.secure_url
+        }
     }
 
     const records = new Category(body)
@@ -218,12 +230,21 @@ module.exports.editCategory = async (req) => {
     }
 
     if (req.file) {
-        const uploadResult = await uploadToCloud(req.file.path)
-        req.body.thumbnail = uploadResult.secure_url
+        if (process.env.NODE_ENV === 'test') {
+            req.body.thumbnail = `https://test.local/${req.file.filename}`;
+        } else {
+            const uploadResult = await uploadToCloud(req.file.path)
+            req.body.thumbnail = uploadResult.secure_url
+        }
     }
 
-    await Category.updateOne({
+    const result = await Category.updateOne({
         _id: id
     }, req.body)
 
+    if (result.matchedCount === 0) {
+        throw { status: 404, message: 'Danh mục không tồn tại' };
+    }
+
+    return result;
 }

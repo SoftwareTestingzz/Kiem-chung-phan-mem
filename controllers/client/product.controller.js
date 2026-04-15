@@ -229,40 +229,37 @@ module.exports.comment = async (req, res) => {
             return handleCommentError(400, 'Bạn chỉ có thể đánh giá sản phẩm này một lần.');
         }
 
-        // Kiểm tra đã từng mua sản phẩm này chưa (đơn completed)
-        const order = await Order.findOne({
-            userId: user._id,
-            'items.productId': product._id,
-            status: 'completed'
-        });
-
-        if (!order) {
-            return handleCommentError(403, 'Bạn cần mua sản phẩm này trước khi bình luận');
-        }
-
         // Validate rating + content
-        const ratingNumber = Number(rating);
-        if (!ratingNumber || ratingNumber < 1 || ratingNumber > 5) {
-            return handleCommentError(400, 'Số sao không hợp lệ');
+        let ratingNumber = null;
+        if (rating !== undefined && rating !== null && rating !== '') {
+            ratingNumber = Number(rating);
+            if (isNaN(ratingNumber) || ratingNumber < 1 || ratingNumber > 5) {
+                return handleCommentError(400, 'Số sao không hợp lệ');
+            }
         }
 
         if (!content || !content.trim()) {
             return handleCommentError(400, 'Nội dung bình luận không được để trống');
         }
 
-        if (content.trim().length > 5000) {
-            return handleCommentError(400, 'Nội dung bình luận không được quá 5000 kí tự');
+        if (content.trim().length > 500) {
+            return handleCommentError(400, 'Nội dung bình luận không được quá 500 ký tự');
         }
 
         // Tạo bình luận mới (mặc định status = 'approved')
-        await Comment.create({
+        const commentData = {
             productId: product._id,
             userId: user._id,
             userName: user.fullName || user.email,
             userEmail: user.email || '',
-            rating: ratingNumber,
             content: content.trim()
-        });
+        };
+
+        if (ratingNumber !== null) {
+            commentData.rating = ratingNumber;
+        }
+
+        await Comment.create(commentData);
 
         req.flash('success', 'Bình luận thành công!');
         return respond(req, res, {

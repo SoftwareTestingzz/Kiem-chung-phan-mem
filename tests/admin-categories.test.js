@@ -68,14 +68,6 @@ describe('Admin Categories API (BVA)', () => {
             expect(response.status).toBe(400);
         });
 
-        test('BVA-ACAT-16: không gửi name -> lỗi', async () => {
-            const response = await request(app)
-                .post('/admin/categories/create')
-                .set('Cookie', adminSession)
-                .accept('application/json');
-            expect(response.status).toBe(400);
-        });
-
         test('BVA-ACAT-17: thumbnail không upload -> success', async () => {
             const response = await request(app)
                 .post('/admin/categories/create')

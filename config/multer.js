@@ -6,14 +6,18 @@ const storage = multer.diskStorage({
     }
 });
 
-const fileFilter = (req, file, cb) => {
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+const path = require('path');
 
-    if (!allowedTypes.includes(file.mimetype)) {
-        return cb(new Error('INVALID_FILE_TYPE'), false);
+const fileFilter = (req, file, cb) => {
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/pjpeg', 'image/x-png'];
+    const extension = path.extname(file.originalname).toLowerCase();
+    const allowedExtensions = ['.jpg', '.jpeg', '.png'];
+
+    if (allowedTypes.includes(file.mimetype) || allowedExtensions.includes(extension)) {
+        return cb(null, true);
     }
 
-    cb(null, true);
+    return cb(new Error('INVALID_FILE_TYPE'), false);
 };
 
 const upload = multer({

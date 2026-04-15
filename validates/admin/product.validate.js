@@ -17,20 +17,24 @@ module.exports.createPost = (req, res, next) => {
         });
     }
 
-    const price = Number(req.body.price);
-    if (isNaN(price) || price < 0) {
-        return respond(req, res, {
-            status: 400,
-            json: { success: false, message: 'Price không hợp lệ' }
-        });
+    if (req.body.price !== undefined && req.body.price !== '') {
+        const price = Number(req.body.price);
+        if (isNaN(price) || price < 0) {
+            return respond(req, res, {
+                status: 400,
+                json: { success: false, message: 'Price không hợp lệ' }
+            });
+        }
     }
 
-    const stock = Number(req.body.stock);
-    if (isNaN(stock) || stock < 0) {
-        return respond(req, res, {
-            status: 400,
-            json: { success: false, message: 'Stock không hợp lệ' }
-        });
+    if (req.body.stock !== undefined && req.body.stock !== '') {
+        const stock = Number(req.body.stock);
+        if (isNaN(stock) || stock < 0) {
+            return respond(req, res, {
+                status: 400,
+                json: { success: false, message: 'Stock không hợp lệ' }
+            });
+        }
     }
 
     next();

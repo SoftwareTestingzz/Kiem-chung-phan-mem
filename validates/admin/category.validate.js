@@ -4,7 +4,9 @@ const respond = require('../../helper/respond');
 module.exports.createPost = (req, res, next) => {
 
     if (!req.body.title) {
-        req.flash('error', 'Vui lòng nhập Tên danh mục!');
+        if (typeof req.flash === 'function') {
+            req.flash('error', 'Vui lòng nhập Tên danh mục!');
+        }
         return respond(req, res, {
             status: 400,
             json: { success: false, message: 'Vui lòng nhập Tên danh mục!' },
@@ -13,7 +15,9 @@ module.exports.createPost = (req, res, next) => {
     }
 
     if (req.body.title.length > 255) {
-        req.flash('error', 'Tên danh mục tối đa 255 ký tự!');
+        if (typeof req.flash === 'function') {
+            req.flash('error', 'Tên danh mục tối đa 255 ký tự!');
+        }
         return res.status(400).json({ success: false, message: 'Tên danh mục tối đa 255 ký tự!' });
     }
 

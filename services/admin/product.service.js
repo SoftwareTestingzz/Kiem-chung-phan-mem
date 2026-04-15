@@ -173,8 +173,12 @@ module.exports.createProduct = async (req, res) => {
     }
 
     if (req.file) {
-        const uploadResult = await uploadToCloud(req.file.path)
-        body.thumbnail = uploadResult.secure_url
+        if (process.env.NODE_ENV === 'test') {
+            body.thumbnail = `https://test.local/${req.file.filename}`;
+        } else {
+            const uploadResult = await uploadToCloud(req.file.path)
+            body.thumbnail = uploadResult.secure_url
+        }
     }
 
     const userId = res.locals.user ? (res.locals.user._id || res.locals.user.id) : null;
@@ -269,8 +273,12 @@ module.exports.editProduct = async (req, id, res) => {
     }
 
     if (req.file) {
-        const uploadResult = await uploadToCloud(req.file.path)
-        body.thumbnail = uploadResult.secure_url
+        if (process.env.NODE_ENV === 'test') {
+            body.thumbnail = `https://test.local/${req.file.filename}`;
+        } else {
+            const uploadResult = await uploadToCloud(req.file.path)
+            body.thumbnail = uploadResult.secure_url
+        }
     }
 
     const userId = res.locals.user ? (res.locals.user._id || res.locals.user.id) : null;

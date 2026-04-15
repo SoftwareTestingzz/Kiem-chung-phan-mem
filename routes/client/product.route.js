@@ -3,8 +3,28 @@ const router = express.Router();
 const controller = require('../../controllers/client/product.controller');
 
 // Middleware bắt đăng nhập đơn giản
-function requireLogin(req, res, next) {
+const Account = require('../../models/user-client');
+
+async function requireLogin(req, res, next) {
   if (!req.session || !req.session.user) {
+    const token = req.cookies?.tokenClient;
+    if (token) {
+      try {
+        const user = await Account.findOne({ token, deleted: false });
+        if (user) {
+          req.session.user = {
+            _id: user._id,
+            fullName: user.fullName,
+            email: user.email,
+            avatar: user.avatar
+          };
+          return next();
+        }
+      } catch (error) {
+        // noop
+      }
+    }
+
     return res.redirect('/login');
   }
   next();
