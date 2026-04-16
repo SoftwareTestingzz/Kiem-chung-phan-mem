@@ -690,7 +690,7 @@ const schema = new mongoose.Schema(
     status: String,
     deleted: { type: Boolean, default: false },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 module.exports = mongoose.model("NewFeature", schema);
@@ -743,7 +743,7 @@ module.exports = router;
 app.use(
   PATH_ADMIN + "/new-feature",
   authMiddleware.requireAuth,
-  newFeatureRoutes
+  newFeatureRoutes,
 );
 ```
 
@@ -806,11 +806,13 @@ orderSchema.index({ userId: 1, createdAt: -1 });
 Dự án này được kết nối với Jira qua MCP (Model Context Protocol).
 
 ### **Thông tin dự án Jira**
+
 - **Project Key**: `KIEM`
 - **Project Name**: `KiemThuPhanMem`
 - **Jira URL**: [https://pson4282.atlassian.net/jira/software/projects/KIEM](https://pson4282.atlassian.net/jira/software/projects/KIEM)
 
 ### **Các lệnh Jira MCP hỗ trợ**
+
 - **`mcp_jira-mcp_getIssuesByJQL`**: Truy vấn issues bằng JQL.
 - **`mcp_jira-mcp_createIssue`**: Tạo issue mới trực tiếp từ coding assistant.
 - **`mcp_jira-mcp_getBoards`**: Xem danh sách boards.
@@ -886,3 +888,4 @@ Dự án này được sử dụng cho mục đích giáo dục.
 
 **Cảm ơn vì sử dụng Verdish! 🎉**
 node scripts/newman-jira-reporter.js
+npm test -- son-unit-controllers.test.js
