@@ -5,6 +5,8 @@
   "scripts": {
     "start": "nodemon --inspect index.js",
     "test": "cross-env NODE_ENV=test jest --testTimeout=30000",
+    "test:unit": "cross-env NODE_ENV=test jest --testPathPatterns=tests/unit --testTimeout=10000",
+    "test:integration": "cross-env NODE_ENV=test jest --testPathPatterns=\"tests/(admin|client)\" --testTimeout=30000",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "test:with-jira": "node jira-integration/newman-jira-runner.js --collection docs/son-collection.json --environment docs/shared-environment.json",
@@ -13,11 +15,19 @@
   },
   "jest": {
     "testEnvironment": "node",
-    "setupFilesAfterEnv": [
-      "./tests/setup.js"
-    ],
-    "testMatch": [
-      "**/tests/**/*.test.js"
+    "projects": [
+      {
+        "displayName": "unit",
+        "testMatch": ["<rootDir>/tests/unit/**/*.test.js"],
+        "setupFilesAfterEnv": ["<rootDir>/tests/unit/setup.unit.js"],
+        "testEnvironment": "node"
+      },
+      {
+        "displayName": "integration",
+        "testMatch": ["<rootDir>/tests/admin-*.test.js", "<rootDir>/tests/client-*.test.js"],
+        "setupFilesAfterEnv": ["<rootDir>/tests/setup.js"],
+        "testEnvironment": "node"
+      }
     ],
     "collectCoverageFrom": [
       "controllers/**/*.js",
