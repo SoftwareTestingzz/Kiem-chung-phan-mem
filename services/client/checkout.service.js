@@ -48,7 +48,7 @@ module.exports.getSelectedItems = async (req, selectedItems) => {
 
     } catch (err) {
         console.error("Get Selected Items Error:", err);
-    
+        throw err;
     }
 };
 
