@@ -128,6 +128,6 @@ module.exports.updateStatus = async (id, status) => {
         return { error: "Admin không có quyền hủy đơn hàng!" };
     }
 
-    await Order.findByIdAndUpdate(id, { status });
+    await Order.findByIdAndUpdate(id, { status }, { runValidators: true });
     return { success: true };
 };
