@@ -1,6 +1,10 @@
 extends ../../layouts/default
+include ../../mixins/alert.pug
 
 block main
+    +alert-success(3000)
+    +alert-error(5000)
+    
     if roleUser && roleUser.permissions && roleUser.permissions.includes('orders_view')
         .container
             h1 Quản lý đơn hàng

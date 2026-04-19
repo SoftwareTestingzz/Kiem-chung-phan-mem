@@ -20,16 +20,23 @@ function hasPermission(res, permission) {
 module.exports.index = async (req, res) => {
     try {
         if (!hasPermission(res, 'accounts_view')) {
-            return res.status(403).send('Forbidden');
+            return respond(req, res, { status: 403, json: { success: false, message: 'Forbidden' }, redirect: `${sysConfig.prefixAdmin}/dashboard` });
         }
         const records = await accountService.getList();
-        res.render('admin/pages/account/index', {
-            pageTitle: 'Quản lý tài khoản',
-            records
+        return respond(req, res, {
+            status: 200,
+            json: { success: true, records },
+            render: {
+                view: 'admin/pages/account/index',
+                data: {
+                    pageTitle: 'Quản lý tài khoản',
+                    records
+                }
+            }
         });
     } catch (err) {
         req.flash('error', 'Có lỗi xảy ra, vui lòng thử lại!');
-        res.redirect(`${sysConfig.prefixAdmin}/dashboard`);
+        return respond(req, res, { status: 500, json: { success: false, message: 'Có lỗi xảy ra, vui lòng thử lại!' }, redirect: `${sysConfig.prefixAdmin}/dashboard` });
     }
 };
 
@@ -41,14 +48,21 @@ module.exports.create = async (req, res) => {
     try {
         const roles = await accountService.create();
 
-        res.render('admin/pages/account/create', {
-            pageTitle: 'Thêm mới tài khoản',
-            roles
+        return respond(req, res, {
+            status: 200,
+            json: { success: true, roles },
+            render: {
+                view: 'admin/pages/account/create',
+                data: {
+                    pageTitle: 'Thêm mới tài khoản',
+                    roles
+                }
+            }
         });
 
     } catch (err) {
         req.flash('error', 'Có lỗi xảy ra, vui lòng thử lại!');
-        res.redirect(`${sysConfig.prefixAdmin}/accounts`);
+        return respond(req, res, { status: 500, json: { success: false, message: 'Có lỗi xảy ra, vui lòng thử lại!' }, redirect: `${sysConfig.prefixAdmin}/accounts` });
     }
 };
 
@@ -206,14 +220,21 @@ module.exports.edit = async (req, res) => {
     try {
         const records = await accountService.edit(req);
 
-        res.render('admin/pages/account/edit', {
-            pageTitle: 'Chỉnh sửa tài khoản',
-            ...records
+        return respond(req, res, {
+            status: 200,
+            json: { success: true, ...records },
+            render: {
+                view: 'admin/pages/account/edit',
+                data: {
+                    pageTitle: 'Chỉnh sửa tài khoản',
+                    ...records
+                }
+            }
         });
 
     } catch (err) {
         req.flash('error', 'Có lỗi xảy ra, vui lòng thử lại!');
-        res.redirect(`${sysConfig.prefixAdmin}/accounts`);
+        return respond(req, res, { status: 500, json: { success: false, message: 'Có lỗi xảy ra, vui lòng thử lại!' }, redirect: `${sysConfig.prefixAdmin}/accounts` });
     }
 };
 
@@ -262,13 +283,20 @@ module.exports.detail = async (req, res) => {
     try {
         const records = await accountService.detail(req);
 
-        res.render('admin/pages/account/detail', {
-            pageTitle: 'Chi tiết tài khoản',
-            ...records
+        return respond(req, res, {
+            status: 200,
+            json: { success: true, ...records },
+            render: {
+                view: 'admin/pages/account/detail',
+                data: {
+                    pageTitle: 'Chi tiết tài khoản',
+                    ...records
+                }
+            }
         });
 
     } catch (err) {
         req.flash('error', 'Không tìm thấy tài khoản!');
-        res.redirect(`${sysConfig.prefixAdmin}/accounts`);
+        return respond(req, res, { status: 500, json: { success: false, message: 'Không tìm thấy tài khoản!' }, redirect: `${sysConfig.prefixAdmin}/accounts` });
     }
 };

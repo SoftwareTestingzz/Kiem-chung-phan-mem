@@ -6,8 +6,13 @@ module.exports = {
     // ====================================================
     // Lấy danh sách đơn hàng của user
     // ====================================================
-    getOrderList: async (userId) => {
-        return await Order.find({ userId })
+    getOrderList: async (userId, query = {}) => {
+        const filter = { userId };
+        if (query.status) {
+            filter.status = query.status;
+        }
+
+        return await Order.find(filter)
             .sort({ createdAt: -1 });
     },
 

@@ -1,6 +1,10 @@
 extends ../../layouts/default
+include ../../mixins/alert.pug
 
 block main
+    +alert-success(3000)
+    +alert-error(5000)
+    
     - const permissions = (roleUser && Array.isArray(roleUser.permissions)) ? roleUser.permissions : []
 
     if permissions.includes('orders_view')

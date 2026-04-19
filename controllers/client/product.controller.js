@@ -49,7 +49,16 @@ module.exports.index = async (req, res) => {
         const categoriesMenu = await categoryService.getMenuCategories();
 
         // PAGINATION
-        const page = Math.max(1, parseInt(req.query.page) || 1);
+        const pageRaw = req.query.page;
+
+        if (pageRaw !== undefined && Number(pageRaw) < 1) {
+            return respond(req, res, {
+                status: 400,
+                json: { success: false, message: 'Page không hợp lệ' }
+            });
+        }
+
+        const page = Number(pageRaw) || 1;
         const perPage = Math.max(1, parseInt(req.query.perPage) || parseInt(req.query.limit) || 10);
         const totalItems = products.length;
         const totalPages = Math.max(1, Math.ceil(totalItems / perPage));
@@ -195,16 +204,19 @@ module.exports.comment = async (req, res) => {
         const user = req.session.user;
         const { rating, content } = req.body;
 
-        const sendError = (status, msg) => {
-            const wantsJson = req.headers['accept']?.includes('application/json') || req.query._format === 'json';
-            if (wantsJson) return res.status(status).json({ success: false, message: msg });
-            return res.status(status).send(msg);
+        const handleCommentError = (status, msg) => {
+            req.flash('error', msg);
+            return respond(req, res, {
+                status: status,
+                json: { success: false, message: msg },
+                redirect: '/detail/' + slug
+            });
         };
 
         // Lấy sản phẩm
         const product = await productService.detail(slug);
         if (!product) {
-            return sendError(404, 'Product not found');
+            return handleCommentError(404, 'Sản phẩm không tồn tại');
         }
 
         // Kiểm tra đã từng review sản phẩm này chưa
@@ -214,49 +226,42 @@ module.exports.comment = async (req, res) => {
         });
 
         if (existingComment) {
-
-            return sendError(400, 'Bạn chỉ có thể đánh giá sản phẩm này một lần.');
-        }
-
-        // Kiểm tra đã từng mua sản phẩm này chưa (đơn completed)
-        const order = await Order.findOne({
-            userId: user._id,
-            'items.productId': product._id,
-            status: 'completed'
-        });
-
-        if (!order) {
-            return sendError(403, 'Bạn cần mua sản phẩm này trước khi bình luận');
+            return handleCommentError(400, 'Bạn chỉ có thể đánh giá sản phẩm này một lần.');
         }
 
         // Validate rating + content
-        const ratingNumber = Number(rating);
-        if (!ratingNumber || ratingNumber < 1 || ratingNumber > 5) {
-            return sendError(400, 'Số sao không hợp lệ');
+        let ratingNumber = null;
+        if (rating !== undefined && rating !== null && rating !== '') {
+            ratingNumber = Number(rating);
+            if (isNaN(ratingNumber) || ratingNumber < 1 || ratingNumber > 5) {
+                return handleCommentError(400, 'Số sao không hợp lệ');
+            }
         }
 
         if (!content || !content.trim()) {
-            return sendError(400, 'Nội dung bình luận không được để trống');
+            return handleCommentError(400, 'Nội dung bình luận không được để trống');
         }
 
-        if (!content || !content.trim()) {
-            return sendError(400, 'Nội dung không được rỗng');
-        }
-
-        if (content.length > 500) {
-            return sendError(400, 'Nội dung quá dài');
+        if (content.trim().length > 500) {
+            return handleCommentError(400, 'Nội dung bình luận không được quá 500 ký tự');
         }
 
         // Tạo bình luận mới (mặc định status = 'approved')
-        await Comment.create({
+        const commentData = {
             productId: product._id,
             userId: user._id,
             userName: user.fullName || user.email,
             userEmail: user.email || '',
-            rating: ratingNumber,
             content: content.trim()
-        });
+        };
 
+        if (ratingNumber !== null) {
+            commentData.rating = ratingNumber;
+        }
+
+        await Comment.create(commentData);
+
+        req.flash('success', 'Bình luận thành công!');
         return respond(req, res, {
             status: 200,
             json: { success: true, message: 'Bình luận thành công!' },

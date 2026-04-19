@@ -3,6 +3,7 @@ const uploadToCloud = require("../../helper/uploadCloud")
 const createTreeHelper = require('../../helper/createTree')
 const filterStatusHelper = require('../../helper/filterStatus')
 const searchHelper = require('../../helper/search')
+const Product = require('../../models/product.model')
 
 module.exports.getList = async (query) => {
 
@@ -58,6 +59,12 @@ module.exports.changeMulti = async (type, idsInput) => {
         }
     }
 
+    const found = await Category.find({ _id: { $in: ids } });
+
+    if (found.length !== ids.length) {
+        throw { status: 404, message: 'Danh mục không tồn tại' };
+    }
+
     const actions = {
         active: { status: "active" },
         inactive: { status: "inactive" },
@@ -71,6 +78,16 @@ module.exports.changeMulti = async (type, idsInput) => {
     }
 
     if (action === "delete") {
+        // ✅ Kiểm tra xem có sản phẩm nào thuộc các danh mục này không
+        const productInCategories = await Product.findOne({
+            product_category: { $in: ids },
+            deleted: false
+        });
+
+        if (productInCategories) {
+            throw { status: 400, message: 'CATEGORY_HAS_PRODUCTS' };
+        }
+
         await Category.updateMany(
             { _id: { $in: ids } },
             {
@@ -112,6 +129,16 @@ module.exports.changeMulti = async (type, idsInput) => {
 }
 
 module.exports.deleteCategory = async (id) => {
+    // ✅ Kiểm tra xem có sản phẩm nào thuộc danh mục này không
+    const productInCategory = await Product.findOne({
+        product_category: id,
+        deleted: false
+    });
+
+    if (productInCategory) {
+        throw { status: 400, message: 'CATEGORY_HAS_PRODUCTS' };
+    }
+
     const category = await Category.findOne({
         _id: id,
         deleted: false
@@ -138,7 +165,17 @@ module.exports.create = async (req) => {
 }
 
 module.exports.createCategory = async (req) => {
+    console.log("--- CREATE CATEGORY SERVICE START ---");
     const body = req.body
+    console.log("Body:", body);
+
+    if (!body.title || !body.title.trim()) {
+        throw { status: 400, message: 'Vui lòng nhập Tên danh mục!' };
+    }
+
+    if (body.title.length > 255) {
+        throw { status: 400, message: 'Tên danh mục tối đa 255 ký tự!' };
+    }
 
     if (!body.position || body.position === "") {
         const count = await Category.countDocuments({ deleted: false })
@@ -148,8 +185,12 @@ module.exports.createCategory = async (req) => {
     }
 
     if (req.file) {
-        const uploadResult = await uploadToCloud(req.file.path)
-        body.thumbnail = uploadResult.secure_url
+        if (process.env.NODE_ENV === 'test') {
+            body.thumbnail = `https://test.local/${req.file.filename}`;
+        } else {
+            const uploadResult = await uploadToCloud(req.file.path)
+            body.thumbnail = uploadResult.secure_url
+        }
     }
 
     const records = new Category(body)
@@ -174,7 +215,9 @@ module.exports.edit = async (id) => {
 }
 
 module.exports.editCategory = async (req) => {
+    console.log("--- EDIT CATEGORY SERVICE START ---", req.params.id);
     const id = req.params.id
+    console.log("Body:", req.body);
 
     if (req.body.position) {
         req.body.position = parseInt(req.body.position)
@@ -187,8 +230,12 @@ module.exports.editCategory = async (req) => {
     }
 
     if (req.file) {
-        const uploadResult = await uploadToCloud(req.file.path)
-        req.body.thumbnail = uploadResult.secure_url
+        if (process.env.NODE_ENV === 'test') {
+            req.body.thumbnail = `https://test.local/${req.file.filename}`;
+        } else {
+            const uploadResult = await uploadToCloud(req.file.path)
+            req.body.thumbnail = uploadResult.secure_url
+        }
     }
 
     const result = await Category.updateOne({
@@ -201,4 +248,9 @@ module.exports.editCategory = async (req) => {
         throw err;
     }
 
+    if (result.matchedCount === 0) {
+        throw { status: 404, message: 'Danh mục không tồn tại' };
+    }
+
+    return result;
 }

@@ -21,7 +21,7 @@ module.exports.index = async (req, res) => {
     } catch (err) {
         req.flash('error', 'Có lỗi xảy ra, vui lòng thử lại!')
         return respond(req, res, {
-            status: 500,
+            status: 400,
             json: { success: false, message: 'Có lỗi xảy ra, vui lòng thử lại!' },
             redirect: `${sysConfig.prefixAdmin}/dashboard`
         });
@@ -40,7 +40,7 @@ module.exports.changeStatus = async (req, res) => {
         });
     } catch (err) {
         return respond(req, res, {
-            status: 500,
+            status: 400,
             json: { success: false, message: 'Có lỗi xảy ra, vui lòng thử lại!' },
             redirect: req.get('Referer') || `${sysConfig.prefixAdmin}/products`
         });
@@ -51,7 +51,16 @@ module.exports.changeStatus = async (req, res) => {
 module.exports.changeMulti = async (req, res) => {
     try {
         const { type, ids } = req.body;
-        const result = await productService.changeMulti(type, ids.split(','));
+        const idsArray = Array.isArray(ids) ? ids : ids.split(',');
+
+        if (!idsArray || idsArray.length === 0) {
+            return respond(req, res, {
+                status: 400,
+                json: { success: false, message: 'Danh sách rỗng' }
+            });
+        }
+
+        const result = await productService.changeMulti(type, idsArray);
         return respond(req, res, {
             status: 200,
             json: { success: true, message: result.message },
@@ -59,7 +68,7 @@ module.exports.changeMulti = async (req, res) => {
         });
     } catch (err) {
         return respond(req, res, {
-            status: err.status || 500,
+            status: err.status || 400,
             json: {
                 success: false,
                 message: err.message || 'Có lỗi xảy ra'
@@ -80,7 +89,7 @@ module.exports.deleteProduct = async (req, res) => {
         });
     } catch (err) {
         return respond(req, res, {
-            status: err.status || 500,
+            status: err.status || 400,
             json: {
                 success: false,
                 message: err.message || 'Có lỗi xảy ra'
@@ -102,7 +111,7 @@ module.exports.create = async (req, res) => {
         });
     } catch (err) {
         return respond(req, res, {
-            status: err.status || 500,
+            status: err.status || 400,
             json: {
                 success: false,
                 message: err.message || 'Có lỗi xảy ra'
@@ -114,19 +123,29 @@ module.exports.create = async (req, res) => {
 
 // [POST] /admin/products/create
 module.exports.createProduct = async (req, res) => {
+    console.log("--- CREATE PRODUCT CONTROLLER START ---");
+    console.log("Headers:", req.headers['accept']);
     try {
         const product = await productService.createProduct(req, res);
+        console.log("Create Success:", product._id);
+        req.flash('success', 'Thêm sản phẩm thành công!');
         return respond(req, res, {
             status: 200,
             json: { success: true, message: 'Thêm sản phẩm thành công!', data: product },
             redirect: `${sysConfig.prefixAdmin}/products`
         });
     } catch (err) {
+        console.error("CREATE PRODUCT ERROR:", err);
+        if (err.message === "TITLE_EXISTS") {
+            req.flash('error', 'Tên sản phẩm đã tồn tại, vui lòng nhập tên khác!');
+        } else {
+            req.flash('error', 'Có lỗi xảy ra, vui lòng thử lại!');
+        }
         return respond(req, res, {
-            status: err.status || 500,
+            status: 400,
             json: {
                 success: false,
-                message: err.message || 'Có lỗi xảy ra'
+                message: err.message === 'TITLE_EXISTS' ? 'Tên sản phẩm đã tồn tại!' : 'Có lỗi xảy ra'
             },
             redirect: req.get('Referer') || `${sysConfig.prefixAdmin}/products`
         });
@@ -145,7 +164,7 @@ module.exports.edit = async (req, res) => {
         });
     } catch (err) {
         return respond(req, res, {
-            status: err.status || 500,
+            status: err.status || 400,
             json: {
                 success: false,
                 message: err.message || 'Có lỗi xảy ra'
@@ -157,26 +176,37 @@ module.exports.edit = async (req, res) => {
 
 // [PATCH] /admin/products/edit/:id
 module.exports.editProduct = async (req, res) => {
+    console.log("--- EDIT PRODUCT CONTROLLER START ---", req.params.id);
+    console.log("Headers:", req.headers['accept']);
     try {
         const updated = await productService.editProduct(req, req.params.id, res);
+        console.log("Update Success Result:", updated);
         if (!updated) {
+            req.flash('error', 'Sản phẩm không tồn tại!');
             return respond(req, res, {
                 status: 404,
                 json: { success: false, message: 'Sản phẩm không tồn tại!' },
                 redirect: `${sysConfig.prefixAdmin}/products`
             });
         }
+        req.flash('success', 'Cập nhật sản phẩm thành công!');
         return respond(req, res, {
             status: 200,
             json: { success: true, message: 'Cập nhật sản phẩm thành công!' },
             redirect: req.get('Referer') || `${sysConfig.prefixAdmin}/products/edit/${req.params.id}`
         });
     } catch (err) {
+        console.error("EDIT PRODUCT ERROR:", err);
+        if (err.message === "TITLE_EXISTS") {
+            req.flash('error', 'Tên sản phẩm đã tồn tại, vui lòng nhập tên khác!');
+        } else {
+            req.flash('error', 'Có lỗi xảy ra, vui lòng thử lại!');
+        }
         return respond(req, res, {
-            status: err.status || 500,
+            status: 400,
             json: {
                 success: false,
-                message: err.message || 'Có lỗi xảy ra'
+                message: err.message === 'TITLE_EXISTS' ? 'Tên sản phẩm đã tồn tại!' : 'Có lỗi xảy ra'
             },
             redirect: req.get('Referer') || `${sysConfig.prefixAdmin}/products`
         });
@@ -204,7 +234,7 @@ module.exports.detail = async (req, res) => {
         });
     } catch (err) {
         return respond(req, res, {
-            status: err.status || 500,
+            status: err.status || 400,
             json: {
                 success: false,
                 message: err.message || 'Có lỗi xảy ra'

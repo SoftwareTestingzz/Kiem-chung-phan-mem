@@ -1,7 +1,10 @@
 extends ../../layouts/default.pug
+include ../../mixins/alert.pug
 
 block main
-
+    +alert-success(3000)
+    +alert-error(5000)
+    
     if roleUser.permissions.includes('roles_create')
         .container.mt-5
             h1 Tạo Role mới

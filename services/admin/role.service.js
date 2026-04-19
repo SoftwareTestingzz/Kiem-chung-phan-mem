@@ -2,14 +2,14 @@ const Role = require('../../models/role.model')
 const permissionLabel = require('../../helper/permissionLable')
 
 module.exports.getList = async () => {
-    let find = {deleted: false}
+    let find = { deleted: false }
 
     return Role.find(find)
 }
 
 module.exports.createRole = async (req) => {
     const role = new Role(req.body)
-    
+
     await role.save()
 }
 
@@ -23,7 +23,7 @@ module.exports.edit = async (id) => {
 }
 
 module.exports.editRole = async (id) => {
-    await Role.updateOne({_id: id}, req.body)
+    await Role.updateOne({ _id: id }, req.body)
 }
 
 module.exports.deleteRole = async (id) => {
@@ -50,7 +50,7 @@ module.exports.detail = async (id) => {
 
 
 module.exports.permissions = async (id) => {
-    const role = await Role.find({ deleted: false});
+    const role = await Role.find({ deleted: false });
 
     return role;
 }
@@ -59,8 +59,8 @@ module.exports.permissionsRole = async (body) => {
 
     const permissions = JSON.parse(body.permissions)
 
-    for (const item of permissions){
-        await Role.updateOne({_id: item.id}, {permissions: item.permissions})
+    for (const item of permissions) {
+        await Role.updateOne({ _id: item.id }, { permissions: item.permissions })
     }
 
 }

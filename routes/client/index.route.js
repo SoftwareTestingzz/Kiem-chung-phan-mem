@@ -42,6 +42,7 @@ module.exports = (app) => {
     app.use("/", homeRoutes);
 
     app.use("/login", loginRoute);
+    app.use("/auth/login", loginRoute);
 
     app.use("/password", passwordRoute);
 

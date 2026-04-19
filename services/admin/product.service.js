@@ -42,7 +42,7 @@ module.exports.getList = async (query) => {
         .skip(pagination.skip)
         .limit(pagination.limitItems)
 
-        products.count = count
+    products.count = count
     return {
         products,
         filterStatus,
@@ -56,6 +56,14 @@ module.exports.changeStatus = async (id, status) => {
 }
 
 module.exports.changeMulti = async (type, ids) => {
+    const found = await Product.find({ _id: { $in: ids } });
+
+    if (found.length !== ids.length) {
+        const err = new Error('NOT_FOUND');
+        err.status = 404;
+        throw err;
+    }
+
     const actions = {
         active: { status: "active" },
         inactive: { status: "inactive" },
@@ -110,27 +118,48 @@ module.exports.changeMulti = async (type, ids) => {
 }
 
 module.exports.deleteProduct = async (id) => {
+    const found = await Product.findOne({ _id: id, deleted: false });
+
+    if (!found) {
+        const err = new Error("NOT_FOUND");
+        err.status = 404;
+        throw err;
+    }
+
     return Product.updateOne(
         { _id: id },
         {
             deleted: true,
             deletedAt: new Date()
         }
-    )
-}
+    );
+};
 
 module.exports.create = async () => {
     const find = { deleted: false }
-    
+
     const records = await Category.find(find)
-    
+
     const categories = createTreeHelper.createTree(records)
 
     return categories
 }
 
 module.exports.createProduct = async (req, res) => {
+    console.log("--- CREATE PRODUCT SERVICE START ---");
     const body = req.body
+    console.log("Body:", body);
+
+    // ✅ Kiểm tra trùng tên sản phẩm (không tính các sản phẩm đã xóa)
+    const existingProduct = await Product.findOne({
+        title: body.title,
+        deleted: false
+    });
+
+    if (existingProduct) {
+        console.log("Error: TITLE_EXISTS");
+        throw new Error("TITLE_EXISTS");
+    }
 
     body.price = parseInt(body.price) || 0
     body.discountPercentage = parseInt(body.discountPercentage) || 0
@@ -144,12 +173,20 @@ module.exports.createProduct = async (req, res) => {
     }
 
     if (req.file) {
-        const uploadResult = await uploadToCloud(req.file.path)
-        body.thumbnail = uploadResult.secure_url
+        if (process.env.NODE_ENV === 'test') {
+            body.thumbnail = `https://test.local/${req.file.filename}`;
+        } else {
+            const uploadResult = await uploadToCloud(req.file.path)
+            body.thumbnail = uploadResult.secure_url
+        }
     }
 
-    req.body.createdBy = {
-        account_id: res.locals.user.id,
+    const userId = res.locals.user ? (res.locals.user._id || res.locals.user.id) : null;
+    if (userId) {
+        body.createdBy = {
+            account_id: userId.toString(),
+            createdAt: new Date()
+        }
     }
 
     const product = new Product(body)
@@ -165,7 +202,7 @@ module.exports.detail = async (id) => {
 
     let categoryTitle = null;
 
-    if (product.product_category ) {
+    if (product.product_category) {
         const category = await Category.findOne({
             deleted: false,
             _id: product.product_category,
@@ -197,9 +234,9 @@ module.exports.detail = async (id) => {
 
 module.exports.edit = async (id) => {
     const find = { deleted: false }
-    
+
     const records = await Category.find(find)
-    
+
     const categories = createTreeHelper.createTree(records)
 
     const product = await Product.findOne({ deleted: false, _id: id })
@@ -210,7 +247,21 @@ module.exports.edit = async (id) => {
 }
 
 module.exports.editProduct = async (req, id, res) => {
+    console.log("--- EDIT PRODUCT SERVICE START ---", id);
     const body = req.body
+    console.log("Body:", body);
+
+    // ✅ Kiểm tra trùng tên sản phẩm (không tính sản phẩm hiện tại và các sản phẩm đã xóa)
+    const existingProduct = await Product.findOne({
+        _id: { $ne: id },
+        title: body.title,
+        deleted: false
+    });
+
+    if (existingProduct) {
+        console.log("Error: TITLE_EXISTS");
+        throw new Error("TITLE_EXISTS");
+    }
 
     body.price = parseInt(body.price) || 0
     body.discountPercentage = parseInt(body.discountPercentage) || 0
@@ -222,14 +273,22 @@ module.exports.editProduct = async (req, id, res) => {
     }
 
     if (req.file) {
-        const uploadResult = await uploadToCloud(req.file.path)
-        body.thumbnail = uploadResult.secure_url
+        if (process.env.NODE_ENV === 'test') {
+            body.thumbnail = `https://test.local/${req.file.filename}`;
+        } else {
+            const uploadResult = await uploadToCloud(req.file.path)
+            body.thumbnail = uploadResult.secure_url
+        }
     }
 
-    req.body.updatedBy = {
-        account_id: res.locals.user.id,
-        updatedAt: new Date()
+    const userId = res.locals.user ? (res.locals.user._id || res.locals.user.id) : null;
+    if (userId) {
+        body.updatedBy = {
+            account_id: userId.toString(),
+            updatedAt: new Date()
+        }
     }
+
     const result = await Product.updateOne({ _id: id }, body)
-    return result.modifiedCount > 0
+    return result.matchedCount > 0
 }

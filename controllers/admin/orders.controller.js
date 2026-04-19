@@ -4,32 +4,55 @@ module.exports = {
     // ======================= DANH SÁCH ĐƠN =======================
     index: async (req, res) => {
         try {
+
             if (!isAdmin(req)) {
                 return res.status(403).send('Forbidden');
+
+            if (!hasPermission(res, "orders_view")) {
+                return respond(req, res, {
+                    status: 403,
+                    json: { success: false, message: 'Forbidden' },
+                    redirect: '/admin/dashboard'
+                });
+
             }
             const result = await orderService.getList(req.query);
-            res.render("admin/pages/orders/index", {
-                pageTitle: "Quản lý đơn hàng",
-                orders: result.docs,
-                total: result.total,
-                page: result.page,
-                limit: result.limit,
-                totalPages: result.totalPages,
-                years: result.years,
-                query: req.query
+            return respond(req, res, {
+                status: 200,
+                json: { success: true, ...result },
+                render: {
+                    view: "admin/pages/orders/index",
+                    data: {
+                        pageTitle: "Quản lý đơn hàng",
+                        orders: result.docs,
+                        total: result.total,
+                        page: result.page,
+                        limit: result.limit,
+                        totalPages: result.totalPages,
+                        years: result.years,
+                        query: req.query
+                    }
+                }
             });
         } catch (err) {
             console.error("Admin Order List Error:", err);
-            res.render("admin/pages/orders/index", {
-                pageTitle: "Quản lý đơn hàng",
-                orders: [],
-                total: 0,
-                page: 1,
-                limit: 10,
-                totalPages: 1,
-                years: [],
-                query: req.query,
-                error: "Không thể tải danh sách đơn!"
+            return respond(req, res, {
+                status: 500,
+                json: { success: false, message: 'Không thể tải danh sách đơn!' },
+                render: {
+                    view: "admin/pages/orders/index",
+                    data: {
+                        pageTitle: "Quản lý đơn hàng",
+                        orders: [],
+                        total: 0,
+                        page: 1,
+                        limit: 10,
+                        totalPages: 1,
+                        years: [],
+                        query: req.query,
+                        error: "Không thể tải danh sách đơn!"
+                    }
+                }
             });
         }
     },
@@ -39,18 +62,28 @@ module.exports = {
         try {
             if (!isAdmin(req)) {
                 return res.status(403).send('Forbidden');
+
+            if (!hasPermission(res, "orders_view")) {
+                return respond(req, res, { status: 403, json: { success: false, message: 'Forbidden' }, redirect: '/admin/orders' });
             }
             const order = await orderService.getDetail(req.params.id);
             if (!order) {
-                return res.status(404).send("Đơn hàng không tồn tại hoặc đã bị khách huỷ!");
+                return respond(req, res, { status: 404, json: { success: false, message: 'Đơn hàng không tồn tại hoặc đã bị khách huỷ!' }, redirect: '/admin/orders' });
             }
-            res.render("admin/pages/orders/detail", {
-                pageTitle: "Chi tiết đơn hàng",
-                order
+            return respond(req, res, {
+                status: 200,
+                json: { success: true, order },
+                render: {
+                    view: "admin/pages/orders/detail",
+                    data: {
+                        pageTitle: "Chi tiết đơn hàng",
+                        order
+                    }
+                }
             });
         } catch (err) {
             console.error("Admin Order Detail Error:", err);
-            res.status(500).send("Lỗi khi tải chi tiết đơn hàng!");
+            return respond(req, res, { status: 500, json: { success: false, message: 'Lỗi khi tải chi tiết đơn hàng!' }, redirect: '/admin/orders' });
         }
     },
 
