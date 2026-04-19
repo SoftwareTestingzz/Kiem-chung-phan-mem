@@ -7,15 +7,22 @@ module.exports.index = async (req, res) => {
     try {
         const records = await roleService.getList()
 
-        res.render('admin/pages/role/index', {
-            pageTitle: 'Phân quyền',
-            records
+        return respond(req, res, {
+            status: 200,
+            json: { success: true, records },
+            render: {
+                view: 'admin/pages/role/index',
+                data: {
+                    pageTitle: 'Phân quyền',
+                    records
+                }
+            }
         })
 
     } catch (err) {
         console.log(err)
         req.flash('error', 'Có lỗi xảy ra, vui lòng thử lại!')
-        res.redirect(`${sysConfig.prefixAdmin}/dashboard`)
+        return respond(req, res, { status: 500, json: { success: false, message: 'Có lỗi xảy ra, vui lòng thử lại!' }, redirect: `${sysConfig.prefixAdmin}/dashboard` })
     }
 }
 
@@ -23,13 +30,20 @@ module.exports.index = async (req, res) => {
 module.exports.create = async (req, res) => {
     try {
 
-        res.render('admin/pages/role/create', {
-            pageTitle: 'Tạo nhóm quyền',
+        return respond(req, res, {
+            status: 200,
+            json: { success: true, message: 'Form tạo nhóm quyền' },
+            render: {
+                view: 'admin/pages/role/create',
+                data: {
+                    pageTitle: 'Tạo nhóm quyền',
+                }
+            }
         })
 
     } catch (err) {
         req.flash('error', 'Có lỗi xảy ra, vui lòng thử lại!')
-        res.redirect(`${sysConfig.prefixAdmin}/roles`)
+        return respond(req, res, { status: 500, json: { success: false, message: 'Có lỗi xảy ra, vui lòng thử lại!' }, redirect: `${sysConfig.prefixAdmin}/roles` })
     }
 }
 
@@ -56,14 +70,21 @@ module.exports.edit = async (req, res) => {
     try {
         const role = await roleService.edit(req.params.id)
 
-        res.render('admin/pages/role/edit', {
-            pageTitle: 'Tạo nhóm quyền',
-            role
+        return respond(req, res, {
+            status: 200,
+            json: { success: true, role },
+            render: {
+                view: 'admin/pages/role/edit',
+                data: {
+                    pageTitle: 'Tạo nhóm quyền',
+                    role
+                }
+            }
         })
 
     } catch (err) {
         req.flash('error', 'Có lỗi xảy ra, vui lòng thử lại!')
-        res.redirect(`${sysConfig.prefixAdmin}/roles`)
+        return respond(req, res, { status: 500, json: { success: false, message: 'Có lỗi xảy ra, vui lòng thử lại!' }, redirect: `${sysConfig.prefixAdmin}/roles` })
     }
 }
 
@@ -108,14 +129,21 @@ module.exports.detail = async (req, res) => {
     try {
         const record = await roleService.detail(req.params.id)
 
-        res.render('admin/pages/role/detail', {
-            pageTitle: 'Chi tiết nhóm quyền',
-            ...record
+        return respond(req, res, {
+            status: 200,
+            json: { success: true, ...record },
+            render: {
+                view: 'admin/pages/role/detail',
+                data: {
+                    pageTitle: 'Chi tiết nhóm quyền',
+                    ...record
+                }
+            }
         })
 
     } catch (err) {
         req.flash('error', 'Có lỗi xảy ra, vui lòng thử lại!')
-        res.redirect(`${sysConfig.prefixAdmin}/roles`)
+        return respond(req, res, { status: 500, json: { success: false, message: 'Có lỗi xảy ra, vui lòng thử lại!' }, redirect: `${sysConfig.prefixAdmin}/roles` })
     }
 }
 
@@ -124,14 +152,21 @@ module.exports.permissions = async (req, res) => {
     try {
         const records = await roleService.permissions(req.params.id)
 
-        res.render('admin/pages/role/permissions', {
-            pageTitle: 'Thiết lập phân quyền',
-            records
+        return respond(req, res, {
+            status: 200,
+            json: { success: true, records },
+            render: {
+                view: 'admin/pages/role/permissions',
+                data: {
+                    pageTitle: 'Thiết lập phân quyền',
+                    records
+                }
+            }
         })
 
     } catch (err) {
         req.flash('error', 'Có lỗi xảy ra, vui lòng thử lại!')
-        res.redirect(`${sysConfig.prefixAdmin}/roles`)
+        return respond(req, res, { status: 500, json: { success: false, message: 'Có lỗi xảy ra, vui lòng thử lại!' }, redirect: `${sysConfig.prefixAdmin}/roles` })
     }
 }
 
