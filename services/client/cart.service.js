@@ -131,11 +131,16 @@ module.exports.updateQuantity = async (req, productId, qty) => {
         throw new Error("Số lượng không hợp lệ");
     }
 
-    if (quantity > item.maxStock) {
+    // Lấy stock thực tế từ DB thay vì dùng maxStock cũ trong cart
+    const product = await Product.findById(productId);
+    if (!product) throw new Error("Sản phẩm không tồn tại");
+
+    if (quantity > product.stock) {
         throw new Error("Vượt quá tồn kho");
     }
 
     item.quantity = quantity;
+    item.maxStock = product.stock; // Cập nhật lại maxStock mới nhất
 
     await cart.save();
     return true;
