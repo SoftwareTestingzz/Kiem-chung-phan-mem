@@ -109,11 +109,13 @@ module.exports = {
         let ids = [];
 
         // Support directItems payload (from product detail) or selectedItems from cart
+        // Xử lý cả trường hợp raw JSON (array) và form-data (string)
         try {
-            if (req.body.directItems) {
-                ids = JSON.parse(req.body.directItems);
-            } else {
-                ids = JSON.parse(req.body.selectedItems);
+            const raw = req.body.directItems || req.body.selectedItems;
+            if (Array.isArray(raw)) {
+                ids = raw;
+            } else if (typeof raw === 'string') {
+                ids = JSON.parse(raw);
             }
         } catch (err) {
             return res.status(400).json({ success: false, message: 'Dữ liệu không hợp lệ' });
