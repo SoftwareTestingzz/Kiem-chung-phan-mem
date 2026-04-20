@@ -127,7 +127,7 @@ module.exports.updateQuantity = async (req, productId, qty) => {
     let item = cart.items.find(i => i.productId.toString() === productId);
     if (!item) throw new Error("Không tìm thấy sản phẩm");
 
-    if (quantity <= 0) {
+    if (isNaN(quantity) || quantity <= 0) {
         throw new Error("Số lượng không hợp lệ");
     }
 
